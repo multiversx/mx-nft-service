@@ -1,4 +1,4 @@
-import { DeployMinterArgs, UpgradeMinterArgs } from '../../../proxy-deployer/models/DeployMinterArgs';
+import { DeployMinterArgs, UpgradeMinterArgs } from '../DeployMinterArgs';
 
 export class DeployMinterRequest {
   royaltiesClaimAddress: string;

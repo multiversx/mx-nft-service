@@ -26,6 +26,7 @@ import { ReindexAuctionPriceUpdatedHandler } from './marketplaces-reindex-handle
 import { ReindexGlobalOfferAcceptedHandler } from './marketplaces-reindex-handlers/reindex-global-offer-accepted.handler';
 import { ReindexAuctionUpdatedHandler } from './marketplaces-reindex-handlers/reindex-auction-updated.handler';
 import { MarketplacesMutationsResolver } from './marketplaces-mutations.resolver';
+import { DisabledMarketplaceEventsModule } from '../rabbitmq/blockchain-events/disable-marketplace/disable-marketplace-events.module';
 
 @Module({
   providers: [
@@ -59,6 +60,7 @@ import { MarketplacesMutationsResolver } from './marketplaces-mutations.resolver
     forwardRef(() => CommonModule),
     forwardRef(() => AuctionsModuleGraph),
     forwardRef(() => OffersModuleGraph),
+    forwardRef(() => DisabledMarketplaceEventsModule),
   ],
   exports: [MarketplacesService, MarketplaceEventsIndexingService, MarketplacesReindexService],
 })

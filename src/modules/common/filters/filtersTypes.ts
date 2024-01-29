@@ -9,7 +9,7 @@ import {
   NFT_IDENTIFIER_ERROR,
   NFT_IDENTIFIER_RGX,
 } from 'src/utils/constants';
-import { CustomFiltersEnum, NftTypeEnum } from '../../assets/models/NftTypes.enum';
+import { NftTypeEnum } from '../../assets/models/NftTypes.enum';
 
 export enum Operator {
   AND,
@@ -177,10 +177,6 @@ export class AssetsFilter {
   @IsOptional()
   @Field(() => NftTypeEnum, { nullable: true })
   type: NftTypeEnum;
-
-  @IsOptional()
-  @Field(() => CustomFiltersEnum, { nullable: true })
-  customFilters: CustomFiltersEnum;
 
   @Field(() => [NftTrait], { nullable: 'itemsAndList' })
   traits: NftTrait[];

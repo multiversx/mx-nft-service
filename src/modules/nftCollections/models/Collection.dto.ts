@@ -8,6 +8,7 @@ import { CollectionNftTrait } from 'src/modules/nft-traits/models/collection-tra
 import { CollectionAsset } from './CollectionAsset.dto';
 import { CollectionSocial } from './CollectionSocial.dto';
 import { CollectionVolumeLast24 } from 'src/modules/analytics/models/collection-volume';
+import { CollectionElastic } from 'src/common/services/mx-communication/elastic-collection.model';
 
 @ObjectType()
 export class Collection {
@@ -119,6 +120,32 @@ export class Collection {
       traits: CollectionNftTrait.fromCollectionTraits(collectionApi.traits),
       preferredRankAlgorithm: collectionApi.assets?.preferredRankAlgorithm,
       scamInfo: ScamInfo.fromScamInfoApi(collectionApi.scamInfo),
+    });
+  }
+
+  static fromCollectionElastic(collectionElastic: CollectionElastic, artistAddress?: string, followersCount?: number) {
+    if (!collectionElastic) {
+      return null;
+    }
+
+    return new Collection({
+      collection: collectionElastic.token,
+      artistAddress: artistAddress,
+      type: NftTypeEnum[collectionElastic.type],
+      ticker: collectionElastic.ticker,
+      ownerAddress: collectionElastic.currentOwner,
+      creationDate: collectionElastic.timestamp,
+      name: collectionElastic.name,
+      canTransferRole: collectionElastic.properties.canTransferNFTCreateRole,
+      canPause: collectionElastic.properties.canPause,
+      canBurn: collectionElastic.properties.canBurn,
+      canFreeze: collectionElastic.properties.canFreeze,
+      canWipe: collectionElastic.properties.canWipe,
+      canAddQuantity: collectionElastic.properties.canAddQuantity,
+      canCreate: collectionElastic.properties.canMint,
+      artistFollowersCount: followersCount,
+      nftsCount: collectionElastic.api_nftCount,
+      verified: collectionElastic.api_isVerified ?? false,
     });
   }
 }

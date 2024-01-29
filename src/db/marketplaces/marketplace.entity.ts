@@ -1,4 +1,4 @@
-import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
+import { MarketplaceState, MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { Column, Entity, Index, JoinTable, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../base-entity';
 import { MarketplaceCollectionEntity } from './marketplace-collection.entity';
@@ -11,6 +11,9 @@ export class MarketplaceEntity extends BaseEntity {
 
   @Column({ length: 62 })
   name: string;
+
+  @Column({ length: 10 })
+  state: MarketplaceState;
 
   @Column({ length: 62, unique: true })
   key: string;

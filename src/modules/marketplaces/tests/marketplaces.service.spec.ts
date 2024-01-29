@@ -4,7 +4,7 @@ import { CollectionType } from 'src/modules/assets/models';
 import { MarketplacesService } from '../marketplaces.service';
 import { MarketplacesCachingService } from '../marketplaces-caching.service';
 import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketplaces';
-import { MarketplaceTypeEnum } from '../models/MarketplaceType.enum';
+import { MarketplaceState, MarketplaceTypeEnum } from '../models/MarketplaceType.enum';
 import { MarketplaceFilters } from '../models/Marketplace.Filter';
 import { Marketplace } from '../models';
 import { RemoveWhitelistCollectionRequest, WhitelistCollectionRequest } from '../models/requests/WhitelistCollectionOnMarketplaceRequest';
@@ -13,26 +13,36 @@ import { Logger } from '@nestjs/common';
 import { WhitelistMarketplaceRequest } from '../models/requests/WhitelistMarketplaceRequest';
 import { UpdateMarketplaceRequest } from '../models/requests/UpdateMarketplaceRequest';
 import { CacheEventsPublisherService } from 'src/modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { DisabledMarketplaceEventsService } from 'src/modules/rabbitmq/blockchain-events/disable-marketplace/disable-marketplace-events.service';
 
 describe('Marketplaces Service', () => {
   let service: MarketplacesService;
   let module: TestingModule;
-  const [inputMarketplace, inputCount] = [
+  const [inputMarketplaces, inputCount] = [
     [
       new MarketplaceEntity({
         address: 'address',
         name: 'name',
         key: 'xoxno',
         type: MarketplaceTypeEnum.External,
+        state: MarketplaceState.Enable,
       }),
       new MarketplaceEntity({
         address: 'address2',
         name: 'name2',
         key: 'common',
         type: MarketplaceTypeEnum.Internal,
+        state: MarketplaceState.Enable,
+      }),
+      new MarketplaceEntity({
+        address: 'disabledAddress',
+        name: 'name',
+        key: 'test',
+        type: MarketplaceTypeEnum.External,
+        state: MarketplaceState.Disable,
       }),
     ],
-    2,
+    3,
   ];
 
   beforeEach(async () => {
@@ -47,6 +57,10 @@ describe('Marketplaces Service', () => {
         },
         {
           provide: MarketplacesCachingService,
+          useFactory: () => ({}),
+        },
+        {
+          provide: DisabledMarketplaceEventsService,
           useFactory: () => ({}),
         },
         {
@@ -85,6 +99,7 @@ describe('Marketplaces Service', () => {
             address: 'address',
             name: 'name',
             key: 'xoxno',
+            state: MarketplaceState.Enable,
             type: MarketplaceTypeEnum.External,
           }),
           new Marketplace({
@@ -92,14 +107,22 @@ describe('Marketplaces Service', () => {
             name: 'name2',
             key: 'common',
             type: MarketplaceTypeEnum.Internal,
+            state: MarketplaceState.Enable,
+          }),
+          new Marketplace({
+            address: 'disabledAddress',
+            name: 'name',
+            key: 'test',
+            type: MarketplaceTypeEnum.External,
+            state: MarketplaceState.Disable,
           }),
         ],
-        count: 2,
+        count: 3,
       });
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -108,6 +131,7 @@ describe('Marketplaces Service', () => {
 
       expect(result).toMatchObject(expectedResult);
     });
+
     it('when filters by marketplaceKey and marketplaceAddress returns list with one item', async () => {
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
 
@@ -125,7 +149,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -159,7 +183,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -185,7 +209,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -211,7 +235,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -238,7 +262,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -270,7 +294,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -286,7 +310,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -303,7 +327,7 @@ describe('Marketplaces Service', () => {
       const expectedResult = ['address2'];
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -348,7 +372,7 @@ describe('Marketplaces Service', () => {
       const expectedResult = ['address'];
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -391,11 +415,11 @@ describe('Marketplaces Service', () => {
   describe('getMarketplacesAddreses', () => {
     it('returns list of addresses for all marketplaces', async () => {
       const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
-      const expectedResult = ['address', 'address2'];
+      const expectedResult = ['address', 'address2', 'disabledAddress'];
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -428,7 +452,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -460,7 +484,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -497,7 +521,7 @@ describe('Marketplaces Service', () => {
       });
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -534,7 +558,7 @@ describe('Marketplaces Service', () => {
         type: MarketplaceTypeEnum.External,
       });
 
-      persistenceService.getMarketplaceByAddress = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
       cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(
         new Marketplace({
           address: 'address2',
@@ -560,7 +584,7 @@ describe('Marketplaces Service', () => {
         type: MarketplaceTypeEnum.Internal,
       });
 
-      persistenceService.getMarketplaceByAddress = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
 
       cacheService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce(
         new Marketplace({
@@ -584,22 +608,46 @@ describe('Marketplaces Service', () => {
       const expectedResult = new CollectionType({
         items: [
           new Marketplace({
+            acceptedPaymentIdentifiers: null,
             address: 'address',
-            name: 'name',
+            iconUrl: 'https://media.elrond.com/markets/xoxno.svg',
+            id: undefined,
             key: 'xoxno',
+            lastIndexTimestamp: undefined,
+            name: 'name',
+            state: MarketplaceState.Enable,
             type: MarketplaceTypeEnum.External,
+            url: undefined,
           }),
           new Marketplace({
+            acceptedPaymentIdentifiers: null,
             address: 'address2',
-            name: 'name2',
+            iconUrl: 'https://media.elrond.com/markets/metaspace.svg',
+            id: undefined,
             key: 'common',
+            lastIndexTimestamp: undefined,
+            name: 'name2',
+            state: MarketplaceState.Enable,
             type: MarketplaceTypeEnum.Internal,
+            url: undefined,
+          }),
+          new Marketplace({
+            acceptedPaymentIdentifiers: null,
+            address: 'disabledAddress',
+            iconUrl: 'https://media.elrond.com/markets/test.svg',
+            id: undefined,
+            key: 'test',
+            lastIndexTimestamp: undefined,
+            name: 'name',
+            state: MarketplaceState.Disable,
+            type: MarketplaceTypeEnum.External,
+            url: undefined,
           }),
         ],
-        count: 2,
+        count: 3,
       });
 
-      persistenceService.getMarketplaces = jest.fn().mockReturnValueOnce([inputMarketplace, inputCount]);
+      persistenceService.getMarketplaces = jest.fn().mockReturnValueOnce([inputMarketplaces, inputCount]);
 
       const result = await service.getMarketplacesFromDb();
 
@@ -618,7 +666,7 @@ describe('Marketplaces Service', () => {
         type: MarketplaceTypeEnum.External,
       });
 
-      persistenceService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce([inputMarketplace[0]]);
+      persistenceService.getMarketplaceByAddressAndCollection = jest.fn().mockReturnValueOnce([inputMarketplaces[0]]);
 
       const result = await service.getMarketplaceByAddressAndCollectionFromDb('', '');
       expect(result).toMatchObject(expectedResult);
@@ -646,7 +694,7 @@ describe('Marketplaces Service', () => {
         type: MarketplaceTypeEnum.External,
       });
 
-      persistenceService.getMarketplaceByAddress = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
 
       const result = await service.getMarketplaceByAddress('');
       expect(result).toMatchObject(expectedResult);
@@ -670,7 +718,7 @@ describe('Marketplaces Service', () => {
 
       cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
         new CollectionType({
-          items: inputMarketplace,
+          items: inputMarketplaces,
           count: inputCount,
         }),
       );
@@ -689,7 +737,7 @@ describe('Marketplaces Service', () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
 
       persistenceService.getMarketplaceByKeyAndCollection = jest.fn().mockReturnValueOnce(null);
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
       persistenceService.saveMarketplaceCollection = jest.fn(() => {
         throw new Error();
       });
@@ -705,12 +753,12 @@ describe('Marketplaces Service', () => {
 
       persistenceService.getMarketplaceByKeyAndCollection = jest.fn().mockReturnValueOnce(null);
       eventPublisher.publish = jest.fn();
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
 
       persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
         new MarketplaceCollectionEntity({
           collectionIdentifier: 'collection',
-          marketplaces: [inputMarketplace[0]],
+          marketplaces: [inputMarketplaces[0]],
         }),
       );
       const expectedResult = await service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest({ marketplaceKey: 'xoxno' }));
@@ -722,14 +770,14 @@ describe('Marketplaces Service', () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
       const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
-      persistenceService.getMarketplaceByKeyAndCollection = jest.fn().mockReturnValueOnce(inputMarketplace);
+      persistenceService.getMarketplaceByKeyAndCollection = jest.fn().mockReturnValueOnce(inputMarketplaces);
       eventPublisher.publish = jest.fn();
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
 
       persistenceService.saveMarketplaceCollection = jest.fn().mockReturnValueOnce(
         new MarketplaceCollectionEntity({
           collectionIdentifier: 'collection',
-          marketplaces: [inputMarketplace[0]],
+          marketplaces: [inputMarketplaces[0]],
         }),
       );
       const expectedResult = await service.whitelistCollectionOnMarketplace(new WhitelistCollectionRequest({ marketplaceKey: 'xoxno' }));
@@ -751,7 +799,7 @@ describe('Marketplaces Service', () => {
     it('when collection not found throws error', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
 
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
       persistenceService.getCollectionByKeyAndCollection = jest.fn().mockReturnValueOnce(null);
 
       await expect(service.removeWhitelistCollection(new RemoveWhitelistCollectionRequest())).rejects.toThrowError(BadRequestError);
@@ -760,7 +808,7 @@ describe('Marketplaces Service', () => {
     it('when marketplace exists and delete fails returns false', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
 
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
       persistenceService.getCollectionByKeyAndCollection = jest.fn().mockReturnValueOnce(new MarketplaceCollectionEntity());
 
       persistenceService.deleteMarketplaceCollection = jest.fn(() => {
@@ -779,13 +827,13 @@ describe('Marketplaces Service', () => {
       const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
       eventPublisher.publish = jest.fn();
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
       persistenceService.getCollectionByKeyAndCollection = jest.fn().mockReturnValueOnce(new MarketplaceCollectionEntity());
 
       persistenceService.deleteMarketplaceCollection = jest.fn().mockReturnValueOnce(
         new MarketplaceCollectionEntity({
           collectionIdentifier: 'collection',
-          marketplaces: [inputMarketplace[0]],
+          marketplaces: [inputMarketplaces[0]],
         }),
       );
       const expectedResult = await service.removeWhitelistCollection(
@@ -800,7 +848,7 @@ describe('Marketplaces Service', () => {
     it('when marketplace key exists throws error', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
 
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
 
       await expect(service.whitelistMarketplace(new WhitelistMarketplaceRequest())).rejects.toThrowError(BadRequestError);
     });
@@ -825,7 +873,7 @@ describe('Marketplaces Service', () => {
       eventPublisher.publish = jest.fn();
       persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(null);
 
-      persistenceService.saveMarketplace = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.saveMarketplace = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
       const expectedResult = await service.whitelistMarketplace(new WhitelistMarketplaceRequest({ marketplaceKey: 'xoxno' }));
 
       expect(expectedResult).toBeTruthy();
@@ -844,7 +892,7 @@ describe('Marketplaces Service', () => {
     it('when marketplace exists and save fails returns false', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
 
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
       persistenceService.updateMarketplace = jest.fn(() => {
         throw new Error();
       });
@@ -859,7 +907,7 @@ describe('Marketplaces Service', () => {
       const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
 
       eventPublisher.publish = jest.fn();
-      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplace[0]);
+      persistenceService.getMarketplaceByKey = jest.fn().mockReturnValueOnce(inputMarketplaces[0]);
 
       persistenceService.updateMarketplace = jest.fn().mockReturnValueOnce(true);
       const expectedResult = await service.updateMarketplace(new UpdateMarketplaceRequest({ marketplaceKey: 'xoxno' }));
@@ -893,6 +941,157 @@ describe('Marketplaces Service', () => {
       persistenceService.getAllMarketplaceCollections = jest.fn().mockReturnValueOnce([]);
 
       const result = await service.getAllCollectionsIdentifiersFromDb();
+      expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  describe('disableMarketplace', () => {
+    it('when marketplace does not exist throws error', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplacesByAddress = jest.fn().mockReturnValueOnce(null);
+
+      await expect(service.disableMarketplace('address', MarketplaceState.Disable)).rejects.toThrowError(BadRequestError);
+    });
+
+    it('when marketplace exists and save fails returns false', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+
+      persistenceService.getMarketplacesByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces);
+      persistenceService.saveMarketplaces = jest.fn(() => {
+        throw new Error();
+      });
+
+      const expectedResult = await service.disableMarketplace('address', MarketplaceState.Disable);
+
+      expect(expectedResult).toBeFalsy();
+    });
+
+    it('when marketplace does exists and update is succesfull returns true', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
+
+      eventPublisher.publish = jest.fn();
+      persistenceService.getMarketplacesByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces);
+
+      persistenceService.saveMarketplaces = jest.fn().mockReturnValueOnce(inputMarketplaces);
+      const expectedResult = await service.disableMarketplace('address', MarketplaceState.Disable);
+
+      expect(expectedResult).toBeTruthy();
+    });
+  });
+
+  describe('enableMarketplace', () => {
+    it('when marketplace does not exist throws error', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      persistenceService.getMarketplacesByAddress = jest.fn().mockReturnValueOnce(null);
+
+      await expect(service.enableMarketplace('address', MarketplaceState.Enable)).rejects.toThrowError(BadRequestError);
+    });
+
+    it('when marketplace exists and save fails returns false', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const disabledMarketplaceService = module.get<DisabledMarketplaceEventsService>(DisabledMarketplaceEventsService);
+
+      persistenceService.getMarketplacesByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces);
+      disabledMarketplaceService.processMissedEventsSinceDisabled = jest.fn(() => {
+        throw new Error();
+      });
+
+      const expectedResult = await service.enableMarketplace('address', MarketplaceState.Enable);
+
+      expect(expectedResult).toBeFalsy();
+    });
+
+    it('when marketplace exists, process succeeds but save fails returns false', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const disabledMarketplaceService = module.get<DisabledMarketplaceEventsService>(DisabledMarketplaceEventsService);
+
+      persistenceService.getMarketplacesByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces);
+      disabledMarketplaceService.processMissedEventsSinceDisabled = jest.fn();
+      persistenceService.saveMarketplaces = jest.fn(() => {
+        throw new Error();
+      });
+
+      const expectedResult = await service.enableMarketplace('address', MarketplaceState.Enable);
+
+      expect(expectedResult).toBeFalsy();
+    });
+
+    it('when marketplace does exists and update is succesfull returns true', async () => {
+      const persistenceService = module.get<PersistenceService>(PersistenceService);
+      const eventPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
+      const disabledMarketplaceService = module.get<DisabledMarketplaceEventsService>(DisabledMarketplaceEventsService);
+
+      eventPublisher.publish = jest.fn();
+      persistenceService.getMarketplacesByAddress = jest.fn().mockReturnValueOnce(inputMarketplaces);
+      persistenceService.saveMarketplaces = jest.fn().mockReturnValueOnce(inputMarketplaces);
+      disabledMarketplaceService.processMissedEventsSinceDisabled = jest.fn();
+      const expectedResult = await service.disableMarketplace('address', MarketplaceState.Disable);
+
+      expect(expectedResult).toBeTruthy();
+    });
+  });
+
+  describe('getDisableMarketplacesAddreses', () => {
+    it('returns list of addresses of disabled marketplaces', async () => {
+      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+      const expected = ['disabledAddress'];
+      cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
+        new CollectionType({
+          items: [
+            new MarketplaceEntity({
+              address: 'address2',
+              name: 'name2',
+              key: 'common',
+              type: MarketplaceTypeEnum.Internal,
+              state: MarketplaceState.Enable,
+            }),
+            new MarketplaceEntity({
+              address: 'disabledAddress',
+              name: 'name',
+              key: 'test',
+              type: MarketplaceTypeEnum.External,
+              state: MarketplaceState.Disable,
+            }),
+          ],
+          count: 2,
+        }),
+      );
+
+      const result = await service.getDisabledMarketplacesAddreses();
+
+      expect(result).toMatchObject(expected);
+    });
+
+    it('when no expernal marketplace exists returns empty array', async () => {
+      const cacheService = module.get<MarketplacesCachingService>(MarketplacesCachingService);
+
+      const expectedResult = [];
+      cacheService.getAllMarketplaces = jest.fn().mockReturnValueOnce(
+        new CollectionType({
+          items: [
+            new Marketplace({
+              address: 'address',
+              name: 'name',
+              key: 'xoxno',
+              type: MarketplaceTypeEnum.Internal,
+              state: MarketplaceState.Enable,
+            }),
+            new Marketplace({
+              address: 'address2',
+              name: 'name2',
+              key: 'common',
+              type: MarketplaceTypeEnum.Internal,
+              state: MarketplaceState.Enable,
+            }),
+          ],
+          count: 2,
+        }),
+      );
+
+      const result = await service.getDisabledMarketplacesAddreses();
+
       expect(result).toMatchObject(expectedResult);
     });
   });

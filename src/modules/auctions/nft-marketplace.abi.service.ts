@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import '../../utils/extensions';
 import { AuctionAbi, BuySftActionArgs, ExternalAuctionAbi } from './models';
 import BigNumber from 'bignumber.js';
@@ -50,6 +50,7 @@ export class NftMarketplaceAbiService {
     private readonly offersService: OffersService,
     private readonly logger: Logger,
     private readonly redisCacheService: RedisCacheService,
+    @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
   ) {
     this.parser = new ResultsParser();

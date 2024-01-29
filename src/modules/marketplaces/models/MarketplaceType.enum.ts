@@ -7,3 +7,11 @@ export enum MarketplaceTypeEnum {
 registerEnumType(MarketplaceTypeEnum, {
   name: 'MarketplaceTypeEnum',
 });
+
+export enum MarketplaceState {
+  Enable = 'Enable',
+  Disable = 'Disable',
+}
+registerEnumType(MarketplaceState, {
+  name: 'MarketplaceState',
+});

@@ -308,4 +308,9 @@ export class CacheInfo {
     key: 'account_likes_count',
     ttl: 5 * Constants.oneSecond(),
   };
+
+  static MarketplaceEvents: CacheInfo = {
+    key: 'marketplace_events',
+    ttl: 12 * Constants.oneMonth(),
+  };
 }

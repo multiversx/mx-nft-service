@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { AuctionStatusEnum } from 'src/modules/auctions/models';
@@ -13,6 +13,7 @@ export class AcceptGlobalOfferEventHandler {
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private auctionsService: AuctionsSetterService,
+    @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
   ) {}
 

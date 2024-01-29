@@ -297,6 +297,10 @@ export class PersistenceService {
     return await this.execute(this.saveMarketplace.name, this.marketplaceRepository.saveMarketplace(entity));
   }
 
+  async saveMarketplaces(entity: MarketplaceEntity[]): Promise<MarketplaceEntity[]> {
+    return await this.execute(this.saveMarketplaces.name, this.marketplaceRepository.saveMarketplaces(entity));
+  }
+
   async updateMarketplace(entity: MarketplaceEntity): Promise<boolean> {
     return await this.execute(this.updateMarketplace.name, this.marketplaceRepository.updateMarketplace(entity));
   }
@@ -307,6 +311,10 @@ export class PersistenceService {
 
   async getMarketplaceByAddress(address: string): Promise<MarketplaceEntity> {
     return await this.execute(this.getMarketplaceByAddress.name, this.marketplaceRepository.getMarketplaceByAddress(address));
+  }
+
+  async getMarketplacesByAddress(address: string): Promise<MarketplaceEntity[]> {
+    return await this.execute(this.getMarketplaceByAddress.name, this.marketplaceRepository.getMarketplacesByAddress(address));
   }
 
   async getMarketplacesByKeys(marketplaceKeys: string[]): Promise<MarketplaceEntity[]> {

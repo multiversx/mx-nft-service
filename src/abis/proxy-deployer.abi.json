@@ -1,0 +1,279 @@
+{
+  "buildInfo": {
+    "rustc": {
+      "version": "1.71.0-nightly",
+      "commitHash": "7f94b314cead7059a71a265a8b64905ef2511796",
+      "commitDate": "2023-04-23",
+      "channel": "Nightly",
+      "short": "rustc 1.71.0-nightly (7f94b314c 2023-04-23)"
+    },
+    "contractCrate": {
+      "name": "proxy-deployer",
+      "version": "0.0.0"
+    },
+    "framework": {
+      "name": "multiversx-sc",
+      "version": "0.44.0"
+    }
+  },
+  "name": "ProxyDeployer",
+  "constructor": {
+    "inputs": [
+      {
+        "name": "default_gas_for_save",
+        "type": "u64"
+      }
+    ],
+    "outputs": []
+  },
+  "endpoints": [
+    {
+      "name": "upgrade",
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "contractDeploy",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "template_address",
+          "type": "Address"
+        },
+        {
+          "name": "args",
+          "type": "variadic<bytes>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "Address"
+        }
+      ]
+    },
+    {
+      "name": "contractUpgrade",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "contract_address",
+          "type": "Address"
+        },
+        {
+          "name": "template_address",
+          "type": "Address"
+        },
+        {
+          "name": "args",
+          "type": "variadic<bytes>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "contractCallByAddress",
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "contract_address",
+          "type": "Address"
+        },
+        {
+          "name": "function_name",
+          "type": "bytes"
+        },
+        {
+          "name": "args",
+          "type": "variadic<bytes>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "upgradeContractsByTemplate",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "gas_per_action",
+          "type": "u64"
+        },
+        {
+          "name": "opt_template_address",
+          "type": "optional<Address>",
+          "multi_arg": true
+        },
+        {
+          "name": "opt_args",
+          "type": "optional<variadic<bytes>>",
+          "multi_arg": true
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ],
+      "allow_multiple_var_args": true
+    },
+    {
+      "name": "addDeployerToBlacklist",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "blacklisted_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "removeDeployerFromBlacklist",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "address",
+          "type": "Address"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "setDefaultGasForSaveOperation",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [
+        {
+          "name": "default_gas_for_save_operation",
+          "type": "u64"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "getAllDeployedContractsByTemplate",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "template_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "List<Address>"
+        }
+      ]
+    },
+    {
+      "name": "getOngoingUpgradeOperations",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "OngoingUpgradeOperation"
+        }
+      ]
+    },
+    {
+      "name": "getDefaultGasForSaveOperation",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "getAllDeployers",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getDeployerContractAddresses",
+      "mutability": "readonly",
+      "inputs": [
+        {
+          "name": "deployer_address",
+          "type": "Address"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "getAllBlacklistedDeployers",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "variadic<Address>",
+          "multi_result": true
+        }
+      ]
+    },
+    {
+      "name": "pause",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "unpause",
+      "onlyOwner": true,
+      "mutability": "mutable",
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "isPaused",
+      "mutability": "readonly",
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "events": [],
+  "esdtAttributes": [],
+  "hasCallback": false,
+  "types": {
+    "OngoingUpgradeOperation": {
+      "type": "struct",
+      "fields": [
+        {
+          "name": "template_address",
+          "type": "Address"
+        },
+        {
+          "name": "arguments",
+          "type": "List<bytes>"
+        },
+        {
+          "name": "contracts_remaining",
+          "type": "List<Address>"
+        }
+      ]
+    }
+  }
+}

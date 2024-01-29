@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { OfferEntity } from 'src/db/offers';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
@@ -15,6 +15,7 @@ export class SendOfferEventHandler {
     private readonly offersService: OffersService,
     private readonly feedEventsSenderService: FeedEventsSenderService,
     private readonly notificationsService: NotificationsService,
+    @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
   ) {}
 

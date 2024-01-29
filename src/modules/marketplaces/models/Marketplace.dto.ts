@@ -5,7 +5,7 @@ import { NftTypeEnum } from 'src/modules/assets/models';
 import { Token } from 'src/modules/usdPrice/Token.model';
 import { DEADRARE_KEY, ELRONDNFTSWAP_KEY, FRAMEIT_KEY, ICI_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import { MarketplaceTypeEnum } from './MarketplaceType.enum';
+import { MarketplaceState, MarketplaceTypeEnum } from './MarketplaceType.enum';
 @ObjectType()
 export class Marketplace {
   id: number;
@@ -27,6 +27,9 @@ export class Marketplace {
 
   @Field(() => MarketplaceTypeEnum)
   type: MarketplaceTypeEnum;
+
+  @Field(() => MarketplaceState)
+  state: MarketplaceState;
 
   @Field({ nullable: true })
   marketplaceCutPercentage: string;
@@ -62,6 +65,7 @@ export class Marketplace {
       key: entity.key,
       type: entity.type,
       lastIndexTimestamp: entity.lastIndexTimestamp,
+      state: entity.state,
     });
   }
 

@@ -1,5 +1,5 @@
 import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import { ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
@@ -16,6 +16,7 @@ export class UpdateListingEventHandler {
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private auctionsService: AuctionsSetterService,
+    @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
     private usdPriceService: UsdPriceService,
   ) {}

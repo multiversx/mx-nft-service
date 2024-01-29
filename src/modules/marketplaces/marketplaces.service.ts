@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import '../../utils/extensions';
 import { CollectionType } from '../assets/models/Collection.type';
 import { Marketplace } from './models';
 import { MarketplacesCachingService } from './marketplaces-caching.service';
 import { MarketplaceCollectionEntity, MarketplaceEntity } from 'src/db/marketplaces';
-import { MarketplaceTypeEnum } from './models/MarketplaceType.enum';
+import { MarketplaceState, MarketplaceTypeEnum } from './models/MarketplaceType.enum';
 import { MarketplaceFilters } from './models/Marketplace.Filter';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { RemoveWhitelistCollectionRequest, WhitelistCollectionRequest } from './models/requests/WhitelistCollectionOnMarketplaceRequest';
@@ -14,6 +14,7 @@ import { UpdateMarketplaceRequest } from './models/requests/UpdateMarketplaceReq
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
 import { mxConfig } from 'src/config';
+import { DisabledMarketplaceEventsService } from '../rabbitmq/blockchain-events/disable-marketplace/disable-marketplace-events.service';
 
 @Injectable()
 export class MarketplacesService {
@@ -21,6 +22,8 @@ export class MarketplacesService {
     private readonly persistenceService: PersistenceService,
     private readonly cacheService: MarketplacesCachingService,
     private readonly cacheEventsPublisher: CacheEventsPublisherService,
+    @Inject(forwardRef(() => DisabledMarketplaceEventsService))
+    private readonly marketplaceService: DisabledMarketplaceEventsService,
     private readonly logger: Logger,
   ) {}
 
@@ -75,9 +78,19 @@ export class MarketplacesService {
   async getExternalMarketplacesAddreses(): Promise<string[]> {
     let allMarketplaces = await this.getAllMarketplaces();
 
-    const externalMarketplaces = allMarketplaces?.items?.filter((m) => m.type === MarketplaceTypeEnum.External);
+    const externalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.type === MarketplaceTypeEnum.External && m.state === MarketplaceState.Enable,
+    );
 
     return externalMarketplaces.map((m) => m.address);
+  }
+
+  async getDisabledMarketplacesAddreses(): Promise<string[]> {
+    let allMarketplaces = await this.getAllMarketplaces();
+
+    const disabledMarketplaces = allMarketplaces?.items?.filter((m) => m.state === MarketplaceState.Disable);
+
+    return disabledMarketplaces.map((m) => m.address);
   }
 
   async getMarketplacesAddreses(): Promise<string[]> {
@@ -131,15 +144,17 @@ export class MarketplacesService {
 
   private async getInternalMarketplaces(): Promise<Marketplace[]> {
     const allMarketplaces = await this.getAllMarketplaces();
-    const internalMarketplaces = allMarketplaces?.items?.filter((m) => m.type === MarketplaceTypeEnum.Internal);
+    const internalMarketplaces = allMarketplaces?.items?.filter(
+      (m) => m.type === MarketplaceTypeEnum.Internal && m.state === MarketplaceState.Enable,
+    );
     return internalMarketplaces;
   }
 
   async getMarketplacesFromDb(): Promise<CollectionType<Marketplace>> {
-    const [campaigns, count]: [MarketplaceEntity[], number] = await this.persistenceService.getMarketplaces();
+    const [marketplaces, count]: [MarketplaceEntity[], number] = await this.persistenceService.getMarketplaces();
     return new CollectionType({
       count: count,
-      items: campaigns.map((campaign) => Marketplace.fromEntity(campaign)),
+      items: marketplaces.map((marketplace) => Marketplace.fromEntity(marketplace)),
     });
   }
 
@@ -230,6 +245,7 @@ export class MarketplacesService {
           name: request.marketplaceName,
           url: request.marketplaceUrl,
           type: MarketplaceTypeEnum.Internal,
+          state: MarketplaceState.Enable,
         }),
       );
 
@@ -241,6 +257,62 @@ export class MarketplacesService {
       this.logger.error('An error has occured while whitelisting marketplace', {
         path: this.whitelistCollectionOnMarketplace.name,
         marketplace: request?.marketplaceKey,
+        exception: error,
+      });
+      return false;
+    }
+  }
+
+  async disableMarketplace(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
+    const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
+
+    if (!marketplaces || marketplaces.length === 0) {
+      throw new BadRequestError('No marketplace with this address');
+    }
+    try {
+      marketplaces?.forEach((m) => (m.state = marketplaceState));
+
+      const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
+
+      if (updatedMarketplaces) {
+        for (const updatedMarketplace of updatedMarketplaces) {
+          this.triggerCacheInvalidation(updatedMarketplace.key, null, updatedMarketplace.address);
+        }
+      }
+
+      return !!updatedMarketplaces;
+    } catch (error) {
+      this.logger.error('An error has occurred while disabaling marketplace state', {
+        path: this.updateMarketplaceState.name,
+        marketplace: address,
+        exception: error,
+      });
+      return false;
+    }
+  }
+
+  async enableMarketplace(address: string, marketplaceState: MarketplaceState): Promise<boolean> {
+    const marketplaces = await this.persistenceService.getMarketplacesByAddress(address);
+    if (!marketplaces || marketplaces.length === 0) {
+      throw new BadRequestError('No marketplace with this address');
+    }
+    try {
+      await this.marketplaceService.processMissedEventsSinceDisabled(marketplaces);
+      marketplaces?.forEach((m) => (m.state = marketplaceState));
+
+      const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
+
+      if (updatedMarketplaces) {
+        for (const updatedMarketplace of updatedMarketplaces) {
+          this.triggerCacheInvalidation(updatedMarketplace.key, null, updatedMarketplace.address);
+        }
+      }
+
+      return !!updatedMarketplaces;
+    } catch (error) {
+      this.logger.error('An error has occurred while enabeling marketplace', {
+        path: this.updateMarketplaceState.name,
+        marketplace: address,
         exception: error,
       });
       return false;
@@ -260,6 +332,7 @@ export class MarketplacesService {
           name: request.marketplaceName ?? marketplace.name,
           url: request.marketplaceUrl ?? marketplace.url,
           type: marketplace.type ?? MarketplaceTypeEnum.Internal,
+          state: marketplace.state,
         }),
       );
 
@@ -300,5 +373,19 @@ export class MarketplacesService {
         extraInfo: { collection: collection },
       }),
     );
+  }
+
+  private async updateMarketplaceState(marketplaces: MarketplaceEntity[], marketplaceState: MarketplaceState) {
+    marketplaces?.forEach((m) => (m.state = marketplaceState));
+
+    const updatedMarketplaces = await this.persistenceService.saveMarketplaces(marketplaces);
+
+    if (updatedMarketplaces) {
+      for (const updatedMarketplace of updatedMarketplaces) {
+        this.triggerCacheInvalidation(updatedMarketplace.key, null, updatedMarketplace.address);
+      }
+    }
+
+    return !!updatedMarketplaces;
   }
 }

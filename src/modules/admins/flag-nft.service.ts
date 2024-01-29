@@ -1,4 +1,4 @@
-import { ElasticQuery, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, MatchQuery, QueryOperator, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { Locker } from '@multiversx/sdk-nestjs-common';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { MxElasticService, NftMedia } from 'src/common';
@@ -67,7 +67,7 @@ export class FlagNftService {
         .withMustExistCondition('identifier')
         .withMustCondition(QueryType.Match('token', collection, QueryOperator.AND))
         .withMustMultiShouldCondition([NftTypeEnum.NonFungibleESDT, NftTypeEnum.SemiFungibleESDT], (type) => QueryType.Match('type', type))
-        .withMustCondition(QueryType.Nested('data', { 'data.nonEmptyURIs': true }))
+        .withMustCondition(QueryType.Nested('data', [new MatchQuery('data.nonEmptyURIs', true)]))
         .withPagination({ from: 0, size: 10000 });
       await this.elasticUpdater.getScrollableList(ELASTIC_TOKENS_INDEX, 'identifier', query, async (items) => {
         const nsfwItems = items.map((item) => ({

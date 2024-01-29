@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { MxApiService, MxElasticService } from 'src/common';
 import '../../utils/extensions';
 import { AssetsLikesService } from './assets-likes.service';
@@ -19,9 +19,6 @@ import { ElasticQuery, ElasticSortOrder, QueryConditionOptions, QueryOperator, Q
 import { Constants } from '@multiversx/sdk-nestjs-common';
 import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { QueryPagination } from 'src/common/services/mx-communication/models/query-pagination';
-import { FeaturedService } from '../featured/featured.service';
-import { FeaturedCollectionsFilter } from '../featured/Featured-Collections.Filter';
-import { FeaturedCollectionTypeEnum } from '../featured/FeatureCollectionType.enum';
 import { constants } from 'src/config';
 import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 
@@ -29,8 +26,8 @@ import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
 export class AssetsGetterService {
   constructor(
     private apiService: MxApiService,
+    @Inject(forwardRef(() => CollectionsGetterService))
     private collectionsService: CollectionsGetterService,
-    private featuredCollectionsService: FeaturedService,
     private elasticService: MxElasticService,
     private assetByIdentifierService: AssetByIdentifierService,
     private assetScamLoader: AssetScamInfoProvider,
@@ -64,20 +61,6 @@ export class AssetsGetterService {
       ? this.getApiQueryWithoutOwnerFlag(filters, offset, limit)
       : this.getApiQuery(filters, offset, limit);
     const apiCountQuery = this.getApiQueryForCount(filters);
-
-    if (filters.ownerAddress && filters.customFilters) {
-      const [ticketsCollections] = await this.featuredCollectionsService.getFeaturedCollections(
-        new FeaturedCollectionsFilter({ type: FeaturedCollectionTypeEnum.Tickets }),
-      );
-      if (!ticketsCollections || ticketsCollections?.length === 0) return new CollectionType<Asset>();
-
-      const ticketCollectionIdentifiers = ticketsCollections.map((x) => x.collection).toString();
-      return await this.getAssetsForUser(
-        filters.ownerAddress,
-        `?identifiers=${ticketCollectionIdentifiers}&from=${offset}&size=${limit}`,
-        `?identifiers=${ticketCollectionIdentifiers}`,
-      );
-    }
 
     if (sorting === AssetsSortingEnum.MostLikes) {
       const assets = await this.assetsLikedService.getMostLikedAssets();

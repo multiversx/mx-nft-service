@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { AuctionEntity } from 'src/db/auctions';
 import { AuctionEventEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
 import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
@@ -15,6 +15,7 @@ export class WithdrawAuctionEventHandler {
   constructor(
     private auctionsGetterService: AuctionsGetterService,
     private auctionsService: AuctionsSetterService,
+    @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
   ) {}
 
