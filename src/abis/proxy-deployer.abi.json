@@ -1,19 +1,20 @@
 {
   "buildInfo": {
     "rustc": {
-      "version": "1.71.0-nightly",
-      "commitHash": "7f94b314cead7059a71a265a8b64905ef2511796",
-      "commitDate": "2023-04-23",
+      "version": "1.76.0-nightly",
+      "commitHash": "d86d65bbc19b928387f68427fcc3a0da498d8a19",
+      "commitDate": "2023-12-10",
       "channel": "Nightly",
-      "short": "rustc 1.71.0-nightly (7f94b314c 2023-04-23)"
+      "short": "rustc 1.76.0-nightly (d86d65bbc 2023-12-10)"
     },
     "contractCrate": {
       "name": "proxy-deployer",
-      "version": "0.0.0"
+      "version": "0.0.0",
+      "gitVersion": "v0.45.2.1-reproducible-47-g2dd8a4e"
     },
     "framework": {
       "name": "multiversx-sc",
-      "version": "0.45.2"
+      "version": "0.47.1"
     }
   },
   "name": "ProxyDeployer",
