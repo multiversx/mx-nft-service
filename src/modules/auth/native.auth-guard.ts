@@ -45,18 +45,12 @@ export class NativeAuthGuard implements CanActivate {
     }
 
     const authorization: string = request.headers['authorization'];
-
-    console.log({ authorization });
-
     const origin = request.headers['origin'];
-    console.log({ origin });
 
     if (!authorization) {
       throw new UnauthorizedException();
     }
     const jwt = authorization.replace('Bearer ', '');
-
-    console.log({ jwt });
     try {
       const userInfo = await this.authServer.validate(jwt);
       if (origin && origin !== userInfo.origin && origin !== 'https://' + userInfo.origin) {
@@ -66,15 +60,12 @@ export class NativeAuthGuard implements CanActivate {
         });
       }
 
-      console.log({ userInfo });
       request.res.set('X-Native-Auth-Issued', userInfo.issued);
       request.res.set('X-Native-Auth-Expires', userInfo.expires);
       request.res.set('X-Native-Auth-Address', userInfo.address);
       request.res.set('X-Native-Auth-Timestamp', Math.round(new Date().getTime() / 1000));
 
       request.auth = userInfo;
-
-      console.log(111111111, userInfo);
       return true;
     } catch (error: any) {
       return false;

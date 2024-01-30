@@ -15,7 +15,6 @@ export class GqlAdminAuthGuard implements CanActivate {
 
     const auth = request.auth;
     const admins = this.apiConfigService.getSecurityAdmins();
-    console.log({ admins });
     if (!admins) {
       return false;
     }
