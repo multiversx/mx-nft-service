@@ -28,7 +28,7 @@ export class ProxyDeployerMutationsResolver extends BaseResolver(TransactionNode
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async whitelistMinterSmartContract(@Args('input') input: WhitelistMinterArgs): Promise<Boolean> {
-    const contractAddresses = await this.minterDeployerService.getDeplyedContractsForAddressAndTamplate(
+    const contractAddresses = await this.minterDeployerService.getDeployedContractsForAddressAndTemplate(
       input.adminAddress,
       process.env.TEMPLATE_MINTER_ADDRESS,
     );

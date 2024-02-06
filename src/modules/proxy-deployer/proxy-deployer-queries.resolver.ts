@@ -15,6 +15,6 @@ export class ProxyDeployerQueriesResolver extends BaseResolver(String) {
   @Mutation(() => [String], { nullable: 'itemsAndList' })
   @UseGuards(JwtOrNativeAuthGuard)
   async xBulkDeployedContracts(@AuthUser() user: UserAuthResult): Promise<string[]> {
-    return await this.minterDeployerService.getDeplyedContractsForAddressAndTamplate(user.address, process.env.TEMPLATE_BULK_ADDRESS);
+    return await this.minterDeployerService.getDeployedContractsForAddressAndTemplate(user.address, process.env.TEMPLATE_BULK_ADDRESS);
   }
 }

@@ -92,7 +92,7 @@ export class ProxyDeployerAbiService {
       .toPlainObject();
   }
 
-  public async getDeplyedContractsForAddressAndTamplate(address: string, templateAddress: string): Promise<string[]> {
+  public async getDeployedContractsForAddressAndTemplate(address: string, templateAddress: string): Promise<string[]> {
     const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
     let getDataQuery = <Interaction>(
       contract.methodsExplicit.getDeployerContractsByTemplate([
