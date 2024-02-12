@@ -96,6 +96,13 @@ export class AuctionsSetterService {
   async saveAuctionEntity(auctionEntity: AuctionEntity, assetTags: string[]): Promise<AuctionEntity> {
     let profiler = new PerformanceProfiler();
     try {
+      if (
+        auctionEntity.maxBidDenominated === auctionEntity.minBidDenominated &&
+        auctionEntity.type !== AuctionTypeEnum.SftAll &&
+        auctionEntity.type !== AuctionTypeEnum.SftOnePerPayment
+      ) {
+        auctionEntity.type = AuctionTypeEnum.FixedPrice;
+      }
       const savedAuction = await this.persistenceService.insertAuction(auctionEntity);
 
       if (assetTags) {
