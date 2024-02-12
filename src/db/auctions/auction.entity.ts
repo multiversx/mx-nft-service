@@ -170,6 +170,7 @@ export class AuctionEntity extends BaseEntity {
       price: string;
       paymentToken: string;
       paymentTokenNonce: string;
+      paymentNonce: number;
       auctionType: string;
       deadline: number;
     },
@@ -192,7 +193,7 @@ export class AuctionEntity extends BaseEntity {
           ? AuctionTypeEnum.Nft
           : AuctionTypeEnum.SftOnePerPayment,
       paymentToken: topicsAuctionToken.paymentToken,
-      paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce),
+      paymentNonce: topicsAuctionToken.paymentTokenNonce?parseInt(topicsAuctionToken.paymentTokenNonce):topicsAuctionToken.paymentNonce,
       ownerAddress: topicsAuctionToken.originalOwner,
       minBid: topicsAuctionToken.price,
       minBidDenominated: BigNumberUtils.denominateAmount(topicsAuctionToken.price, decimals),
