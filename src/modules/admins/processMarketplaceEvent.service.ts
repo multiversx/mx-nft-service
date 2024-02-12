@@ -1,13 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import {
-  ElasticQuery,
-  ElasticSortOrder,
-  RangeGreaterThanOrEqual,
-  QueryType,
-} from '@multiversx/sdk-nestjs';
 import { MarketplaceTypeEnum } from '../marketplaces/models/MarketplaceType.enum';
 import { MarketplaceEventsService } from '../rabbitmq/blockchain-events/marketplace-events.service';
+import {ElasticQuery,QueryType,RangeGreaterThanOrEqual,ElasticSortOrder, MatchQuery} from '@multiversx/sdk-nestjs-elastic';
 
 @Injectable()
 export class ProcessMarketplaceEventService {
@@ -28,16 +23,8 @@ export class ProcessMarketplaceEventService {
       );
 
       const query = ElasticQuery.create()
-        .withMustCondition(
-          QueryType.Nested('events', {
-            'events.address': marketplaceAddress,
-          }),
-        )
-        .withMustCondition(
-          QueryType.Nested('events', {
-            'events.identifier': eventName,
-          }),
-        )
+        .withMustCondition(QueryType.Nested('events', [new MatchQuery('events.address', marketplaceAddress)]))
+        .withMustCondition(QueryType.Nested('events', [new MatchQuery('events.identifier', eventName)]))
         .withRangeFilter('timestamp', new RangeGreaterThanOrEqual(1678468260))
         .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }])
         .withPagination({ from: 0, size: 10000 });

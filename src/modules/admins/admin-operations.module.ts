@@ -13,6 +13,8 @@ import { NftTraitsModule } from '../nft-traits/nft-traits.module';
 import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 import { AuthModule } from '../auth/auth.module';
 import { ReportsModuleGraph } from '../reports/reports.module';
+import { ProcessMarketplaceEventService } from './processMarketplaceEvent.service';
+import { NftEventsModule } from '../rabbitmq/blockchain-events/nft-events.module';
 
 @Module({
   imports: [
@@ -24,11 +26,13 @@ import { ReportsModuleGraph } from '../reports/reports.module';
     MarketplacesModuleGraph,
     AuthModule,
     ReportsModuleGraph,
+    NftEventsModule,
   ],
   providers: [
     Logger,
     AdminOperationsResolver,
     FlagNftService,
+    ProcessMarketplaceEventService,
     VerifyContentService,
     AssetsRedisHandler,
     AssetByIdentifierService,

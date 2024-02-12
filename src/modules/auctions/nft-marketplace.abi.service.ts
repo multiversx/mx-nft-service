@@ -254,6 +254,7 @@ export class NftMarketplaceAbiService {
   async getAuctionQuery(auctionId: number, marketplace: Marketplace): Promise<AuctionAbi | ExternalAuctionAbi> {
     let scContract: SmartContract;
     if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
+
       this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
       scContract = await this.contractLoader.getContract(marketplace.address);
     } else {
@@ -264,6 +265,7 @@ export class NftMarketplaceAbiService {
 
     const response = await this.getFirstQueryResult(getDataQuery);
 
+    console.log({auctionId, mar: marketplace.key,a: response?.firstValue})
     const auction: AuctionAbi = response?.firstValue?.valueOf();
     return auction;
   }

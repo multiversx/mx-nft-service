@@ -25,7 +25,9 @@ export class WithdrawAuctionEventHandler {
     const marketplace = await this.marketplaceService.getMarketplaceByType(withdraw.getAddress(), marketplaceType, topics.collection);
     if (!marketplace) return;
 
-    this.logger.log(`${withdraw.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+    this.logger.log(
+      `Withdraw event detected for hash '${hash}' and marketplace '${marketplace?.name}' identifier ${topics.collection}-${topics.nonce}`,
+    );
     if (topics.auctionId) {
       auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
     } else {

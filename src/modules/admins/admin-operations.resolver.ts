@@ -17,6 +17,8 @@ import { ReportsService } from '../reports/reports.service';
 import { ClearReportCollectionInput, ClearReportInput } from './models/clear-report.input';
 import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
 import { GraphQLError } from 'graphql';
+import { ProcessMarketplaceEventService } from './processMarketplaceEvent.service';
+import {ProcessMarketplaceEventInput} from './models/process-marketplace-event.input';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -24,6 +26,7 @@ export class AdminOperationsResolver {
     private readonly logger: Logger,
     private readonly flagService: FlagNftService,
     private reportNfts: ReportsService,
+    private readonly processEventsService: ProcessMarketplaceEventService,
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
@@ -133,8 +136,25 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
+  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async processMarketplaceEvent(
+    @Args('input')
+    input: ProcessMarketplaceEventInput,
+  ): Promise<boolean> {
+    try {
+      await this.processEventsService.updateCollectionNftsNSFWByAdmin(
+        input.marketplaceAddress,
+        input.eventName,
+      );
+      return true;
+    } catch (error) {
+      throw new GraphQLError(error);
+    }
+  }
+
+  @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
-  async reindexMarketplaceEvents(
+  async reindexEventForMarketplace(
     @Args('input')
     input: MarketplaceEventsIndexingArgs,
   ): Promise<boolean> {

@@ -169,6 +169,7 @@ export class AuctionEntity extends BaseEntity {
       nrAuctionTokens: string;
       price: string;
       paymentToken: string;
+      paymentNonce: number;
       paymentTokenNonce: string;
       auctionType: string;
       deadline: number;
@@ -181,6 +182,8 @@ export class AuctionEntity extends BaseEntity {
     if (!topicsAuctionToken) {
       return null;
     }
+
+    console.log({topicsAuctionToken})
     return new AuctionEntity({
       marketplaceAuctionId: parseInt(topicsAuctionToken.auctionId, 16),
       collection: topicsAuctionToken.collection,
@@ -192,7 +195,7 @@ export class AuctionEntity extends BaseEntity {
           ? AuctionTypeEnum.Nft
           : AuctionTypeEnum.SftOnePerPayment,
       paymentToken: topicsAuctionToken.paymentToken,
-      paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce),
+      paymentNonce: topicsAuctionToken.paymentTokenNonce?parseInt(topicsAuctionToken.paymentTokenNonce):topicsAuctionToken.paymentNonce,
       ownerAddress: topicsAuctionToken.originalOwner,
       minBid: topicsAuctionToken.price,
       minBidDenominated: BigNumberUtils.denominateAmount(topicsAuctionToken.price, decimals),
