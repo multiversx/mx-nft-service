@@ -1,14 +1,20 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, forwardRef } from '@nestjs/common';
 import * as request from 'supertest';
-import { CleanupInterceptor, FieldsInterceptor } from '@multiversx/sdk-nestjs-http';
-import { Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+//import { CleanupInterceptor, FieldsInterceptor } from '@multiversx/sdk-nestjs-http';
+import { Test, TestingModule} from '@nestjs/testing';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+//import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { TagEntity } from 'src/db/auctions/tags.entity';
+import { AppModule } from 'src/app.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 //import { getApplication } from './get-application';
 
 describe('TagsResolver', () => {
   let app: INestApplication;
+  let moduleFixture: TestingModule;
 
-  // beforeEach(async () => {
+  // beforeAll(async () => {
   //   try{
   //     console.log("Before each creating app.")
   //     app = await getApplication();
@@ -17,31 +23,36 @@ describe('TagsResolver', () => {
   //   }
   // });
 
-  beforeEach(async () => {
-    const moduleRef = await Test.createTestingModule({
+  beforeAll(async () => {
+    moduleFixture = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({
-          type: "sqlite",
-          database: ":memory:",
-          dropSchema: true,
-          entities: ['src/db/**/*.entity.ts'],
-          synchronize: false,
-          logging: true,
-        })
+        // TypeOrmModule.forRoot({
+        //   type: "sqlite",
+        //   database: ":memory:",
+        //   dropSchema: true,
+        //   entities: ['src/db/**/*.entity.js'],
+        //   synchronize: false,
+        //   logging: false,
+        // }),
+        GraphQLModule.forRoot<ApolloDriverConfig>({ driver: ApolloDriver, playground: false, autoSchemaFile: 'schema.gql' }),
+        forwardRef(() => AppModule),
       ],
     }).compile();
 
-    app = moduleRef.createNestApplication();
-    app.useGlobalInterceptors(
-      new FieldsInterceptor(),
-      new CleanupInterceptor(),
-    );
+    app = moduleFixture.createNestApplication();
     await app.init();
-  });
+    
+    const tagsRepository = moduleFixture.get(getRepositoryToken(TagEntity));
+    const testTag = new TagEntity();
+    testTag.tag = 'newTag';
+    await tagsRepository.save(testTag);
+  }, 10000);
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
-  });
+    const tagsRepository = moduleFixture.get(getRepositoryToken(TagEntity));
+    await tagsRepository.clear();
+  }, 10000);
 
   describe('Query #tags', () => {
     it('should return correct data for the tags query', async () => {
@@ -49,23 +60,11 @@ describe('TagsResolver', () => {
             query Query($filters: TagsFilter!) {
                 tags(filters: $filters) {
                  edges {
-                    cursor
                     node {
-                    count
-                    tag
+                      count
+                      tag
                     }
-                }
-                pageData {
-                    count
-                    limit
-                    offset
-                }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                    hasPreviousPage
-                    startCursor
-                }
+                  }
                 }
             }
         `;
@@ -86,7 +85,9 @@ describe('TagsResolver', () => {
 
         const { data } = response.body;
         console.log(data);
+
         expect(data).toBeDefined();
+        expect(data.tags.edges.length).toBeGreaterThan(0);
     });
   });
 });

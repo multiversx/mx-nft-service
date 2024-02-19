@@ -20,11 +20,14 @@ export async function createTestingModule() {
     ],
   });
 
+  console.log("compiled.");
   const compiled = await moduleBuilder.compile();
 
+  console.log("create nest app.");
   const app = compiled.createNestApplication(undefined, {
     logger: false,
   });
 
+  console.log("app init");
   return await app.init();
 }
