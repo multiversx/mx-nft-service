@@ -3,7 +3,7 @@ import { BaseResolver } from '../common/base.resolver';
 import { NotificationsService } from './notifications.service';
 import { NotificationsResponse, Notification } from './models';
 import { connectionFromArraySlice } from 'graphql-relay';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import { UseGuards } from '@nestjs/common';
 import { NotificationsFilters } from './models/Notifications.Filter';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
@@ -25,7 +25,7 @@ export class NotificationsResolver extends BaseResolver(Notification) {
     pagination: ConnectionArgs,
     @AuthUser() user: UserAuthResult,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [notifications, count] = await this.notificationsService.getNotifications(user.address, filters?.marketplaceKey);
     const page = connectionFromArraySlice(notifications, pagination, {
       arrayLength: count,

@@ -1,6 +1,6 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { MarketplacesService } from './marketplaces.service';
 import { Marketplace } from './models/Marketplace.dto';
@@ -28,7 +28,7 @@ export class MarketplacesQueriesResolver extends BaseResolver(Marketplace) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const marketplaces = await this.marketplaceService.getMarketplaces(limit, offset, filters);
     // todo: investigate
     pagination.after = undefined;
