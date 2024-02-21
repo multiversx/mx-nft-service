@@ -4,7 +4,7 @@ import { Asset, AssetsResponse } from '../assets/models';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { BaseResolver } from '../common/base.resolver';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { Collection } from '../nftCollections/models';
 import CollectionResponse from '../nftCollections/models/CollectionResponse';
@@ -29,7 +29,7 @@ export class FeaturedCollectionsResolver extends BaseResolver(Collection) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<AssetsResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [collections, count] = await this.featuredService.getFeaturedCollections(filters, limit, offset);
     return PageResponse.mapResponse<Collection>(collections || [], pagination, count || 0, offset, limit);
   }

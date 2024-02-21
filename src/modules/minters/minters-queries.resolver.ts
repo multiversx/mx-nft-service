@@ -6,7 +6,7 @@ import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { MintersService } from './minters.service';
 import { GqlAdminAuthGuard } from '../auth/gql-admin.auth-guard';
 import { MinterFilters } from './models/MinterFilters';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { MintersResponse } from './models/MintersResponse';
 
@@ -23,7 +23,7 @@ export class MintersQueriesResolver extends BaseResolver(MintersResponse) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<MintersResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const minters = await this.minterService.getMinters(filters);
     return PageResponse.mapResponse<Minter>(minters || [], pagination, minters?.length || 0, offset, limit);
   }

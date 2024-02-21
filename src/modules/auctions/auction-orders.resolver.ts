@@ -4,7 +4,7 @@ import { AuctionsOrdersProvider } from '.';
 import { Auction } from './models';
 import { Order, OrdersResponse } from '../orders/models';
 import { OrderEntity } from 'src/db/orders';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Auction)
@@ -19,7 +19,7 @@ export class AuctionOrdersResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const { id } = auction;
     if (!id) {
       return null;

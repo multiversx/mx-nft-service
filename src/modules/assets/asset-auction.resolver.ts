@@ -4,7 +4,7 @@ import { Asset } from './models';
 import { Auction, AuctionResponse } from '../auctions/models';
 import { AuctionEntity } from 'src/db/auctions';
 import { AuctionsForAssetProvider } from '../auctions/loaders/asset-auctions.loader';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Asset)
@@ -19,7 +19,7 @@ export class AssetAuctionResolver extends BaseResolver(Asset) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const { identifier } = asset;
     if (!identifier) {
       return null;

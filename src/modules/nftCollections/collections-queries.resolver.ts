@@ -4,7 +4,7 @@ import { Collection, CollectionAsset } from './models';
 import CollectionResponse from './models/CollectionResponse';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
 import { Address } from '@multiversx/sdk-core';
@@ -45,7 +45,7 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<CollectionResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [collections, count] = await this.collectionsGetterService.getCollections(offset, limit, filters, sorting);
 
     return PageResponse.mapResponse<Collection>(collections || [], pagination, count || 0, offset, limit);
