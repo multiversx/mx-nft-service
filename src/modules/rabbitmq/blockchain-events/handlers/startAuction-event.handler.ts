@@ -22,6 +22,7 @@ export class StartAuctionEventHandler {
     private auctionsSetterService: AuctionsSetterService,
     private auctionsGetterService: AuctionsGetterService,
     private feedEventsSenderService: FeedEventsSenderService,
+    @Inject(forwardRef(() => AssetByIdentifierService))
     private assetByIdentifierService: AssetByIdentifierService,
     private usdPriceService: UsdPriceService,
     @Inject(forwardRef(() => MarketplacesService))
