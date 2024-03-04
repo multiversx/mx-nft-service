@@ -127,6 +127,7 @@ export class MarketplaceEventsService {
 
   public async handleNftEvents(auctionEvents: any[], hash: string, marketplaceType: MarketplaceTypeEnum) {
     for (let event of auctionEvents) {
+      console.log({ identifier: event.identifier });
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
         case KroganSwapAuctionEventEnum.Bid:
