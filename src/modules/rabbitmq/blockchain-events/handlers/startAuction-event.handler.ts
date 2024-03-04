@@ -29,24 +29,28 @@ export class StartAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
-    if (!auctionTokenEvent && !topics) return;
+    try {
+      const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
+      if (!auctionTokenEvent && !topics) return;
 
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      auctionTokenEvent.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
+      const marketplace = await this.marketplaceService.getMarketplaceByType(
+        auctionTokenEvent.getAddress(),
+        marketplaceType,
+        topics.collection,
+      );
 
-    if (!marketplace) return;
-    this.logger.log(
-      `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
-    );
-    const auction = await this.saveAuction(topics, marketplace, hash);
+      if (!marketplace) return;
+      this.logger.log(
+        `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      );
+      const auction = await this.saveAuction(topics, marketplace, hash);
 
-    if (!auction) return;
+      if (!auction) return;
 
-    await this.feedEventsSenderService.sendStartAuctionEvent(topics, auction, marketplace);
+      await this.feedEventsSenderService.sendStartAuctionEvent(topics, auction, marketplace);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async saveAuction(topics: any, marketplace: Marketplace, hash: string) {
