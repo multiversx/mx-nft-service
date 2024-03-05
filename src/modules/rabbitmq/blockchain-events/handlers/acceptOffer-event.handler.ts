@@ -27,54 +27,58 @@ export class AcceptOfferEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const generalMarketplace = await this.marketplaceService.getMarketplaceByType(event.address, marketplaceType);
+    try {
+      const generalMarketplace = await this.marketplaceService.getMarketplaceByType(event.address, marketplaceType);
 
-    if (generalMarketplace?.type === MarketplaceTypeEnum.External) {
-      let acceptOfferEvent = undefined;
-      let topics = undefined;
-      if (generalMarketplace.key === XOXNO_KEY) {
-        acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
-        topics = acceptOfferEvent.getTopics();
-      }
-      if (generalMarketplace.key === FRAMEIT_KEY) {
-        acceptOfferEvent = new AcceptOfferFrameitEvent(event);
-        topics = acceptOfferEvent.getTopics();
-      }
-      if (!acceptOfferEvent) return;
+      if (generalMarketplace?.type === MarketplaceTypeEnum.External) {
+        let acceptOfferEvent = undefined;
+        let topics = undefined;
+        if (generalMarketplace.key === XOXNO_KEY) {
+          acceptOfferEvent = new AcceptOfferXoxnoEvent(event);
+          topics = acceptOfferEvent.getTopics();
+        }
+        if (generalMarketplace.key === FRAMEIT_KEY) {
+          acceptOfferEvent = new AcceptOfferFrameitEvent(event);
+          topics = acceptOfferEvent.getTopics();
+        }
+        if (!acceptOfferEvent) return;
 
-      this.logger.log(
-        `${acceptOfferEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${generalMarketplace?.name}'`,
+        this.logger.log(
+          `${acceptOfferEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${generalMarketplace?.name}'`,
+        );
+
+        if (topics.auctionId || topics.auctionId !== 0) {
+          let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(topics.auctionId, generalMarketplace.key);
+          if (!auction) return;
+
+          auction.status = AuctionStatusEnum.Closed;
+          auction.modifiedDate = new Date(new Date().toUTCString());
+          this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.AcceptOffer);
+        }
+        return;
+      }
+
+      const acceptOfferEvent = new AcceptOfferEvent(event);
+      const topics = acceptOfferEvent.getTopics();
+      const marketplace = await this.marketplaceService.getMarketplaceByType(
+        acceptOfferEvent.getAddress(),
+        marketplaceType,
+        topics.collection,
       );
+      this.logger.log(`Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
 
-      if (topics.auctionId || topics.auctionId !== 0) {
-        let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(topics.auctionId, generalMarketplace.key);
-        if (!auction) return;
+      const offer = await this.offersService.getOfferByIdAndMarketplace(topics.offerId, marketplace.key);
 
-        auction.status = AuctionStatusEnum.Closed;
-        auction.modifiedDate = new Date(new Date().toUTCString());
-        this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.AcceptOffer);
-      }
-      return;
+      await this.offersService.saveOffer({
+        ...offer,
+        status: OfferStatusEnum.Accepted,
+        modifiedDate: new Date(new Date().toUTCString()),
+      });
+
+      await this.feedEventsSenderService.sendAcceptOfferEvent(topics.nftOwner, offer);
+      await this.notificationsService.updateNotificationStatusForOffers([offer.identifier]);
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
-
-    const acceptOfferEvent = new AcceptOfferEvent(event);
-    const topics = acceptOfferEvent.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      acceptOfferEvent.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
-    this.logger.log(`Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-
-    const offer = await this.offersService.getOfferByIdAndMarketplace(topics.offerId, marketplace.key);
-
-    await this.offersService.saveOffer({
-      ...offer,
-      status: OfferStatusEnum.Accepted,
-      modifiedDate: new Date(new Date().toUTCString()),
-    });
-
-    await this.feedEventsSenderService.sendAcceptOfferEvent(topics.nftOwner, offer);
-    await this.notificationsService.updateNotificationStatusForOffers([offer.identifier]);
   }
 }

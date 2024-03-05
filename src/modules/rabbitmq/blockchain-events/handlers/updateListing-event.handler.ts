@@ -22,24 +22,28 @@ export class UpdateListingEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const updateListingEvent = new UpdateListingEvent(event);
-    const topics = updateListingEvent.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      updateListingEvent.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
-    this.logger.log(
-      `${updateListingEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
-    );
-    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
+    try {
+      const updateListingEvent = new UpdateListingEvent(event);
+      const topics = updateListingEvent.getTopics();
+      const marketplace = await this.marketplaceService.getMarketplaceByType(
+        updateListingEvent.getAddress(),
+        marketplaceType,
+        topics.collection,
+      );
+      this.logger.log(
+        `${updateListingEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      );
+      let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
 
-    if (auction && marketplace) {
-      const paymentToken = await this.usdPriceService.getToken(auction.paymentToken);
+      if (auction && marketplace) {
+        const paymentToken = await this.usdPriceService.getToken(auction.paymentToken);
 
-      this.updateAuctionListing(auction, updateListingEvent, paymentToken, hash);
+        this.updateAuctionListing(auction, updateListingEvent, paymentToken, hash);
 
-      this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.UpdateListing);
+        this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.UpdateListing);
+      }
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
   }
 

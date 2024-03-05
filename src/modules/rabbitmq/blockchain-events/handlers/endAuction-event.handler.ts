@@ -25,23 +25,27 @@ export class EndAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const endAuctionEvent = new EndAuctionEvent(event);
-    const topics = endAuctionEvent.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      endAuctionEvent.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
+    try {
+      const endAuctionEvent = new EndAuctionEvent(event);
+      const topics = endAuctionEvent.getTopics();
+      const marketplace = await this.marketplaceService.getMarketplaceByType(
+        endAuctionEvent.getAddress(),
+        marketplaceType,
+        topics.collection,
+      );
 
-    if (!marketplace) return;
-    this.logger.log(`End auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-    const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
+      if (!marketplace) return;
+      this.logger.log(`End auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
 
-    if (!auction) return;
+      if (!auction) return;
 
-    this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionEventEnum.EndAuctionEvent);
-    this.notificationsService.updateNotificationStatus([auction.id]);
-    this.ordersService.updateOrder(auction.id, OrderStatusEnum.Bought);
-    await this.feedEventsSenderService.sendWonAuctionEvent(topics, auction, marketplace);
+      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionEventEnum.EndAuctionEvent);
+      this.notificationsService.updateNotificationStatus([auction.id]);
+      this.ordersService.updateOrder(auction.id, OrderStatusEnum.Bought);
+      await this.feedEventsSenderService.sendWonAuctionEvent(topics, auction, marketplace);
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
+    }
   }
 }

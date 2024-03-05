@@ -25,48 +25,52 @@ export class BuyEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { buySftEvent, topics } = this.getEventAndTopics(event, hash);
-    let auction: AuctionEntity;
+    try {
+      const { buySftEvent, topics } = this.getEventAndTopics(event, hash);
+      let auction: AuctionEntity;
 
-    const marketplace = await this.marketplaceService.getMarketplaceByType(buySftEvent.getAddress(), marketplaceType, topics.collection);
+      const marketplace = await this.marketplaceService.getMarketplaceByType(buySftEvent.getAddress(), marketplaceType, topics.collection);
 
-    if (!marketplace) return;
-    this.logger.log(`${buySftEvent.getIdentifier()}  event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      if (!marketplace) return;
+      this.logger.log(`${buySftEvent.getIdentifier()}  event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
 
-    if (topics.auctionId) {
-      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
-    } else {
-      const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
-      auction = await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(auctionIdentifier, marketplace.key);
+      if (topics.auctionId) {
+        auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
+      } else {
+        const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
+        auction = await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(auctionIdentifier, marketplace.key);
+      }
+      if (!auction) return;
+
+      const result = await this.auctionsGetterService.getAvailableTokens(auction.id);
+      const totalRemaining = result ? result[0]?.availableTokens - parseFloat(topics.boughtTokens) : 0;
+      if (totalRemaining === 0) {
+        this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionStatusEnum.Ended);
+      }
+      const orderSft = await this.ordersService.createOrderForSft(
+        new CreateOrderArgs({
+          ownerAddress: topics.currentWinner,
+          auctionId: auction.id,
+          priceToken: auction.paymentToken,
+          priceAmount: auction.minBid,
+          priceNonce: auction.paymentNonce,
+          blockHash: hash,
+          status: OrderStatusEnum.Bought,
+          boughtTokens: topics.boughtTokens,
+          marketplaceKey: marketplace.key,
+        }),
+      );
+      await this.feedEventsSenderService.sendBuyEvent(
+        topics.currentWinner,
+        auction.minBid,
+        topics.boughtTokens,
+        orderSft,
+        auction,
+        marketplace,
+      );
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
-    if (!auction) return;
-
-    const result = await this.auctionsGetterService.getAvailableTokens(auction.id);
-    const totalRemaining = result ? result[0]?.availableTokens - parseFloat(topics.boughtTokens) : 0;
-    if (totalRemaining === 0) {
-      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionStatusEnum.Ended);
-    }
-    const orderSft = await this.ordersService.createOrderForSft(
-      new CreateOrderArgs({
-        ownerAddress: topics.currentWinner,
-        auctionId: auction.id,
-        priceToken: auction.paymentToken,
-        priceAmount: auction.minBid,
-        priceNonce: auction.paymentNonce,
-        blockHash: hash,
-        status: OrderStatusEnum.Bought,
-        boughtTokens: topics.boughtTokens,
-        marketplaceKey: marketplace.key,
-      }),
-    );
-    await this.feedEventsSenderService.sendBuyEvent(
-      topics.currentWinner,
-      auction.minBid,
-      topics.boughtTokens,
-      orderSft,
-      auction,
-      marketplace,
-    );
   }
 
   private getEventAndTopics(event: any, hash: string) {

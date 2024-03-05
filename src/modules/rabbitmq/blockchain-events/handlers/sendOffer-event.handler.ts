@@ -20,23 +20,27 @@ export class SendOfferEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    if (marketplaceType === MarketplaceTypeEnum.External) {
-      return;
+    try {
+      if (marketplaceType === MarketplaceTypeEnum.External) {
+        return;
+      }
+      const sendOffer = new SendOfferEvent(event);
+      const topics = sendOffer.getTopics();
+      const marketplace = await this.marketplaceService.getMarketplaceByType(sendOffer.getAddress(), marketplaceType, topics.collection);
+
+      if (!marketplace || marketplace.type === MarketplaceTypeEnum.External) {
+        return;
+      }
+
+      this.logger.log(`Send Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+
+      const offer = await this.offersService.saveOffer(OfferEntity.fromEventTopics(topics, hash, marketplace.key, OfferStatusEnum.Active));
+
+      if (!offer) return;
+      await this.feedEventsSenderService.sendOfferEvent(offer);
+      await this.notificationsService.addNotificationForOffer(offer);
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
-    const sendOffer = new SendOfferEvent(event);
-    const topics = sendOffer.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(sendOffer.getAddress(), marketplaceType, topics.collection);
-
-    if (!marketplace || marketplace.type === MarketplaceTypeEnum.External) {
-      return;
-    }
-
-    this.logger.log(`Send Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-
-    const offer = await this.offersService.saveOffer(OfferEntity.fromEventTopics(topics, hash, marketplace.key, OfferStatusEnum.Active));
-
-    if (!offer) return;
-    await this.feedEventsSenderService.sendOfferEvent(offer);
-    await this.notificationsService.addNotificationForOffer(offer);
   }
 }

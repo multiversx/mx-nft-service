@@ -20,22 +20,26 @@ export class WithdrawAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { withdraw, topics } = this.getEventAndTopics(event);
-    let auction: AuctionEntity;
-    const marketplace = await this.marketplaceService.getMarketplaceByType(withdraw.getAddress(), marketplaceType, topics.collection);
-    if (!marketplace) return;
+    try {
+      const { withdraw, topics } = this.getEventAndTopics(event);
+      let auction: AuctionEntity;
+      const marketplace = await this.marketplaceService.getMarketplaceByType(withdraw.getAddress(), marketplaceType, topics.collection);
+      if (!marketplace) return;
 
-    this.logger.log(`${withdraw.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-    if (topics.auctionId) {
-      auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
-    } else {
-      const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
-      auction = await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(auctionIdentifier, marketplace.key);
+      this.logger.log(`${withdraw.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      if (topics.auctionId) {
+        auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
+      } else {
+        const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
+        auction = await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(auctionIdentifier, marketplace.key);
+      }
+
+      if (!auction) return;
+
+      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Closed, hash, AuctionEventEnum.WithdrawEvent);
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
-
-    if (!auction) return;
-
-    this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Closed, hash, AuctionEventEnum.WithdrawEvent);
   }
 
   private getEventAndTopics(event: any) {

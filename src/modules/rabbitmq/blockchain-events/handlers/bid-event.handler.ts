@@ -28,44 +28,48 @@ export class BidEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    let [bidEvent, topics] = [undefined, undefined];
-    let marketplace: Marketplace;
-    if (marketplaceType === MarketplaceTypeEnum.External) {
-      marketplace = await this.marketplaceService.getMarketplaceByAddress(event.address);
-      [bidEvent, topics] = this.getEventAndTopics(event, marketplace.key);
-    } else {
-      [bidEvent, topics] = this.getEventAndTopics(event);
-      marketplace = await this.marketplaceService.getMarketplaceByType(bidEvent.getAddress(), marketplaceType, topics.collection);
-    }
-    if (!marketplace) return;
-    this.logger.log(`${bidEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-    const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
-    if (!auction) return;
+    try {
+      let [bidEvent, topics] = [undefined, undefined];
+      let marketplace: Marketplace;
+      if (marketplaceType === MarketplaceTypeEnum.External) {
+        marketplace = await this.marketplaceService.getMarketplaceByAddress(event.address);
+        [bidEvent, topics] = this.getEventAndTopics(event, marketplace.key);
+      } else {
+        [bidEvent, topics] = this.getEventAndTopics(event);
+        marketplace = await this.marketplaceService.getMarketplaceByType(bidEvent.getAddress(), marketplaceType, topics.collection);
+      }
+      if (!marketplace) return;
+      this.logger.log(`${bidEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
+      if (!auction) return;
 
-    const activeOrder = await this.ordersService.getActiveOrderForAuction(auction.id);
-    if (activeOrder && activeOrder.priceAmount === topics.currentBid) {
-      return;
-    }
+      const activeOrder = await this.ordersService.getActiveOrderForAuction(auction.id);
+      if (activeOrder && activeOrder.priceAmount === topics.currentBid) {
+        return;
+      }
 
-    const order = await this.ordersService.updateAuctionOrders(
-      new CreateOrderArgs({
-        ownerAddress: topics.currentWinner,
-        auctionId: auction.id,
-        priceToken: auction.paymentToken,
-        priceAmount: topics.currentBid,
-        priceNonce: auction.paymentNonce,
-        blockHash: hash,
-        status: OrderStatusEnum.Active,
-        marketplaceKey: marketplace.key,
-      }),
-      activeOrder,
-    );
-    await this.feedEventsSenderService.sendBidEvent(auction, topics, order);
-    if (auction.maxBidDenominated === order.priceAmountDenominated) {
-      this.notificationsService.updateNotificationStatus([auction?.id]);
-      this.notificationsService.addNotifications(auction, order);
-      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, event.identifier);
-      this.persistenceService.updateOrderWithStatus(order, OrderStatusEnum.Bought);
+      const order = await this.ordersService.updateAuctionOrders(
+        new CreateOrderArgs({
+          ownerAddress: topics.currentWinner,
+          auctionId: auction.id,
+          priceToken: auction.paymentToken,
+          priceAmount: topics.currentBid,
+          priceNonce: auction.paymentNonce,
+          blockHash: hash,
+          status: OrderStatusEnum.Active,
+          marketplaceKey: marketplace.key,
+        }),
+        activeOrder,
+      );
+      await this.feedEventsSenderService.sendBidEvent(auction, topics, order);
+      if (auction.maxBidDenominated === order.priceAmountDenominated) {
+        this.notificationsService.updateNotificationStatus([auction?.id]);
+        this.notificationsService.addNotifications(auction, order);
+        this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, event.identifier);
+        this.persistenceService.updateOrderWithStatus(order, OrderStatusEnum.Bought);
+      }
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
   }
 

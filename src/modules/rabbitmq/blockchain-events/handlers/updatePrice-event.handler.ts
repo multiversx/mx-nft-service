@@ -24,21 +24,25 @@ export class UpdatePriceEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const updatePriceEvent = new UpdatePriceEvent(event);
-    const topics = updatePriceEvent.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      updatePriceEvent.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
-    this.logger.log(`${updatePriceEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
-    let newPrice: string = await this.getNewPrice(marketplace, topics);
-    if (auction && newPrice) {
-      const paymentToken = await this.usdPriceService.getToken(auction.paymentToken);
-      this.updateAuctionPrice(auction, newPrice, hash, paymentToken?.decimals);
+    try {
+      const updatePriceEvent = new UpdatePriceEvent(event);
+      const topics = updatePriceEvent.getTopics();
+      const marketplace = await this.marketplaceService.getMarketplaceByType(
+        updatePriceEvent.getAddress(),
+        marketplaceType,
+        topics.collection,
+      );
+      this.logger.log(`${updatePriceEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
+      let newPrice: string = await this.getNewPrice(marketplace, topics);
+      if (auction && newPrice) {
+        const paymentToken = await this.usdPriceService.getToken(auction.paymentToken);
+        this.updateAuctionPrice(auction, newPrice, hash, paymentToken?.decimals);
 
-      this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.UpdatePrice);
+        this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.UpdatePrice);
+      }
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
   }
 
