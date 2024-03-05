@@ -21,15 +21,19 @@ export class SwapUpdateEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const updateEvent = new ElrondSwapUpdateEvent(event);
-    const topics = updateEvent.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(updateEvent.getAddress(), marketplaceType);
-    this.logger.log(`${updateEvent.getIdentifier()}  auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
+    try {
+      const updateEvent = new ElrondSwapUpdateEvent(event);
+      const topics = updateEvent.getTopics();
+      const marketplace = await this.marketplaceService.getMarketplaceByType(updateEvent.getAddress(), marketplaceType);
+      this.logger.log(`${updateEvent.getIdentifier()}  auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
 
-    if (auction) {
-      await this.updateAuctionPrice(auction, topics, hash);
-      this.auctionsService.updateAuction(auction, KroganSwapAuctionEventEnum.NftSwapUpdate);
+      if (auction) {
+        await this.updateAuctionPrice(auction, topics, hash);
+        this.auctionsService.updateAuction(auction, KroganSwapAuctionEventEnum.NftSwapUpdate);
+      }
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
   }
 
