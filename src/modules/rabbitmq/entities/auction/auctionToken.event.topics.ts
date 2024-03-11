@@ -6,7 +6,7 @@ export class AuctionTokenEventsTopics {
   private nonce: string;
   private auctionId: string;
   private nrAuctionTokens: string;
-  private originalOwner: Address;
+  private originalOwner: string;
   private minBid: string;
   private maxBid: string;
   private startTime: number;
@@ -20,14 +20,14 @@ export class AuctionTokenEventsTopics {
     this.nonce = Buffer.from(rawTopics[2], 'base64').toString('hex');
     this.auctionId = Buffer.from(rawTopics[3], 'base64').toString('hex');
     this.nrAuctionTokens = parseInt(Buffer.from(rawTopics[4], 'base64').toString('hex'), 16).toString();
-    this.originalOwner = new Address(Buffer.from(rawTopics[5], 'base64'));
+    this.originalOwner = new Address(Buffer.from(rawTopics[5], 'base64')).bech32();
 
     this.minBid = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[6])).toString();
-    this.maxBid = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[7])).toString();
+    this.maxBid = rawTopics[7] ? BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[7])).toString() : '0';
     this.startTime = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[8]));
-    this.endTime = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[9]));
+    this.endTime = rawTopics[9] ? parseInt(BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[9])).toString()) : 0;
     this.paymentToken = BinaryUtils.base64Decode(rawTopics[10]);
-    this.paymentNonce = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[11]));
+    this.paymentNonce = rawTopics[11] ? parseInt(BinaryUtils.hexToNumber(rawTopics[11]).toString()) : 0;
     this.auctionType = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[12])).toString();
 
     if (this.startTime.toString().length > 10) {
@@ -40,7 +40,7 @@ export class AuctionTokenEventsTopics {
 
   toPlainObject() {
     return {
-      originalOwner: this.originalOwner.bech32(),
+      originalOwner: this.originalOwner,
       collection: this.collection,
       nonce: this.nonce,
       auctionId: this.auctionId,

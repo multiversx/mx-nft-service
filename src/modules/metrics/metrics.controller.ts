@@ -19,8 +19,7 @@ export class MetricsController {
 
   @Post('/event')
   async notify(@Body() payload: RabbitEvent): Promise<HttpStatus> {
-    const resp = await this.marketplaceEvents.handleNftEvents(payload?.events, payload?.hash, MarketplaceTypeEnum.External);
-    console.log('resp', resp);
+    await this.marketplaceEvents.handleNftAuctionEvents(payload?.events, payload?.hash, MarketplaceTypeEnum.External);
     return HttpStatus.OK;
   }
 }

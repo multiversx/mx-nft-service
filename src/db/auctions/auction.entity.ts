@@ -160,6 +160,56 @@ export class AuctionEntity extends BaseEntity {
     });
   }
 
+  static fromAuctionTopics(
+    topicsAuctionToken: {
+      collection: string;
+      nonce: string;
+      auctionId: string;
+      nrAuctionTokens: string;
+      originalOwner: string;
+      minBid: string;
+      maxBid: string;
+      startTime: number;
+      endTime: number;
+      paymentToken: string;
+      paymentNonce: number;
+      auctionType: string;
+    },
+    tags: string,
+    hash: string,
+    marketplaceKey: string,
+    decimals: number = 18,
+  ) {
+    if (!topicsAuctionToken) {
+      return null;
+    }
+    console.log('topicsAuctionToken', topicsAuctionToken);
+    return new AuctionEntity({
+      marketplaceAuctionId: parseInt(topicsAuctionToken.auctionId, 16),
+      collection: topicsAuctionToken.collection,
+      nonce: parseInt(topicsAuctionToken.nonce, 16),
+      nrAuctionedTokens: parseInt(topicsAuctionToken.nrAuctionTokens, 16),
+      status: AuctionStatusEnum.Running,
+      type:
+        topicsAuctionToken.auctionType === '' || parseInt(topicsAuctionToken.auctionType) === ElrondSwapAuctionTypeEnum.Auction
+          ? AuctionTypeEnum.Nft
+          : AuctionTypeEnum.SftOnePerPayment,
+      paymentToken: topicsAuctionToken.paymentToken,
+      paymentNonce: topicsAuctionToken.paymentNonce,
+      ownerAddress: topicsAuctionToken.originalOwner,
+      minBid: topicsAuctionToken.minBid,
+      minBidDenominated: BigNumberUtils.denominateAmount(topicsAuctionToken.minBid, decimals),
+      maxBid: topicsAuctionToken.maxBid ?? '0',
+      maxBidDenominated: BigNumberUtils.denominateAmount(topicsAuctionToken.maxBid ?? '0', decimals),
+      startDate: DateUtils.getCurrentTimestamp(),
+      endDate: topicsAuctionToken.endTime,
+      identifier: `${topicsAuctionToken.collection}-${topicsAuctionToken.nonce}`,
+      tags: tags ? `,${tags},` : '',
+      blockHash: hash,
+      marketplaceKey: marketplaceKey,
+    });
+  }
+
   static fromWithdrawTopics(
     topicsAuctionToken: {
       originalOwner: string;
