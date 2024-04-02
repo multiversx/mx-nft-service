@@ -47,6 +47,6 @@ export class ProxyDeployerMutationsResolver extends BaseResolver(TransactionNode
   @Mutation(() => TransactionNode)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployMarketplaceContract(@Args('input') input: DeployMarketplaceArgs): Promise<TransactionNode> {
-    return await this.minterDeployerService.deployBulkSc(input.ownerAddress);
+    return await this.minterDeployerService.deployMarketplaceSc(input.ownerAddress, input.marketplaceFee, input.paymentTokens);
   }
 }
