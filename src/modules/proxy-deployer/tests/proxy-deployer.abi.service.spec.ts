@@ -82,13 +82,13 @@ describe('Proxy  Deployer Abi Service', () => {
 
       const expectedResult = {
         chainID: 'T',
-        data: 'Y29udHJhY3REZXBsb3lAMDAwMDAwMDAwMDAwMDAwMDA1MDAyZjcwNTEzMzE1ZTIwNDM0MDNhMDkwMTEyNmRkODYzMmNkZTc3MTU5ZTNkZg==',
+        data: 'Y29udHJhY3REZXBsb3lAMDAwMDAwMDAwMDAwMDAwMDA1MDAyZjcwNTEzMzE1ZTIwNDM0MDNhMDkwMTEyNmRkODYzMmNkZTc3MTU5ZTNkZkAwM2U4QDU3NDU0NzRjNDQyZDYxMzIzODYzMzUzOQ==',
         gasLimit: 70000000,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,
         receiver: 'erd1qqqqqqqqqqqqqpgqut6lamz9dn480ytj8cmcwvydcu3lj55epltq9t9kam',
-        sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
+        sender: 'erd1qqqqqqqqqqqqqpgq9ac9zvc4ugzrgqaqjqgjdhvxxtx7wu2eu00sxezym3',
         signature: undefined,
         value: '0',
         version: 1,
@@ -102,7 +102,7 @@ describe('Proxy  Deployer Abi Service', () => {
 
     const expectedResult = {
       chainID: 'T',
-      data: 'Y29udHJhY3REZXBsb3lAMDAwMDAwMDAwMDAwMDAwMDA1MDAyZjcwNTEzMzE1ZTIwNDM0MDNhMDkwMTEyNmRkODYzMmNkZTc3MTU5ZTNkZkAyNzEwQDAwMDAwMDA0NDU0NzRjNDQ=',
+      data: 'Y29udHJhY3REZXBsb3lAMDAwMDAwMDAwMDAwMDAwMDA1MDAyZjcwNTEzMzE1ZTIwNDM0MDNhMDkwMTEyNmRkODYzMmNkZTc3MTU5ZTNkZkAyNzEwQDQ1NDc0YzQ0',
       gasLimit: 70000000,
       gasPrice: 1000000000,
       nonce: 0,
