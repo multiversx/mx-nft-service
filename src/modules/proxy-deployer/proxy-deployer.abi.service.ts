@@ -56,7 +56,10 @@ export class ProxyDeployerAbiService {
     const args: any[] = [new AddressValue(Address.fromString(process.env.TEMPLATE_MARKETPLACE_ADDRESS))];
     if (paymentTokens) {
       args.push(
-        VariadicValue.fromItems(new U32Value(marketplaceFee), List.fromItems(paymentTokens?.map((tag) => BytesValue.fromUTF8(tag)))),
+        VariadicValue.fromItems(
+          new U32Value(marketplaceFee),
+          VariadicValue.fromItems(...paymentTokens?.map((paymentToken) => BytesValue.fromUTF8(paymentToken))),
+        ),
       );
     }
     return contract.methods
