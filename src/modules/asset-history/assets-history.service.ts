@@ -17,6 +17,7 @@ import { AssetsHistoryNftEventService } from './services/assets-history.nft-even
 import { AssetsHistoryElrondNftsSwapEventsService } from './services/assets-history.nfts-swap-auction.service';
 import { AssetsHistoryCachingService } from './assets-history-caching.service';
 import { AssetsHistoryElasticService } from './assets-history-elastic.service';
+import { DateUtils } from 'src/utils/date-utils';
 
 @Injectable()
 export class AssetsHistoryService {
@@ -41,7 +42,12 @@ export class AssetsHistoryService {
     beforeTimestamp: number,
     historyLog: AssetHistoryLog[] = [],
   ): Promise<AssetHistoryLog[]> {
-    const elasticLogs = await this.assetsHistoryElasticService.getHistoryLog(collection, nonce, limit, beforeTimestamp);
+    const elasticLogs = await this.assetsHistoryElasticService.getHistoryLog(
+      collection,
+      nonce,
+      limit,
+      beforeTimestamp ?? DateUtils.getCurrentTimestamp(),
+    );
 
     for (let index = 0; index < elasticLogs.length; index++) {
       if (historyLog.length === limit) {
