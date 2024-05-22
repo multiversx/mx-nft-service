@@ -14,6 +14,7 @@ import { AcceptOfferEventHandler } from './handlers-reindex/acceptOffer-event.ha
 import { WithdrawOfferEventHandler } from './handlers-reindex/withdrawOffer-event.handler';
 import { UpdateListingEventHandler } from './handlers-reindex/updateListing-event.handler';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class MarketplaceEventsProcessingService {
@@ -36,13 +37,13 @@ export class MarketplaceEventsProcessingService {
     private marketplaceService: MarketplacesService,
   ) { }
 
-  public async handleNftAuctionEvents(auctionEvents: any[], hash: string) {
+  public async handleNftAuctionEvents(auctionEvents: EventLog[]) {
     for (let event of auctionEvents) {
       const marketplace = await this.marketplaceService.getMarketplaceByAddress(event.address);
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
         case KroganSwapAuctionEventEnum.Bid:
-          await this.bidEventHandler.handle(event, hash, marketplace);
+          await this.bidEventHandler.handle(event, marketplace);
 
           break;
         case AuctionEventEnum.BuySftEvent:
@@ -53,10 +54,10 @@ export class MarketplaceEventsProcessingService {
         case KroganSwapAuctionEventEnum.Purchase:
           const eventName = Buffer.from(event.topics[0], 'base64').toString();
           if (eventName === ExternalAuctionEventEnum.UpdateOffer || eventName === KroganSwapAuctionEventEnum.UpdateListing) {
-            this.logger.log(`${eventName} event detected for hash '${hash}' for marketplace ${event.address}, ignore it for the moment`);
+            this.logger.log(`${eventName} event detected  for marketplace ${event.address}, ignore it for the moment`);
             continue;
           }
-          await this.buyEventHandler.handle(event, hash, marketplace);
+          await this.buyEventHandler.handle(event, marketplace);
           break;
         case AuctionEventEnum.WithdrawEvent:
         case KroganSwapAuctionEventEnum.WithdrawSwap:
@@ -64,61 +65,61 @@ export class MarketplaceEventsProcessingService {
         case ExternalAuctionEventEnum.ReturnListing:
           if (Buffer.from(event.topics[0], 'base64').toString() === ExternalAuctionEventEnum.UpdateOffer) {
             this.logger.log(
-              `${event.topics[0]} event detected for hash '${hash}' for marketplace ${event.addreses}, ignore it for the moment`,
+              `${event.topics[0]} event detected for marketplace ${event.address}, ignore it for the moment`,
             );
             continue;
           }
-          await this.withdrawAuctionEventHandler.handle(event, hash, marketplace);
+          await this.withdrawAuctionEventHandler.handle(event, marketplace);
           break;
         case AuctionEventEnum.EndAuctionEvent:
-          await this.endAuctionEventHandler.handle(event, hash, marketplace);
+          await this.endAuctionEventHandler.handle(event, marketplace);
           break;
         case AuctionEventEnum.AuctionTokenEvent:
         case ExternalAuctionEventEnum.Listing:
         case ExternalAuctionEventEnum.ListNftOnMarketplace:
         case KroganSwapAuctionEventEnum.NftSwap:
-          await this.startAuctionEventHandler.handle(event, hash, marketplace);
+          await this.startAuctionEventHandler.handle(event, marketplace);
           break;
         case ExternalAuctionEventEnum.ChangePrice:
         case ExternalAuctionEventEnum.UpdatePrice:
-          await this.updatePriceEventHandler.handle(event, hash, marketplace);
+          await this.updatePriceEventHandler.handle(event, marketplace);
           break;
         case ExternalAuctionEventEnum.UpdateListing: {
-          await this.updateListingEventHandler.handle(event, hash, marketplace);
+          await this.updateListingEventHandler.handle(event, marketplace);
           break;
         }
         case ExternalAuctionEventEnum.AcceptOffer:
         case ExternalAuctionEventEnum.AcceptOfferFromAuction:
-          const acceptOfferEventName = Buffer.from(event.topics[0], 'base64').toString();
+          const acceptOfferEventName = Buffer.from(event.topics[0], 'hex').toString();
           if (acceptOfferEventName === ExternalAuctionEventEnum.UserDeposit) {
             continue;
           }
           if (acceptOfferEventName === ExternalAuctionEventEnum.EndTokenEvent) {
-            await this.withdrawAuctionEventHandler.handle(event, hash, marketplace);
+            await this.withdrawAuctionEventHandler.handle(event, marketplace);
           } else {
-            await this.acceptOfferEventHandler.handle(event, hash, marketplace);
+            await this.acceptOfferEventHandler.handle(event, marketplace);
           }
 
           break;
         case AuctionEventEnum.WithdrawAuctionAndAcceptOffer:
-          if (Buffer.from(event.topics[0], 'base64').toString() === AuctionEventEnum.Accept_offer_token_event) {
-            await this.acceptOfferEventHandler.handle(event, hash, marketplace);
+          if (Buffer.from(event.topics[0], 'hex').toString() === AuctionEventEnum.Accept_offer_token_event) {
+            await this.acceptOfferEventHandler.handle(event, marketplace);
           } else {
-            await this.withdrawAuctionEventHandler.handle(event, hash, marketplace);
+            await this.withdrawAuctionEventHandler.handle(event, marketplace);
           }
           break;
         case ExternalAuctionEventEnum.AcceptGlobalOffer:
-          await this.acceptGlobalOfferEventHandler.handle(event, hash, marketplace);
+          await this.acceptGlobalOfferEventHandler.handle(event, marketplace);
           break;
         case AuctionEventEnum.SendOffer:
-          await this.sendOfferEventHandler.handle(event, hash, marketplace);
+          await this.sendOfferEventHandler.handle(event, marketplace);
           break;
         case AuctionEventEnum.WithdrawOffer:
-          await this.withdrawOfferEventHandler.handle(event, hash, marketplace);
+          await this.withdrawOfferEventHandler.handle(event, marketplace);
           break;
         case KroganSwapAuctionEventEnum.NftSwapUpdate:
         case KroganSwapAuctionEventEnum.NftSwapExtend:
-          await this.swapUpdateEventHandler.handle(event, hash, marketplace);
+          await this.swapUpdateEventHandler.handle(event, marketplace);
           break;
         case MarketplaceEventEnum.SCUpgrade: {
           await this.slackReportService.sendScUpgradeNotification(event.address);

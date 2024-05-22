@@ -13,6 +13,7 @@ import { AcceptOfferXoxnoEvent } from '../../entities/auction-reindex/acceptOffe
 import { FeedEventsSenderService } from '../feed-events.service';
 import { AcceptOfferFrameitEvent } from '../../entities/auction-reindex/acceptOfferFrameit.event';
 import { Marketplace } from 'src/modules/marketplaces/models';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class AcceptOfferEventHandler {
@@ -27,7 +28,7 @@ export class AcceptOfferEventHandler {
     private readonly notificationsService: NotificationsService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       if (marketplace?.type === MarketplaceTypeEnum.External) {
         let acceptOfferEvent = undefined;
@@ -43,7 +44,7 @@ export class AcceptOfferEventHandler {
         if (!acceptOfferEvent) return;
 
         this.logger.log(
-          `${acceptOfferEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+          `${acceptOfferEvent.getIdentifier()} event detected for  marketplace '${marketplace?.name}'`,
         );
 
         if (topics.auctionId || topics.auctionId !== 0) {
@@ -60,11 +61,11 @@ export class AcceptOfferEventHandler {
       const acceptOfferEvent = new AcceptOfferEvent(event);
       const topics = acceptOfferEvent.getTopics();
       marketplace = await this.marketplaceService.getMarketplaceByType(
-        acceptOfferEvent.getAddress(),
+        acceptOfferEvent.address,
         marketplace.type,
         topics.collection,
       );
-      this.logger.log(`Accept Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`Accept Offer event detected for hash marketplace '${marketplace?.name}'`);
 
       const offer = await this.offersService.getOfferByIdAndMarketplace(topics.offerId, marketplace.key);
 

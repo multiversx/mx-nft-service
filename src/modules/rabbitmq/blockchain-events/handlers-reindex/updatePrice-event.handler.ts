@@ -9,6 +9,7 @@ import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { DEADRARE_KEY } from 'src/utils/constants';
 import { UpdatePriceEvent } from '../../entities/auction-reindex/updatePrice.event';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class UpdatePriceEventHandler {
@@ -22,21 +23,21 @@ export class UpdatePriceEventHandler {
     private nftAbiService: NftMarketplaceAbiService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       const updatePriceEvent = new UpdatePriceEvent(event);
       const topics = updatePriceEvent.getTopics();
       marketplace = await this.marketplaceService.getMarketplaceByType(
-        updatePriceEvent.getAddress(),
+        updatePriceEvent.address,
         marketplace.type,
         topics.collection,
       );
-      this.logger.log(`${updatePriceEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`${updatePriceEvent.identifier} event detected for marketplace '${marketplace?.name}'`);
       let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
       let newPrice: string = await this.getNewPrice(marketplace, topics);
       if (auction && newPrice) {
         const paymentToken = await this.usdPriceService.getToken(auction.paymentToken);
-        this.updateAuctionPrice(auction, newPrice, hash, paymentToken?.decimals);
+        this.updateAuctionPrice(auction, newPrice, 'hash', paymentToken?.decimals);
 
         this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.UpdatePrice);
       }

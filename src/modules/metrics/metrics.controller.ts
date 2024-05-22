@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { MetricsCollector } from './metrics.collector';
-import { RabbitEvent } from './rabbitEvent';
+import { EventLog } from './rabbitEvent';
 import { MarketplaceEventsProcessingService } from '../rabbitmq/blockchain-events/marketplace-events-processing.service';
 
 @Controller()
@@ -17,8 +17,8 @@ export class MetricsController {
   }
 
   @Post('/event')
-  async notify(@Body() payload: RabbitEvent): Promise<HttpStatus> {
-    await this.marketplaceEvents.handleNftAuctionEvents(payload?.events, payload?.hash);
+  async notify(@Body() payload: EventLog[]): Promise<HttpStatus> {
+    await this.marketplaceEvents.handleNftAuctionEvents(payload);
     return HttpStatus.OK;
   }
 }

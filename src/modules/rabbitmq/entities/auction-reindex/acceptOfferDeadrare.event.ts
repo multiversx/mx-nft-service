@@ -1,10 +1,10 @@
-import { GenericEvent } from '../generic.event';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 import { AcceptOfferDeadrareEventsTopics } from './acceptOfferDeadrare.event.topics';
 
-export class AcceptOfferDeadrareEvent extends GenericEvent {
+export class AcceptOfferDeadrareEvent extends EventLog {
   private decodedTopics: AcceptOfferDeadrareEventsTopics;
 
-  constructor(init?: Partial<GenericEvent>) {
+  constructor(init?: Partial<EventLog>) {
     super(init);
     this.decodedTopics = new AcceptOfferDeadrareEventsTopics(this.topics);
   }

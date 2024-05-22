@@ -6,6 +6,7 @@ import { OfferStatusEnum } from 'src/modules/offers/models';
 import { OffersService } from 'src/modules/offers/offers.service';
 import { WithdrawOfferEvent } from '../../entities/auction-reindex/withdrawOffer.event';
 import { Marketplace } from 'src/modules/marketplaces/models';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class WithdrawOfferEventHandler {
@@ -17,7 +18,7 @@ export class WithdrawOfferEventHandler {
     private readonly marketplaceService: MarketplacesService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       if (marketplace.type === MarketplaceTypeEnum.External) {
         return;
@@ -25,14 +26,14 @@ export class WithdrawOfferEventHandler {
       const withdrawOfferEvent = new WithdrawOfferEvent(event);
       const topics = withdrawOfferEvent.getTopics();
       marketplace = await this.marketplaceService.getMarketplaceByCollectionAndAddress(
-        withdrawOfferEvent.getAddress(),
+        withdrawOfferEvent.address,
         topics.collection,
       );
 
       if (!marketplace) {
         return;
       }
-      this.logger.log(`Withdraw Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`Withdraw Offer event detected for marketplace '${marketplace?.name}'`);
 
       const withdrawOffer = await this.offersService.getOfferByIdAndMarketplace(topics.offerId, marketplace.key);
 

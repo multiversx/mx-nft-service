@@ -8,6 +8,7 @@ import { WithdrawEvent } from '../../entities/auction-reindex';
 import { ClaimEvent } from '../../entities/auction-reindex/claim.event';
 import { ElrondSwapWithdrawEvent } from '../../entities/auction-reindex/elrondnftswap/elrondswap-withdraw.event';
 import { Marketplace } from 'src/modules/marketplaces/models';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class WithdrawAuctionEventHandler {
@@ -19,14 +20,14 @@ export class WithdrawAuctionEventHandler {
     private readonly marketplaceService: MarketplacesService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       const { withdraw, topics } = this.getEventAndTopics(event);
       let auction: AuctionEntity;
-      marketplace = await this.marketplaceService.getMarketplaceByType(withdraw.getAddress(), marketplace.type, topics.collection);
+      marketplace = await this.marketplaceService.getMarketplaceByType(withdraw.address, marketplace.type, topics.collection);
       if (!marketplace) return;
 
-      this.logger.log(`${withdraw.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`${withdraw.identifier} event detected for marketplace '${marketplace?.name}'`);
       if (topics.auctionId) {
         auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
       } else {
@@ -36,13 +37,13 @@ export class WithdrawAuctionEventHandler {
 
       if (!auction) return;
 
-      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Closed, hash, AuctionEventEnum.WithdrawEvent);
+      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Closed, 'hash', AuctionEventEnum.WithdrawEvent);
     } catch (error) {
       console.error('An errror occured while handling bid event', error);
     }
   }
 
-  private getEventAndTopics(event: any) {
+  private getEventAndTopics(event: EventLog) {
     if (event.identifier === KroganSwapAuctionEventEnum.WithdrawSwap) {
       const withdraw = new ElrondSwapWithdrawEvent(event);
       const topics = withdraw.getTopics();

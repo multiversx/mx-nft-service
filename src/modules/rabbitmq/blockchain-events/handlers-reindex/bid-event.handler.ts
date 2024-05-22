@@ -12,6 +12,7 @@ import { ELRONDNFTSWAP_KEY } from 'src/utils/constants';
 import { BidEvent } from '../../entities/auction-reindex';
 import { ElrondSwapBidEvent } from '../../entities/auction-reindex/elrondnftswap/elrondswap-bid.event';
 import { FeedEventsSenderService } from '../feed-events.service';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class BidEventHandler {
@@ -27,7 +28,7 @@ export class BidEventHandler {
     private readonly persistenceService: PersistenceService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       let [bidEvent, topics] = [undefined, undefined];
       if (marketplace.type === MarketplaceTypeEnum.External) {
@@ -37,7 +38,7 @@ export class BidEventHandler {
         marketplace = await this.marketplaceService.getMarketplaceByType(bidEvent.getAddress(), marketplace.type, topics.collection);
       }
       if (!marketplace) return;
-      this.logger.log(`${bidEvent.getIdentifier()} event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`${bidEvent.getIdentifier()} event detected for marketplace '${marketplace?.name}'`);
       const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
       if (!auction) return;
 
@@ -53,7 +54,7 @@ export class BidEventHandler {
           priceToken: auction.paymentToken,
           priceAmount: topics.currentBid,
           priceNonce: auction.paymentNonce,
-          blockHash: hash,
+          blockHash: '',
           status: OrderStatusEnum.Active,
           marketplaceKey: marketplace.key,
         }),
@@ -63,7 +64,7 @@ export class BidEventHandler {
       if (auction.maxBidDenominated === order.priceAmountDenominated) {
         this.notificationsService.updateNotificationStatus([auction?.id]);
         this.notificationsService.addNotifications(auction, order);
-        this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, event.identifier);
+        this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, 'hash', event.identifier);
         this.persistenceService.updateOrderWithStatus(order, OrderStatusEnum.Bought);
       }
     } catch (error) {

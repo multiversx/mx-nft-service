@@ -11,6 +11,7 @@ import { ClaimEvent } from '../../entities/auction-reindex/claim.event';
 import { ElrondSwapBuyEvent } from '../../entities/auction-reindex/elrondnftswap/elrondswap-buy.event';
 import { FeedEventsSenderService } from '../feed-events.service';
 import { Marketplace } from 'src/modules/marketplaces/models';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class BuyEventHandler {
@@ -24,15 +25,15 @@ export class BuyEventHandler {
     private readonly marketplaceService: MarketplacesService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: any, marketplace: Marketplace) {
     try {
-      const { buySftEvent, topics } = this.getEventAndTopics(event, hash);
+      const { buySftEvent, topics } = this.getEventAndTopics(event, 'hash');
       let auction: AuctionEntity;
 
-      marketplace = await this.marketplaceService.getMarketplaceByType(buySftEvent.getAddress(), marketplace.type, topics.collection);
+      marketplace = await this.marketplaceService.getMarketplaceByType(buySftEvent.address, marketplace.type, topics.collection);
 
       if (!marketplace) return;
-      this.logger.log(`${buySftEvent.getIdentifier()}  event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`${buySftEvent.identifier}  event detected for marketplace '${marketplace?.name}'`);
 
       if (topics.auctionId) {
         auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
@@ -45,7 +46,7 @@ export class BuyEventHandler {
       const result = await this.auctionsGetterService.getAvailableTokens(auction.id);
       const totalRemaining = result ? result[0]?.availableTokens - parseFloat(topics.boughtTokens) : 0;
       if (totalRemaining === 0) {
-        this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionStatusEnum.Ended);
+        this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, 'hash', AuctionStatusEnum.Ended);
       }
       const orderSft = await this.ordersService.createOrderForSft(
         new CreateOrderArgs({
@@ -54,7 +55,7 @@ export class BuyEventHandler {
           priceToken: auction.paymentToken,
           priceAmount: auction.minBid,
           priceNonce: auction.paymentNonce,
-          blockHash: hash,
+          blockHash: 'hash',
           status: OrderStatusEnum.Bought,
           boughtTokens: topics.boughtTokens,
           marketplaceKey: marketplace.key,
@@ -73,7 +74,7 @@ export class BuyEventHandler {
     }
   }
 
-  private getEventAndTopics(event: any, hash: string) {
+  private getEventAndTopics(event: EventLog, hash: string) {
     if (event.identifier === KroganSwapAuctionEventEnum.Purchase) {
       if (Buffer.from(event.topics[0], 'base64').toString() === KroganSwapAuctionEventEnum.UpdateListing) {
         this.logger.log(

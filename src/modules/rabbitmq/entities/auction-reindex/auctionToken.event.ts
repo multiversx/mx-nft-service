@@ -1,10 +1,10 @@
-import { GenericEvent } from '../generic.event';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 import { AuctionTokenEventsTopics } from './auctionToken.event.topics';
 
-export class AuctionTokenEvent extends GenericEvent {
+export class AuctionTokenEvent extends EventLog {
   private decodedTopics: AuctionTokenEventsTopics;
 
-  constructor(init?: Partial<GenericEvent>) {
+  constructor(init?: Partial<EventLog>) {
     super(init);
     this.decodedTopics = new AuctionTokenEventsTopics(this.topics);
   }

@@ -9,6 +9,7 @@ import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { UpdateListingEvent } from '../../entities/auction-reindex/updateListing.event';
 import { Marketplace } from 'src/modules/marketplaces/models';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class UpdateListingEventHandler {
@@ -21,20 +22,20 @@ export class UpdateListingEventHandler {
     private usdPriceService: UsdPriceService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       const updateListingEvent = new UpdateListingEvent(event);
       const topics = updateListingEvent.getTopics();
-      marketplace = await this.marketplaceService.getMarketplaceByType(updateListingEvent.getAddress(), marketplace.type, topics.collection);
+      marketplace = await this.marketplaceService.getMarketplaceByType(updateListingEvent.address, marketplace.type, topics.collection);
       this.logger.log(
-        `${updateListingEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+        `${updateListingEvent.identifier} listing event detected for marketplace '${marketplace?.name}'`,
       );
       let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
 
       if (auction && marketplace) {
         const paymentToken = await this.usdPriceService.getToken(auction.paymentToken);
 
-        this.updateAuctionListing(auction, updateListingEvent, paymentToken, hash);
+        this.updateAuctionListing(auction, updateListingEvent, paymentToken, 'hash');
 
         this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.UpdateListing);
       }

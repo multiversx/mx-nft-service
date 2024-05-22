@@ -1,10 +1,10 @@
-import { GenericEvent } from '../generic.event';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 import { AcceptOfferFrameitEventsTopics } from './acceptOfferFrameit.event.topics';
 
-export class AcceptOfferFrameitEvent extends GenericEvent {
+export class AcceptOfferFrameitEvent extends EventLog {
   private decodedTopics: AcceptOfferFrameitEventsTopics;
 
-  constructor(init?: Partial<GenericEvent>) {
+  constructor(init?: Partial<EventLog>) {
     super(init);
     this.decodedTopics = new AcceptOfferFrameitEventsTopics(this.topics);
   }

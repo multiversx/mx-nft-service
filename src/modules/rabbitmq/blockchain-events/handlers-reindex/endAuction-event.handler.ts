@@ -23,23 +23,23 @@ export class EndAuctionEventHandler {
     private notificationsService: NotificationsService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: any, marketplace: Marketplace) {
     try {
       const endAuctionEvent = new EndAuctionEvent(event);
       const topics = endAuctionEvent.getTopics();
       marketplace = await this.marketplaceService.getMarketplaceByType(
-        endAuctionEvent.getAddress(),
+        endAuctionEvent.address,
         marketplace.type,
         topics.collection,
       );
 
       if (!marketplace) return;
-      this.logger.log(`End auction event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`End auction event detected for marketplace '${marketplace?.name}'`);
       const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
 
       if (!auction) return;
 
-      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, hash, AuctionEventEnum.EndAuctionEvent);
+      this.auctionsService.updateAuctionStatus(auction.id, AuctionStatusEnum.Ended, 'hash', AuctionEventEnum.EndAuctionEvent);
       this.notificationsService.updateNotificationStatus([auction.id]);
       this.ordersService.updateOrder(auction.id, OrderStatusEnum.Bought);
       await this.feedEventsSenderService.sendWonAuctionEvent(topics, auction, marketplace);

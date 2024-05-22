@@ -13,6 +13,7 @@ import { AuctionTokenEvent } from '../../entities/auction-reindex';
 import { ElrondSwapAuctionEvent } from '../../entities/auction-reindex/elrondnftswap/elrondswap-auction.event';
 import { ListNftEvent } from '../../entities/auction-reindex/listNft.event';
 import { FeedEventsSenderService } from '../feed-events.service';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class StartAuctionEventHandler {
@@ -27,22 +28,22 @@ export class StartAuctionEventHandler {
     private readonly marketplaceService: MarketplacesService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: any, marketplace: Marketplace) {
     try {
       const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
       if (!auctionTokenEvent && !topics) return;
 
       marketplace = await this.marketplaceService.getMarketplaceByType(
-        auctionTokenEvent.getAddress(),
+        auctionTokenEvent.address,
         marketplace.type,
         topics.collection,
       );
 
       if (!marketplace) return;
       this.logger.log(
-        `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+        `${auctionTokenEvent.identifier} listing event detected for marketplace '${marketplace?.name}'`,
       );
-      const auction = await this.saveAuction(topics, marketplace, hash);
+      const auction = await this.saveAuction(topics, marketplace, 'hash');
 
       if (!auction) return;
 
@@ -89,7 +90,7 @@ export class StartAuctionEventHandler {
     );
   }
 
-  private getEventAndTopics(event: any) {
+  private getEventAndTopics(event: EventLog) {
     if (event.identifier === KroganSwapAuctionEventEnum.NftSwap) {
       const auctionTokenEvent = new ElrondSwapAuctionEvent(event);
       const topics = auctionTokenEvent.getTopics();

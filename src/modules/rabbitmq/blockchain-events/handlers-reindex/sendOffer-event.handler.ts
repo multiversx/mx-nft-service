@@ -8,6 +8,7 @@ import { OffersService } from 'src/modules/offers/offers.service';
 import { SendOfferEvent } from '../../entities/auction-reindex/sendOffer.event';
 import { FeedEventsSenderService } from '../feed-events.service';
 import { Marketplace } from 'src/modules/marketplaces/models';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class SendOfferEventHandler {
@@ -20,22 +21,22 @@ export class SendOfferEventHandler {
     private readonly marketplaceService: MarketplacesService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       if (marketplace.type === MarketplaceTypeEnum.External) {
         return;
       }
       const sendOffer = new SendOfferEvent(event);
       const topics = sendOffer.getTopics();
-      marketplace = await this.marketplaceService.getMarketplaceByType(sendOffer.getAddress(), marketplace.type, topics.collection);
+      marketplace = await this.marketplaceService.getMarketplaceByType(sendOffer.address, marketplace.type, topics.collection);
 
       if (!marketplace) {
         return;
       }
 
-      this.logger.log(`Send Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`Send Offer event detected for marketplace '${marketplace?.name}'`);
 
-      const offer = await this.offersService.saveOffer(OfferEntity.fromEventTopics(topics, hash, marketplace.key, OfferStatusEnum.Active));
+      const offer = await this.offersService.saveOffer(OfferEntity.fromEventTopics(topics, 'hash', marketplace.key, OfferStatusEnum.Active));
 
       if (!offer) return;
       await this.feedEventsSenderService.sendOfferEvent(offer);

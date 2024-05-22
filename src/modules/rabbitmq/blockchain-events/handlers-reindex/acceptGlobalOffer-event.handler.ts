@@ -5,6 +5,7 @@ import { AuctionStatusEnum } from 'src/modules/auctions/models';
 import { XOXNO_KEY } from 'src/utils/constants';
 import { AcceptGlobalOfferEvent } from '../../entities/auction-reindex/acceptGlobalOffer.event';
 import { Marketplace } from 'src/modules/marketplaces/models';
+import { EventLog } from 'src/modules/metrics/rabbitEvent';
 
 @Injectable()
 export class AcceptGlobalOfferEventHandler {
@@ -14,11 +15,11 @@ export class AcceptGlobalOfferEventHandler {
     private auctionsService: AuctionsSetterService,
   ) { }
 
-  async handle(event: any, hash: string, marketplace: Marketplace) {
+  async handle(event: EventLog, marketplace: Marketplace) {
     try {
       const acceptGlobalOfferEvent = new AcceptGlobalOfferEvent(event);
       const topics = acceptGlobalOfferEvent.getTopics();
-      this.logger.log(`Accept Global Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      this.logger.log(`Accept Global Offer event detected for  marketplace '${marketplace?.name}'`);
       if (marketplace.key !== XOXNO_KEY || topics.auctionId <= 0) {
         return;
       }
