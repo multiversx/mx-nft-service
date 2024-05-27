@@ -11,7 +11,7 @@ import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
 import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
 import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
 import { LowestAuctionProvider } from '../auctions/loaders/lowest-auctions.loader';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
 import { AssetsViewsLoader } from './loaders/assets-views.loader';
@@ -63,7 +63,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
     @Args({ name: 'sorting', type: () => AssetsSortingEnum, nullable: true })
     sorting: AssetsSortingEnum,
   ): Promise<AssetsResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const response = await this.assetsService.getAssets(offset, limit, filters, sorting);
 
     return PageResponse.mapResponse<Asset>(response?.items || [], pagination, response?.count || 0, offset, limit);

@@ -1,6 +1,6 @@
 import { Query, Resolver, Args } from '@nestjs/graphql';
 import { Account } from '../account-stats/models';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { ArtistsService } from './artists.service';
 import { ArtistFilters } from './models/Artists.Filter';
@@ -17,7 +17,7 @@ export class ArtistsResolver {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<ArtistResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [accounts, count] = await this.artistsService.getArtists(filters, offset, limit);
     return PageResponse.mapResponse<Account>(accounts || [], pagination, count || 0, offset, limit);
   }

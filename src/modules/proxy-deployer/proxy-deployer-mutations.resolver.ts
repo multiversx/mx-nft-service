@@ -9,10 +9,13 @@ import { TransactionNode } from '../common/transaction';
 import { DeployBulkArgs } from './models/DeployBulkArgs';
 import { DeployMarketplaceArgs } from './models/DeployMarketplaceArgs';
 import { DeployMinterArgs } from './models/DeployMinterArgs';
+import { WhitelistMinterArgs } from '../minters/models';
+import { WhitelistMinterRequest } from '../minters/models/requests/whitelistMinterRequest';
+import { MintersService } from '../minters/minters.service';
 
 @Resolver(() => TransactionNode)
 export class ProxyDeployerMutationsResolver extends BaseResolver(TransactionNode) {
-  constructor(private minterDeployerService: ProxyDeployerAbiService) {
+  constructor(private minterService: MintersService, private minterDeployerService: ProxyDeployerAbiService) {
     super();
   }
 
@@ -20,6 +23,19 @@ export class ProxyDeployerMutationsResolver extends BaseResolver(TransactionNode
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployMinterSmartContract(@Args('input') input: DeployMinterArgs): Promise<TransactionNode> {
     return await this.minterDeployerService.deployMinterSc(DeployMinterRequest.fromArgs(input));
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async whitelistMinterSmartContract(@Args('input') input: WhitelistMinterArgs): Promise<Boolean> {
+    const contractAddresses = await this.minterDeployerService.getDeployedContractsForAddressAndTemplate(
+      input.adminAddress,
+      process.env.TEMPLATE_MINTER_ADDRESS,
+    );
+    if (contractAddresses.includes(input.address)) {
+      return await this.minterService.whitelistMinter(WhitelistMinterRequest.fromArgs(input));
+    }
+    return false;
   }
 
   @Mutation(() => TransactionNode)
@@ -31,6 +47,6 @@ export class ProxyDeployerMutationsResolver extends BaseResolver(TransactionNode
   @Mutation(() => TransactionNode)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async deployMarketplaceContract(@Args('input') input: DeployMarketplaceArgs): Promise<TransactionNode> {
-    return await this.minterDeployerService.deployBulkSc(input.ownerAddress);
+    return await this.minterDeployerService.deployMarketplaceSc(input.ownerAddress, input.marketplaceFee, input.paymentTokens);
   }
 }

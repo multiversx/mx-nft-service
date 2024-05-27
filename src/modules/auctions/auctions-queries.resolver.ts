@@ -6,7 +6,7 @@ import { UseGuards } from '@nestjs/common';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AssetsProvider } from '../assets/loaders/assets.loader';
 import { Account } from '../account-stats/models';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import { FiltersExpression, Sorting, Grouping } from '../common/filters/filtersTypes';
 import { AuctionCustomFilter } from '../common/filters/AuctionCustomFilters';
 import PageResponse from '../common/PageResponse';
@@ -68,7 +68,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [auctions, count, priceRange] = await this.auctionsGetterService.getAuctions(
       new QueryRequest({
         limit,
@@ -97,7 +97,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
 
     const [auctions, count, priceRange] = await this.auctionsGetterService.getAuctionsOrderByNoBids(
       new QueryRequest({ limit, offset, filters, groupByOption: groupBy }),
@@ -134,7 +134,7 @@ export class AuctionsQueriesResolver extends BaseResolver(Auction) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [auctions, count] = await this.auctionsGetterService.getClaimableAuctions(limit, offset, user.address, filters?.marketplaceKey);
     return PageResponse.mapResponse<Auction>(auctions, pagination, count, offset, limit);
   }

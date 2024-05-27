@@ -30,10 +30,6 @@ describe('Minters Service', () => {
           useFactory: () => ({}),
         },
         {
-          provide: MintersDeployerAbiService,
-          useFactory: () => ({}),
-        },
-        {
           provide: PersistenceService,
           useFactory: () => ({}),
         },
@@ -63,9 +59,7 @@ describe('Minters Service', () => {
     it('when saves succed returns true', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cacheEventsPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
-      const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
       persistenceService.saveMinter = jest.fn().mockReturnValueOnce(new MinterEntity({ address: 'address' }));
-      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(['address']);
 
       cacheEventsPublisher.publish = jest.fn();
 
@@ -74,21 +68,10 @@ describe('Minters Service', () => {
       expect(result).toBeTruthy();
     });
 
-    it('when minter address not in the expected list returns false', async () => {
-      const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
-      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(['address1']);
-
-      const result = await service.whitelistMinter(new WhitelistMinterRequest({ address: 'address' }));
-
-      expect(result).toBeFalsy();
-    });
-
     it('when minter address in the expected list but save fails returns false', async () => {
       const persistenceService = module.get<PersistenceService>(PersistenceService);
       const cacheEventsPublisher = module.get<CacheEventsPublisherService>(CacheEventsPublisherService);
-      const mintersDeployerAbiService = module.get<MintersDeployerAbiService>(MintersDeployerAbiService);
       persistenceService.saveMinter = jest.fn().mockReturnValueOnce(null);
-      mintersDeployerAbiService.getMintersForAddress = jest.fn().mockReturnValueOnce(['address']);
 
       cacheEventsPublisher.publish = jest.fn();
 

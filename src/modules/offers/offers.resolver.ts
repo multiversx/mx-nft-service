@@ -5,7 +5,7 @@ import { connectionFromArraySlice } from 'graphql-relay';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { NftMarketplaceAbiService } from '../auctions';
 import { Account } from '../account-stats/models';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import { UseGuards } from '@nestjs/common';
 import { TransactionNode } from '../common/transaction';
 import { AssetsProvider } from '../assets';
@@ -40,7 +40,7 @@ export class OffersResolver extends BaseResolver(Offer) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [offers, count] = await this.offersService.getOffers(filters, offset, limit);
     const page = connectionFromArraySlice(offers, pagination, {
       arrayLength: count,

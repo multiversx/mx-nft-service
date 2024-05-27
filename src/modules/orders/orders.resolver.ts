@@ -8,7 +8,7 @@ import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { AuctionProvider } from '../auctions';
 import { Account } from '../account-stats/models';
 import { FiltersExpression, Sorting } from '../common/filters/filtersTypes';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import { QueryRequest } from '../common/filters/QueryRequest';
 
 @Resolver(() => Order)
@@ -26,7 +26,7 @@ export class OrdersResolver extends BaseResolver(Order) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [orders, count] = await this.ordersService.getOrders(new QueryRequest({ limit, offset, filters, sorting }));
     const page = connectionFromArraySlice(orders, pagination, {
       arrayLength: count,

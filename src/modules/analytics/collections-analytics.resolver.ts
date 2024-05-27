@@ -5,7 +5,7 @@ import { CollectionsAnalyticsModel } from './models/collections-stats.model';
 import { BaseResolver } from '../common/base.resolver';
 import { CollectionsAnalyticsResponse } from './models/collections-analytics.response';
 import PageResponse from '../common/PageResponse';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import { CollectionDetailsProvider } from './loaders/collection-details.loader';
 import { CollectionsDetailsModel } from './models/collections-details.model';
 import { AnalyticsArgs, CollectionAnalyticsArgs } from './models/analytics-args.model';
@@ -26,7 +26,7 @@ export class CollectionsAnalyticsResolver extends BaseResolver(CollectionsAnalyt
     @Args('input', { type: () => CollectionAnalyticsArgs, nullable: true })
     input: CollectionAnalyticsArgs,
   ): Promise<CollectionsAnalyticsResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [collections, count] = await this.collectionsAnalyticsService.getCollectionsOrderByVolum(limit, offset, input.series);
     return PageResponse.mapResponse<CollectionsAnalyticsModel>(collections || [], pagination, count || 0, 0, limit);
   }

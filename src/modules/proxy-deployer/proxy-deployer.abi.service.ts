@@ -56,7 +56,10 @@ export class ProxyDeployerAbiService {
     const args: any[] = [new AddressValue(Address.fromString(process.env.TEMPLATE_MARKETPLACE_ADDRESS))];
     if (paymentTokens) {
       args.push(
-        VariadicValue.fromItems(new U32Value(marketplaceFee), List.fromItems(paymentTokens?.map((tag) => BytesValue.fromUTF8(tag)))),
+        VariadicValue.fromItems(
+          new U32Value(marketplaceFee),
+          VariadicValue.fromItems(...paymentTokens?.map((paymentToken) => BytesValue.fromUTF8(paymentToken))),
+        ),
       );
     }
     return contract.methods
@@ -92,13 +95,18 @@ export class ProxyDeployerAbiService {
       .toPlainObject();
   }
 
-  public async getMintersForAddress(address: string): Promise<string[]> {
+  public async getDeployedContractsForAddressAndTemplate(address: string, templateAddress: string): Promise<string[]> {
     const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
-    let getDataQuery = <Interaction>contract.methodsExplicit.getUserNftMinterContracts([new AddressValue(new Address(address))]);
+    let getDataQuery = <Interaction>(
+      contract.methodsExplicit.getDeployerContractsByTemplate([
+        new AddressValue(new Address(address)),
+        new AddressValue(new Address(templateAddress)),
+      ])
+    );
 
     const response = await this.getFirstQueryResult(getDataQuery);
     const contractAddresses: AddressValue[] = response?.firstValue?.valueOf();
-    return contractAddresses.map((x) => x.valueOf().bech32());
+    return contractAddresses?.map((x) => x.valueOf().bech32());
   }
 
   private async getFirstQueryResult(interaction: Interaction) {

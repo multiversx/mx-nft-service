@@ -2,7 +2,7 @@ import { Tag } from './models';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { TagsService } from './tags.service';
 import { TagsResponse } from './models/TagsResponse';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { TagsFilter } from './models/Tags.Filter';
 
@@ -17,7 +17,7 @@ export class TagsResolver {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<TagsResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [tags, count] = await this.tagsService.getTags(offset, limit, filters);
 
     return PageResponse.mapResponse<Tag>(tags || [], pagination, count || 0, offset, limit);

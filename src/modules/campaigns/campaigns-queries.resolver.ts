@@ -1,7 +1,7 @@
 import { Resolver, Query, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { BaseResolver } from '../common/base.resolver';
 import { Campaign, CampaignsResponse } from './models';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 import { CampaignStatusEnum } from './models/CampaignStatus.enum';
 import { DateUtils } from 'src/utils/date-utils';
@@ -21,7 +21,7 @@ export class CampaignsQueriesResolver extends BaseResolver(Campaign) {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ) {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const campaigns = await this.campaignsService.getCampaigns(limit, offset, filters);
     return PageResponse.mapResponse<Campaign>(campaigns?.items || [], pagination, campaigns?.count || 0, offset, limit);
   }

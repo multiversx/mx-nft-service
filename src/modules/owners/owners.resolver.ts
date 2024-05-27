@@ -3,7 +3,7 @@ import { Query, Resolver, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { OwnersService } from './owners.service';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
-import ConnectionArgs from '../common/filters/ConnectionArgs';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import PageResponse from '../common/PageResponse';
 
 @Resolver(() => Owner)
@@ -17,7 +17,7 @@ export class OwnersResolver {
     @Args({ name: 'pagination', type: () => ConnectionArgs, nullable: true })
     pagination: ConnectionArgs,
   ): Promise<OwnerResponse> {
-    const { limit, offset } = pagination.pagingParams();
+    const { limit, offset } = getPagingParameters(pagination);
     const [owners, count] = await this.ownersService.getOwnersForIdentifier(filters?.identifier, offset, limit);
     return PageResponse.mapResponse<Owner>(owners || [], pagination, count || 0, offset, limit);
   }

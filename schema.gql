@@ -1027,8 +1027,10 @@ type Mutation {
   whitelistCollectionOnMarketplace(input: WhitelistCollectionArgs!): Boolean!
   whitelistMarketplace(input: WhitelistMarketplaceArgs!): Boolean!
   whitelistMinter(input: WhitelistMinterArgs!): Boolean!
+  whitelistMinterSmartContract(input: WhitelistMinterArgs!): Boolean!
   withdraw(auctionId: Int!): TransactionNode!
   withdrawOffer(offerId: Int!): TransactionNode!
+  xBulkDeployedContracts: [String]
 }
 
 input MyClaimableAuctionsFilters {

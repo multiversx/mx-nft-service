@@ -36,7 +36,7 @@ function checkPagingSanity(args: ConnectionArgs): PagingMeta {
 const getId = (cursor: ConnectionCursor) => parseInt(fromGlobalId(cursor).id, 10);
 const nextId = (cursor: ConnectionCursor) => getId(cursor) + 1;
 
-function getPagingParameters(args: ConnectionArgs) {
+export function getPagingParameters(args: ConnectionArgs) {
   const meta = checkPagingSanity(args);
 
   switch (meta.pagingType) {
@@ -81,10 +81,6 @@ export default class ConnectionArgs implements ConnectionArguments {
   @Max(100)
   @Field(() => Int, { nullable: true, description: 'Paginate last' })
   public last?: number;
-
-  pagingParams() {
-    return getPagingParameters(this);
-  }
 }
 
 @InputType()

@@ -28,7 +28,6 @@ export class JwtOrNativeAuthGuard implements CanActivate {
         }
       }),
     );
-
     const canActivate = canActivateResponses.reduce((result, value) => result || value, false);
     return canActivate;
   }
