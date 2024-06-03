@@ -39,8 +39,8 @@ export class MarketplaceEventsProcessingService {
 
   public async handleNftAuctionEvents(auctionEvents: EventLog[]) {
     for (let event of auctionEvents) {
-      console.log('Received events: ', event.identifier)
       const marketplace = await this.marketplaceService.getMarketplaceByAddress(event.address);
+      console.log('Received events: ', event.identifier, { marketplace })
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
         case KroganSwapAuctionEventEnum.Bid:
