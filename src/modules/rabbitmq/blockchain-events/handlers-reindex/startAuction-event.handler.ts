@@ -55,6 +55,7 @@ export class StartAuctionEventHandler {
 
   private async saveAuction(topics: any, marketplace: Marketplace, hash: string) {
     const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
+    console.log({ auctionIdentifier, topics })
     if (marketplace.key === ELRONDNFTSWAP_KEY || marketplace.key === ENEFTOR_KEY || marketplace.key === XOXNO_KEY) {
       if (topics.auctionId === '0') {
         let auctionId = await this.auctionsGetterService.getLastAuctionIdForMarketplace(marketplace.key);
