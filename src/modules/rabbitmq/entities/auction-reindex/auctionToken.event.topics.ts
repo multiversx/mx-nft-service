@@ -26,7 +26,7 @@ export class AuctionTokenEventsTopics {
     this.maxBid = rawTopics[7] ? BinaryUtils.hexToNumber(rawTopics[7]).toString() : '0';
     this.startTime = BinaryUtils.hexToNumber(rawTopics[8]);
     this.endTime = rawTopics[9] ? parseInt(BinaryUtils.hexToNumber(rawTopics[9]).toString()) : 0;
-    this.paymentToken = rawTopics[10];
+    this.paymentToken = rawTopics[10].toString();
     this.paymentNonce = rawTopics[11] ? parseInt(BinaryUtils.hexToNumber(rawTopics[11]).toString()) : 0;
     this.auctionType = BinaryUtils.hexToNumber(rawTopics[12]).toString();
 
