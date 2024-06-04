@@ -102,4 +102,4 @@ import { DisabledMarketplaceEventsModule } from './disable-marketplace/disable-m
   ],
   exports: [NftEventsService, NftEventsConsumer],
 })
-export class NftEventsModule {}
+export class NftEventsModule { }

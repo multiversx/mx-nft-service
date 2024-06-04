@@ -18,19 +18,23 @@ export class AcceptGlobalOfferEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const acceptGlobalOfferEvent = new AcceptGlobalOfferEvent(event);
-    const topics = acceptGlobalOfferEvent.getTopics();
-    const marketplace = await this.marketplaceService.getMarketplaceByType(acceptGlobalOfferEvent.getAddress(), marketplaceType);
-    this.logger.log(`Accept Global Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
-    if (marketplace.key !== XOXNO_KEY || topics.auctionId <= 0) {
-      return;
+    try {
+      const acceptGlobalOfferEvent = new AcceptGlobalOfferEvent(event);
+      const topics = acceptGlobalOfferEvent.getTopics();
+      const marketplace = await this.marketplaceService.getMarketplaceByType(acceptGlobalOfferEvent.getAddress(), marketplaceType);
+      this.logger.log(`Accept Global Offer event detected for hash '${hash}' and marketplace '${marketplace?.name}'`);
+      if (marketplace.key !== XOXNO_KEY || topics.auctionId <= 0) {
+        return;
+      }
+
+      let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(topics.auctionId, marketplace.key);
+
+      if (!auction) return;
+      auction.status = AuctionStatusEnum.Closed;
+      auction.modifiedDate = new Date(new Date().toUTCString());
+      this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.AcceptGlobalOffer);
+    } catch (error) {
+      console.error('An errror occured while handling bid event', error);
     }
-
-    let auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(topics.auctionId, marketplace.key);
-
-    if (!auction) return;
-    auction.status = AuctionStatusEnum.Closed;
-    auction.modifiedDate = new Date(new Date().toUTCString());
-    this.auctionsService.updateAuction(auction, ExternalAuctionEventEnum.AcceptGlobalOffer);
   }
 }
