@@ -38,7 +38,7 @@ export class BidEventHandler {
         marketplace = await this.marketplaceService.getMarketplaceByType(bidEvent.getAddress(), marketplace.type, topics.collection);
       }
       if (!marketplace) return;
-      this.logger.log(`${bidEvent.getIdentifier()} event detected for marketplace '${marketplace?.name}'`);
+      this.logger.log(`${bidEvent.identifier} event detected for marketplace '${marketplace?.name}'`);
       const auction = await this.auctionsGetterService.getAuctionByIdAndMarketplace(parseInt(topics.auctionId, 16), marketplace.key);
       if (!auction) return;
 

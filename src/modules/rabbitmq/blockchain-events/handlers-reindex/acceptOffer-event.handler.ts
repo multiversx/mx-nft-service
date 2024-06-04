@@ -44,7 +44,7 @@ export class AcceptOfferEventHandler {
         if (!acceptOfferEvent) return;
 
         this.logger.log(
-          `${acceptOfferEvent.getIdentifier()} event detected for  marketplace '${marketplace?.name}'`,
+          `${acceptOfferEvent.identifier} event detected for  marketplace '${marketplace?.name}'`,
         );
 
         if (topics.auctionId || topics.auctionId !== 0) {
