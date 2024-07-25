@@ -9,7 +9,7 @@ import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.servi
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { ELRONDNFTSWAP_KEY, ENEFTOR_KEY } from 'src/utils/constants';
+import { ELRONDNFTSWAP_KEY, ENEFTOR_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { AuctionTokenEvent } from '../../entities/auction';
 import { ElrondSwapAuctionEvent } from '../../entities/auction/elrondnftswap/elrondswap-auction.event';
 import { ListNftEvent } from '../../entities/auction/listNft.event';
@@ -29,29 +29,33 @@ export class StartAuctionEventHandler {
   ) {}
 
   async handle(event: any, hash: string, marketplaceType: MarketplaceTypeEnum) {
-    const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
-    if (!auctionTokenEvent && !topics) return;
+    try {
+      const { auctionTokenEvent, topics } = this.getEventAndTopics(event);
+      if (!auctionTokenEvent && !topics) return;
 
-    const marketplace = await this.marketplaceService.getMarketplaceByType(
-      auctionTokenEvent.getAddress(),
-      marketplaceType,
-      topics.collection,
-    );
+      const marketplace = await this.marketplaceService.getMarketplaceByType(
+        auctionTokenEvent.getAddress(),
+        marketplaceType,
+        topics.collection,
+      );
 
-    if (!marketplace) return;
-    this.logger.log(
-      `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
-    );
-    const auction = await this.saveAuction(topics, marketplace, hash);
+      if (!marketplace) return;
+      this.logger.log(
+        `${auctionTokenEvent.getIdentifier()} listing event detected for hash '${hash}' and marketplace '${marketplace?.name}'`,
+      );
+      const auction = await this.saveAuction(topics, marketplace, hash);
 
-    if (!auction) return;
+      if (!auction) return;
 
-    await this.feedEventsSenderService.sendStartAuctionEvent(topics, auction, marketplace);
+      await this.feedEventsSenderService.sendStartAuctionEvent(topics, auction, marketplace);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async saveAuction(topics: any, marketplace: Marketplace, hash: string) {
     const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
-    if (marketplace.key === ELRONDNFTSWAP_KEY || marketplace.key === ENEFTOR_KEY) {
+    if (marketplace.key === ELRONDNFTSWAP_KEY || marketplace.key === ENEFTOR_KEY || marketplace.key === XOXNO_KEY) {
       if (topics.auctionId === '0') {
         let auctionId = await this.auctionsGetterService.getLastAuctionIdForMarketplace(marketplace.key);
         topics.auctionId = (auctionId && auctionId > 0 ? auctionId + 1 : 1).toString(16);
@@ -73,6 +77,12 @@ export class StartAuctionEventHandler {
     if (topics.paymentToken !== mxConfig.egld) {
       const paymentToken = await this.usdPriceService.getToken(topics.paymentToken);
       decimals = paymentToken.decimals;
+    }
+    if (auctionTokenEventMarketplace.key === XOXNO_KEY) {
+      return await this.auctionsSetterService.saveAuctionEntity(
+        AuctionEntity.fromAuctionTopics(topics, asset.tags?.toString(), hash, auctionTokenEventMarketplace.key, decimals),
+        asset.tags,
+      );
     }
     return await this.auctionsSetterService.saveAuctionEntity(
       AuctionEntity.fromWithdrawTopics(topics, asset.tags?.toString(), hash, auctionTokenEventMarketplace.key, decimals),
