@@ -23,7 +23,7 @@ export class ElasticUpdatesEventsService {
     private readonly documentDbService: DocumentDbService,
     private readonly redisCacheService: RedisCacheService,
     private readonly mxApiService: MxApiService,
-  ) {}
+  ) { }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -111,7 +111,7 @@ export class ElasticUpdatesEventsService {
   }
 
   public async handleScamInfoForNftMintBurnAndUpdateEvents(mintEvents: any[]): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     let nftsToUpdate: Asset[] = [];
     let nftsToDelete: string[] = [];
