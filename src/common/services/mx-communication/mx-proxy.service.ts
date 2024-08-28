@@ -20,6 +20,7 @@ export class MxProxyService {
       timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
       httpAgent: mxConfig.keepAlive ? httpAgent : null,
       httpsAgent: mxConfig.keepAlive ? httpsAgent : null,
+      clientName: "nft-service"
     });
   }
 

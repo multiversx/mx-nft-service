@@ -47,7 +47,7 @@ describe('Proxy  Deployer Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
       expect(result).toMatchObject(expectedResult);
     });
@@ -68,7 +68,7 @@ describe('Proxy  Deployer Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
       expect(result).toMatchObject(expectedResult);
     });
@@ -91,7 +91,7 @@ describe('Proxy  Deployer Abi Service', () => {
         sender: 'erd1qqqqqqqqqqqqqpgq9ac9zvc4ugzrgqaqjqgjdhvxxtx7wu2eu00sxezym3',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
       expect(result).toMatchObject(expectedResult);
     });
@@ -111,7 +111,7 @@ describe('Proxy  Deployer Abi Service', () => {
       sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
       signature: undefined,
       value: '0',
-      version: 1,
+      version: 2,
     };
     expect(result).toMatchObject(expectedResult);
   });
