@@ -29,7 +29,6 @@ export class MxApiService {
     };
     const httpAgent = new Agent(keepAliveOptions);
     const httpsAgent = new Agent.HttpsAgent(keepAliveOptions);
-
     this.apiProvider = new ApiNetworkProvider(process.env.ELROND_API, {
       timeout: mxConfig.proxyTimeout,
       httpAgent: mxConfig.keepAlive ? httpAgent : null,
@@ -37,6 +36,7 @@ export class MxApiService {
       headers: {
         origin: 'NftService',
       },
+      clientName: "nft-service",
     });
   }
 
@@ -394,9 +394,9 @@ export class MxApiService {
     const token = await this.doGetGeneric(this.getTokenData.name, `tokens/${tokenId}?fields=identifier,name,ticker,decimals,price`);
     return token
       ? new Token({
-          ...token,
-          symbol: token.ticker,
-        })
+        ...token,
+        symbol: token.ticker,
+      })
       : undefined;
   }
 

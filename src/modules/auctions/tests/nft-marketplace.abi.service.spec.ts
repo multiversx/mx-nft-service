@@ -106,7 +106,7 @@ describe('Nft Marketplace Abi Service', () => {
       sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
       signature: undefined,
       value: '0',
-      version: 1,
+      version: 2,
     };
 
     it('returns built transaction with right arguments', async () => {
@@ -147,7 +147,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
       const result = await service.createAuction(ownerAddress, {
         ...createAuctionRequestWithEgld,
@@ -201,7 +201,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '111111111111111',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.bid(ownerAddress, inputWithEgld);
@@ -226,7 +226,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.bid(ownerAddress, inputWithEsdt);
@@ -264,7 +264,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.withdraw('erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha', 1);
@@ -318,7 +318,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '111111111111111',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.createOffer(ownerAddress, createOfferRequest);
@@ -343,7 +343,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.createOffer(
@@ -392,7 +392,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.withdrawOffer('erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha', 1);
@@ -478,7 +478,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.acceptOffer(ownerAddress, acceptOfferWithoutAuction);
@@ -560,7 +560,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.acceptOffer(ownerAddress, acceptOfferWithAuctionId);
@@ -588,7 +588,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.endAuction('erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha', 1);
@@ -635,7 +635,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '1111111',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.buySft(ownerAddress, buySftRequestWithEgld);
@@ -661,7 +661,7 @@ describe('Nft Marketplace Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.buySft(ownerAddress, {

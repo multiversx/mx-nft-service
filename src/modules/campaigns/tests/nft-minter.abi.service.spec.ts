@@ -59,7 +59,7 @@ describe('Nft Minter Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '50000000000000000',
-        version: 1,
+        version: 2,
       };
       expect(result).toMatchObject(expectedResult);
     });
@@ -78,7 +78,7 @@ describe('Nft Minter Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '10000000',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.buyRandomNft(
@@ -117,7 +117,7 @@ describe('Nft Minter Abi Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       expect(result).toMatchObject(expectedResult);
