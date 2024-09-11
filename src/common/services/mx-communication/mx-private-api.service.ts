@@ -26,6 +26,7 @@ export class MxPrivateApiService {
       headers: {
         origin: 'NftService',
       },
+      clientName: "nft-service",
     });
   }
 

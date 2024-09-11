@@ -61,7 +61,7 @@ describe('Assets Transaction Service', () => {
       sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
       signature: undefined,
       value: '0',
-      version: 1,
+      version: 2,
     };
 
     it('returns built transaction with right arguments', async () => {
@@ -107,7 +107,7 @@ describe('Assets Transaction Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.burnQuantity(ownerAddress, burnRequest);
@@ -149,7 +149,7 @@ describe('Assets Transaction Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.burnQuantity(ownerAddress, burnRequest);
@@ -170,7 +170,7 @@ describe('Assets Transaction Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.transferNft(
@@ -195,7 +195,7 @@ describe('Assets Transaction Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.transferNft(
@@ -231,7 +231,7 @@ describe('Assets Transaction Service', () => {
         sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
         signature: undefined,
         value: '0',
-        version: 1,
+        version: 2,
       };
 
       const result = await service.createNft(
