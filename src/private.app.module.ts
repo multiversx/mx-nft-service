@@ -14,6 +14,7 @@ import { ScamModule } from './modules/scam/scam.module';
 import { NftTraitsModule } from './modules/nft-traits/nft-traits.module';
 import { CacheEventsPublisherModule } from './modules/rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.module';
 import * as ormconfig from './ormconfig';
+import { ScamUpdatePublisherModule } from './modules/rabbitmq/elastic-updates/scam-trigger/scam-update-publiser.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import * as ormconfig from './ormconfig';
     AdminOperationsModuleGraph,
     NftRarityModuleGraph,
     CacheEventsPublisherModule,
+    ScamUpdatePublisherModule,
     ScamModule,
     NftTraitsModule,
     MarketplacesModuleGraph,
@@ -31,4 +33,4 @@ import * as ormconfig from './ormconfig';
   controllers: [MetricsController, ReindexController, CachingController],
   exports: [NsfwUpdaterService, RarityUpdaterService],
 })
-export class PrivateAppModule {}
+export class PrivateAppModule { }

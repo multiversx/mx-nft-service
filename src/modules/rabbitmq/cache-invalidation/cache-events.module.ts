@@ -18,12 +18,14 @@ import { CampaignsCachingService } from 'src/modules/campaigns/campaigns-caching
 import { MarketplaceRedisHandler } from 'src/modules/marketplaces/loaders/marketplace.redis-handler';
 import { AssetsSupplyRedisHandler } from 'src/modules/assets/loaders/assets-supply.redis-handler';
 import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
+import { ScamUpdatePublisherModule } from '../elastic-updates/scam-trigger/scam-update-publiser.module';
 
 @Module({
   imports: [
     PubSubListenerModule,
     CommonModule,
     CacheInvalidationEventsModule,
+    ScamUpdatePublisherModule,
     CacheAdminEventsModule,
     CommonRabbitModule.register(() => {
       return {
@@ -49,4 +51,4 @@ import { PubSubListenerModule } from 'src/pubsub/pub.sub.listener.module';
   ],
   exports: [],
 })
-export class CacheEventsModule {}
+export class CacheEventsModule { }

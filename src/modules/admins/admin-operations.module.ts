@@ -13,11 +13,13 @@ import { NftTraitsModule } from '../nft-traits/nft-traits.module';
 import { MarketplacesModuleGraph } from '../marketplaces/marketplaces.module';
 import { AuthModule } from '../auth/auth.module';
 import { ReportsModuleGraph } from '../reports/reports.module';
+import { ScamUpdatePublisherModule } from '../rabbitmq/elastic-updates/scam-trigger/scam-update-publiser.module';
 
 @Module({
   imports: [
     CommonModule,
     CacheEventsPublisherModule,
+    ScamUpdatePublisherModule,
     MxCommunicationModule,
     NftRarityModuleGraph,
     NftTraitsModule,
@@ -36,4 +38,4 @@ import { ReportsModuleGraph } from '../reports/reports.module';
   ],
   exports: [FlagNftService],
 })
-export class AdminOperationsModuleGraph {}
+export class AdminOperationsModuleGraph { }
