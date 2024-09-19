@@ -9,7 +9,7 @@ export class ScamUpdateEventsConsumer {
   constructor(private readonly collectionScamService: CollectionScamService) { }
 
   @CompetingRabbitConsumer({
-    connection: 'default',
+    connection: 'common',
     queueName: rabbitQueues.SCAM_UPDATE,
     exchange: rabbitExchanges.SCAM_UPDATE,
   })
