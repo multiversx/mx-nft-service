@@ -162,7 +162,7 @@ export class AdminOperationsResolver {
   }
 
   @Mutation(() => Boolean)
-  // @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
   async trigerScamUpdate(@Args('input', { type: () => ScamUpdateInput }) input: ScamUpdateInput): Promise<boolean> {
     this.scamUpdatePublisherService.publish({ collectionIdentifier: input.collectionIdentifier, type: input.type });
     return true;

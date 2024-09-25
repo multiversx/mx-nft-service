@@ -14,7 +14,6 @@ export class ScamUpdateEventsConsumer {
     exchange: rabbitExchanges.SCAM_UPDATE,
   })
   async consumeScamEvents(event: MarkScamCollectionEvent) {
-    console.log({ event })
     if (event.type === ScamInputEnum.allow) {
       await this.collectionScamService.manuallyClearCollectionScamInfo(event.collectionIdentifier)
     } else {
