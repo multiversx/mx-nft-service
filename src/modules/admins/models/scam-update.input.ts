@@ -1,6 +1,5 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, registerEnumType } from '@nestjs/graphql';
 import { Matches } from 'class-validator';
-import { ScamInfoTypeEnum } from 'src/modules/assets/models';
 import { COLLECTION_IDENTIFIER_ERROR, COLLECTION_IDENTIFIER_RGX } from 'src/utils/constants';
 
 @InputType()
@@ -11,6 +10,15 @@ export class ScamUpdateInput {
   @Field(() => String)
   collectionIdentifier: string;
 
-  @Field(() => ScamInfoTypeEnum)
-  type: ScamInfoTypeEnum;
+  @Field(() => ScamInputEnum)
+  type: ScamInputEnum;
 }
+
+export enum ScamInputEnum {
+  deny = 'deny',
+  allow = 'allow'
+}
+
+registerEnumType(ScamInputEnum, {
+  name: 'ScamInputEnum',
+});

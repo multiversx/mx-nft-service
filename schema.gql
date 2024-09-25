@@ -1343,9 +1343,14 @@ enum ScamInfoTypeEnum {
   scam
 }
 
+enum ScamInputEnum {
+  allow
+  deny
+}
+
 input ScamUpdateInput {
   collectionIdentifier: String!
-  type: ScamInfoTypeEnum!
+  type: ScamInputEnum!
 }
 
 input SearchFilter {

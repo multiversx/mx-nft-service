@@ -1,8 +1,8 @@
-import { ScamInfoTypeEnum } from "src/modules/assets/models";
+import { ScamInputEnum } from "src/modules/admins/models/scam-update.input";
 
 export class MarkScamCollectionEvent {
   collectionIdentifier: string;
-  type: ScamInfoTypeEnum
+  type: ScamInputEnum
   constructor(init?: Partial<MarkScamCollectionEvent>) {
     Object.assign(this, init);
   }
