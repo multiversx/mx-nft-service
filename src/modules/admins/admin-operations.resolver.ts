@@ -17,6 +17,8 @@ import { ReportsService } from '../reports/reports.service';
 import { ClearReportCollectionInput, ClearReportInput } from './models/clear-report.input';
 import { MarketplaceReindexDataArgs } from '../marketplaces/models/MarketplaceReindexDataArgs';
 import { GraphQLError } from 'graphql';
+import { ScamUpdatePublisherService } from '../rabbitmq/elastic-updates/scam-trigger/scam-update-publiser.service';
+import { ScamUpdateInput } from './models/scam-update.input';
 
 @Resolver(() => Boolean)
 export class AdminOperationsResolver {
@@ -27,9 +29,10 @@ export class AdminOperationsResolver {
     private readonly nftRarityService: NftRarityService,
     private readonly nftTraitService: NftTraitsService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
+    private readonly scamUpdatePublisherService: ScamUpdatePublisherService,
     private readonly marketplaceEventsIndexingService: MarketplaceEventsIndexingService,
     private readonly marketplacesReindexService: MarketplacesReindexService,
-  ) {}
+  ) { }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
@@ -155,6 +158,13 @@ export class AdminOperationsResolver {
     this.marketplacesReindexService.reindexMarketplaceData(input).catch((error) => {
       this.logger.error(error);
     });
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtOrNativeAuthGuard, GqlAdminAuthGuard)
+  async trigerScamUpdate(@Args('input', { type: () => ScamUpdateInput }) input: ScamUpdateInput): Promise<boolean> {
+    this.scamUpdatePublisherService.publish({ collectionIdentifier: input.collectionIdentifier, type: input.type });
     return true;
   }
 }
