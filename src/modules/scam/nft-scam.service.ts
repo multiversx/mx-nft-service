@@ -26,7 +26,7 @@ export class NftScamService {
     private readonly pluginsService: PluginService,
     private readonly cacheEventsPublisher: CacheEventsPublisherService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   async validateNftScamInfoForIdentifier(identifier: string): Promise<boolean> {
     const nft = await this.assetByIdentifierService.getAsset(identifier);
@@ -246,12 +246,7 @@ export class NftScamService {
     const apiNfts = await this.mxApiService.getNftsByIdentifiers(nftsMissingFromDb?.map((x) => x.identifier));
     if (!apiNfts) return;
     let mappedNfts: Asset[] = [];
-    if (scamInfo.type === ScamInfoTypeEnum.none) {
-      mappedNfts = apiNfts?.map((x) => new Asset({ ...Asset.fromNft(x), scamInfo }));
-    } else {
-      mappedNfts = apiNfts?.map((x) => Asset.fromNft(x));
-      await this.pluginsService.computeScamInfo(mappedNfts);
-    }
+    mappedNfts = apiNfts?.map((x) => new Asset({ ...Asset.fromNft(x), scamInfo }));
 
     await this.updateBulkScamInfo(scamEngineVersion, mappedNfts);
   }
