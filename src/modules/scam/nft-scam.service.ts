@@ -245,8 +245,7 @@ export class NftScamService {
 
     const apiNfts = await this.mxApiService.getNftsByIdentifiers(nftsMissingFromDb?.map((x) => x.identifier));
     if (!apiNfts) return;
-    let mappedNfts: Asset[] = [];
-    mappedNfts = apiNfts?.map((x) => new Asset({ ...Asset.fromNft(x), scamInfo }));
+    let mappedNfts: Asset[] = apiNfts?.map((x) => new Asset({ ...Asset.fromNft(x), scamInfo }));
 
     await this.updateBulkScamInfo(scamEngineVersion, mappedNfts);
   }
