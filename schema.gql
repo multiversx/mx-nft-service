@@ -1016,6 +1016,7 @@ type Mutation {
   stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
   transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
+  trigerScamUpdate(input: ScamUpdateInput!): Boolean!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
   updateMarketplace(input: UpdateMarketplaceArgs!): Boolean!
@@ -1340,6 +1341,16 @@ enum ScamInfoTypeEnum {
   none
   potentialScam
   scam
+}
+
+enum ScamInputEnum {
+  allow
+  deny
+}
+
+input ScamUpdateInput {
+  collectionIdentifier: String!
+  type: ScamInputEnum!
 }
 
 input SearchFilter {

@@ -45,7 +45,6 @@ import { PluginModule } from 'src/plugins/plugin.module';
 import { AnalyticsEventsService } from './analytics-events.service';
 import { AnalyticsModule } from 'src/modules/analytics/analytics.module';
 import { MintersModuleGraph } from 'src/modules/minters/minters.module';
-import { DisabledMarketplaceEventsService } from './disable-marketplace/disable-marketplace-events.service';
 import { DisabledMarketplaceEventsModule } from './disable-marketplace/disable-marketplace-events.module';
 @Module({
   imports: [
@@ -102,4 +101,4 @@ import { DisabledMarketplaceEventsModule } from './disable-marketplace/disable-m
   ],
   exports: [NftEventsService, NftEventsConsumer],
 })
-export class NftEventsModule {}
+export class NftEventsModule { }

@@ -16,4 +16,4 @@ import { CacheEventsPublisherService, NftLikePublisherService } from './change-e
   providers: [CacheEventsPublisherService, NftLikePublisherService],
   exports: [CacheEventsPublisherService, NftLikePublisherService],
 })
-export class CacheEventsPublisherModule {}
+export class CacheEventsPublisherModule { }

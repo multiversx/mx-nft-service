@@ -22,6 +22,6 @@ import { NftScamService } from './nft-scam.service';
     CollectionScamResolver,
     AssetByIdentifierService,
   ],
-  exports: [NftScamService, NftScamElasticService, AssetByIdentifierService],
+  exports: [NftScamService, NftScamElasticService, AssetByIdentifierService, CollectionScamService],
 })
-export class ScamModule {}
+export class ScamModule { }
