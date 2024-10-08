@@ -1,7 +1,7 @@
-import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers';
 import { mxConfig } from '../../../config';
 import * as Agent from 'agentkeepalive';
 import { Injectable } from '@nestjs/common';
+import { ProxyNetworkProvider } from '@multiversx/sdk-core/out/networkProviders';
 
 @Injectable()
 export class MxProxyService {

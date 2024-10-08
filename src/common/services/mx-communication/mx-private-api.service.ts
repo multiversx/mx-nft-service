@@ -3,7 +3,7 @@ import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import * as Agent from 'agentkeepalive';
 import { mxConfig } from 'src/config';
-import { ApiNetworkProvider } from '@multiversx/sdk-network-providers';
+import { ApiNetworkProvider } from '@multiversx/sdk-core';
 
 @Injectable()
 export class MxPrivateApiService {
