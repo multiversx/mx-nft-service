@@ -5,7 +5,7 @@ import { ElasticUpdatesEventsService } from './elastic-updates-events.service';
 
 @Injectable()
 export class ElasiticUpdatesConsumer {
-  constructor(private readonly elasticUpdateService: ElasticUpdatesEventsService) {}
+  constructor(private readonly elasticUpdateService: ElasticUpdatesEventsService) { }
 
   @CompetingRabbitConsumer({
     connection: 'default',
@@ -18,7 +18,7 @@ export class ElasiticUpdatesConsumer {
       const mintNftEvents = events?.events?.filter((e: { identifier: NftEventEnum }) => e.identifier === NftEventEnum.ESDTNFTCreate);
       const burnAndUpdateNftAttributesEvents = events?.events?.filter(
         (e: { identifier: NftEventEnum }) =>
-          e.identifier === NftEventEnum.ESDTNFTBurn || e.identifier === NftEventEnum.ESDTNFTUpdateAttributes,
+          e.identifier === NftEventEnum.ESDTNFTBurn || e.identifier === NftEventEnum.ESDTNFTUpdateAttributes || e.identifier === NftEventEnum.ESDTMetaDataUpdate || e.identifier === NftEventEnum.ESDTMetaDataRecreate,
       );
       const mintBurnAndUpdateNftAttributesEvents = [...mintNftEvents, ...burnAndUpdateNftAttributesEvents];
 
