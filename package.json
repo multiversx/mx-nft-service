@@ -102,6 +102,11 @@
     "typeorm": "0.3.16",
     "winston": "3.7.2"
   },
+  "overrides": {
+    "@multiversx/sdk-native-auth-server": {
+      "@multiversx/sdk-core": "13.10.0-alpha.0"
+    }
+  },
   "devDependencies": {
     "@nestjs/cli": "10.4.5",
     "@nestjs/schematics": "10.1.4",
