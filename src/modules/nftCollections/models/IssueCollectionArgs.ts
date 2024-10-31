@@ -18,7 +18,7 @@ export class IssueCollectionArgs {
   @MaxLength(10, {
     message: 'The token ticker should have at most 10 caracters',
   })
-  @Matches(RegExp('^[A-Z][A-Z0-9]{2,9}$'), {
+  @Matches(RegExp('^[A-Z0-9]{2,9}$'), {
     message: 'The token ticker should have only alphanumeric UPPERCASE characters',
   })
   tokenTicker: string;
