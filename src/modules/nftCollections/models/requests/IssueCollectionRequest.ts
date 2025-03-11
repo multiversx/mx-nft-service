@@ -8,6 +8,9 @@ export class IssueCollectionRequest {
   canPause: boolean = false;
   canTransferNFTCreateRole: boolean = false;
   collectionType: 'issueSemiFungible' | 'issueNonFungible';
+  canChangeOwner: boolean = false;
+  canUpgrade: boolean = false;
+  canAddSpecialRoles: boolean = false;
 
   constructor(init?: Partial<IssueCollectionRequest>) {
     Object.assign(this, init);
@@ -21,6 +24,9 @@ export class IssueCollectionRequest {
       canWipe: issueCollectionArgs.canWipe,
       canPause: issueCollectionArgs.canPause,
       canTransferNFTCreateRole: issueCollectionArgs.canTransferNFTCreateRole,
+      canChangeOwner: issueCollectionArgs.canChangeOwner,
+      canUpgrade: issueCollectionArgs.canUpgrade,
+      canAddSpecialRoles: issueCollectionArgs.canAddSpecialRoles,
       collectionType: collectionType,
     });
   }

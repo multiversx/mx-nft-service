@@ -28,7 +28,7 @@ export class SendOfferEventsTopics {
 
   toPlainObject() {
     return {
-      offerOwner: this.offerOwner.bech32(),
+      offerOwner: this.offerOwner.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       offerId: this.offerId,

@@ -68,7 +68,7 @@ export class AssetsHistoryExternalAuctionService {
     const possibleAddresses = topics?.filter((topic) => topic.length === 44);
 
     for (let i = 0; i < possibleAddresses?.length; i++) {
-      addresses.push(possibleAddresses[i].base64ToBech32());
+      addresses.push(Buffer.from(possibleAddresses[i], 'base64').toString('hex'));
     }
 
     if (differentThanAddress) {

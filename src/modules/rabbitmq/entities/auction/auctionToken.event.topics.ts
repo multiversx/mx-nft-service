@@ -40,7 +40,7 @@ export class AuctionTokenEventsTopics {
 
   toPlainObject() {
     return {
-      originalOwner: this.originalOwner.bech32(),
+      originalOwner: this.originalOwner.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       auctionId: this.auctionId,

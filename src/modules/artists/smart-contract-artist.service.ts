@@ -1,6 +1,6 @@
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable, Logger } from '@nestjs/common';
 import { MxApiService } from 'src/common';
-import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
 
@@ -47,7 +47,7 @@ export class SmartContractArtistsService {
       const transaction = await this.mxApiService.getTransactionByHash(selectedContract.deployTxHash);
       return {
         address: scAddress,
-        owner: transaction.sender.bech32(),
+        owner: transaction.sender.toBech32(),
       };
     }
     this.logger.log(`Contract not found for ${scAddress}`);

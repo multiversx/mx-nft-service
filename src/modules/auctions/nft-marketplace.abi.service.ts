@@ -1,50 +1,49 @@
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
-import '../../utils/extensions';
-import { AuctionAbi, BuySftActionArgs, ExternalAuctionAbi } from './models';
-import BigNumber from 'bignumber.js';
 import {
   Address,
+  BigUIntType,
   BigUIntValue,
   BooleanType,
   BooleanValue,
   BytesValue,
-  Interaction,
   OptionalValue,
+  SmartContractController,
+  SmartContractQuery,
+  Token,
   TokenIdentifierValue,
+  TokenTransfer,
+  TransactionsFactoryConfig,
   TypedValue,
   U64Type,
   U64Value,
-  BigUIntType,
-  ResultsParser,
-  SmartContract,
-  TokenTransfer,
 } from '@multiversx/sdk-core';
-import { mxConfig, gas } from '../../config';
-import { MxProxyService, getSmartContract, MxApiService } from 'src/common';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { TransactionNode } from '../common/transaction';
-import { BidRequest, BuySftRequest, CreateAuctionRequest } from './models/requests';
-import { MarketplacesService } from '../marketplaces/marketplaces.service';
-import { AuctionsGetterService } from './auctions-getter.service';
-import { MarketplaceUtils } from './marketplaceUtils';
-import { Marketplace } from '../marketplaces/models';
-import { BadRequestError } from 'src/common/models/errors/bad-request-error';
-import { CreateOfferRequest } from '../offers/models';
-import { OffersService } from '../offers/offers.service';
-import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
-import { NftTypeEnum } from '../assets/models';
 import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Constants } from '@multiversx/sdk-nestjs-common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import BigNumber from 'bignumber.js';
+import { MxApiService } from 'src/common';
+import { BadRequestError } from 'src/common/models/errors/bad-request-error';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { gas, mxConfig } from '../../config';
+import '../../utils/extensions';
+import { NftTypeEnum } from '../assets/models';
+import { TransactionNode } from '../common/transaction';
+import { MarketplacesService } from '../marketplaces/marketplaces.service';
+import { Marketplace } from '../marketplaces/models';
+import { CreateOfferRequest } from '../offers/models';
+import { AcceptOfferRequest } from '../offers/models/AcceptOfferRequest';
+import { OffersService } from '../offers/offers.service';
+import { AuctionsGetterService } from './auctions-getter.service';
 import { ContractLoader } from './contractLoader';
+import { MarketplaceUtils } from './marketplaceUtils';
+import { AuctionAbi, BuySftActionArgs, ExternalAuctionAbi } from './models';
+import { BidRequest, BuySftRequest, CreateAuctionRequest } from './models/requests';
 
 @Injectable()
 export class NftMarketplaceAbiService {
-  private readonly parser: ResultsParser;
-  private contractLoader = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath);
+  private config = new TransactionsFactoryConfig({ chainID: mxConfig.chainID });
 
   constructor(
-    private readonly mxProxyService: MxProxyService,
     private readonly apiService: MxApiService,
     private readonly auctionsService: AuctionsGetterService,
     private readonly offersService: OffersService,
@@ -52,9 +51,7 @@ export class NftMarketplaceAbiService {
     private readonly redisCacheService: RedisCacheService,
     @Inject(forwardRef(() => MarketplacesService))
     private readonly marketplaceService: MarketplacesService,
-  ) {
-    this.parser = new ResultsParser();
-  }
+  ) {}
 
   async createAuction(ownerAddress: string, args: CreateAuctionRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(args.identifier);
@@ -64,39 +61,42 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
-    const contract = await this.contractLoader.getContract(marketplace.address);
     if (marketplace.acceptedPaymentIdentifiers && !marketplace.acceptedPaymentIdentifiers.includes(args.paymentToken)) {
       throw new BadRequestError('Unaccepted payment token');
     }
-    return contract.methodsExplicit
-      .auctionToken(this.getCreateAuctionArgs(args))
-      .withSingleESDTNFTTransfer(TokenTransfer.metaEsdtFromBigInteger(collection, parseInt(nonce, 16), new BigNumber(args.quantity)))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.startAuction)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+
+    const factory = await ContractLoader.getFactory();
+    const token = new Token({ identifier: collection, nonce: BigInt(parseInt(nonce, 16)) });
+    const transfer = new TokenTransfer({ token, amount: BigInt(args.quantity) });
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplace.address),
+      function: 'auctionToken',
+      gasLimit: gas.startAuction,
+      arguments: this.getCreateAuctionArgs(args),
+      tokenTransfers: [transfer],
+    });
+    return transaction.toPlainObject();
   }
 
   async bid(ownerAddress: string, request: BidRequest): Promise<TransactionNode> {
-    const { contract, auction } = await this.configureTransactionData(request.auctionId);
+    const { marketplaceAddress, auction } = await this.configureTransactionData(request.auctionId);
     if (request.paymentTokenIdentifier !== auction.paymentToken) throw new BadRequestError('Unaccepted payment token');
 
     return request.paymentTokenIdentifier !== mxConfig.egld
-      ? await this.bidWithEsdt(ownerAddress, request, contract, auction.marketplaceAuctionId)
-      : await this.bidWithEgld(ownerAddress, request, contract, auction.marketplaceAuctionId);
+      ? await this.bidWithEsdt(ownerAddress, request, marketplaceAddress, auction.marketplaceAuctionId)
+      : await this.bidWithEgld(ownerAddress, request, marketplaceAddress, auction.marketplaceAuctionId);
   }
 
   async withdraw(ownerAddress: string, auctionId: number): Promise<TransactionNode> {
-    const { contract, auction } = await this.configureTransactionData(auctionId);
-
-    return contract.methodsExplicit
-      .withdraw([new U64Value(new BigNumber(auction.marketplaceAuctionId))])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.withdraw)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const { marketplaceAddress, auction } = await this.configureTransactionData(auctionId);
+    const factory = await ContractLoader.getFactory();
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplaceAddress),
+      function: 'withdraw',
+      gasLimit: gas.withdraw,
+      arguments: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
+    });
+    return transaction.toPlainObject();
   }
 
   async createOffer(ownerAddress: string, request: CreateOfferRequest): Promise<TransactionNode> {
@@ -110,33 +110,28 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('Unaccepted payment token');
     }
 
-    const contract = await this.contractLoader.getContract(marketplace.address);
-    const intermediateInteraction = await this.getGenericOfferInteraction(contract, collection, nonce, request);
-
+    const factory = await ContractLoader.getFactory();
     if (request.paymentToken !== mxConfig.egld) {
-      return intermediateInteraction
-        .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(request.paymentToken, new BigNumber(request.paymentAmount)))
-        .withSender(Address.fromString(ownerAddress))
-        .buildTransaction()
-        .toPlainObject();
-    }
-    return intermediateInteraction
-      .withValue(TokenTransfer.egldFromBigInteger(request.paymentAmount))
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
-  }
+      const token = new Token({ identifier: request.paymentToken });
+      const transfer = new TokenTransfer({ token, amount: BigInt(request.paymentAmount) });
 
-  private async getGenericOfferInteraction(
-    contract: SmartContract,
-    collection: string,
-    nonce: string,
-    request: CreateOfferRequest,
-  ): Promise<Interaction> {
-    return contract.methodsExplicit
-      .sendOffer(await this.getCreateOfferArgs(collection, nonce, request))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.bid);
+      const response = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+        contract: Address.newFromBech32(marketplace.address),
+        function: 'sendOffer',
+        gasLimit: gas.bid,
+        arguments: await this.getCreateOfferArgs(collection, nonce, request),
+        tokenTransfers: [transfer],
+      });
+      return response.toPlainObject();
+    }
+    const response = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplace.address),
+      function: 'sendOffer',
+      gasLimit: gas.bid,
+      arguments: await this.getCreateOfferArgs(collection, nonce, request),
+      nativeTransferAmount: BigInt(request.paymentAmount),
+    });
+    return response.toPlainObject();
   }
 
   async withdrawOffer(ownerAddress: string, offerId: number): Promise<TransactionNode> {
@@ -147,14 +142,14 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
-    const contract = await this.contractLoader.getContract(marketplace.address);
-    return contract.methodsExplicit
-      .withdrawOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.withdraw)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory();
+    const query = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplace.address),
+      function: 'withdrawOffer',
+      gasLimit: gas.withdraw,
+      arguments: [new U64Value(new BigNumber(offer.marketplaceOfferId))],
+    });
+    return query.toPlainObject();
   }
 
   async acceptOffer(ownerAddress: string, request: AcceptOfferRequest): Promise<TransactionNode> {
@@ -185,23 +180,21 @@ export class NftMarketplaceAbiService {
     if (asset.type === NftTypeEnum.SemiFungibleESDT && parseInt(asset.balance) < parseInt(offer.boughtTokensNo)) {
       throw new BadRequestError('Not enough balance to accept this offer!');
     }
-
-    const contract = await this.contractLoader.getContract(marketplace.address);
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(asset.identifier);
-    return contract.methodsExplicit
-      .acceptOffer([new U64Value(new BigNumber(offer.marketplaceOfferId))])
-      .withSingleESDTNFTTransfer(
-        TokenTransfer.metaEsdtFromBigInteger(
-          collection,
-          parseInt(nonce, 16),
-          asset.type === NftTypeEnum.SemiFungibleESDT ? new BigNumber(offer.boughtTokensNo) : new BigNumber(1),
-        ),
-      )
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.withdraw)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory();
+    const token = new Token({ identifier: collection, nonce: BigInt(parseInt(nonce, 16)) });
+    const transfer = new TokenTransfer({
+      token,
+      amount: asset.type === NftTypeEnum.SemiFungibleESDT ? BigInt(offer.boughtTokensNo) : BigInt(1),
+    });
+    const query = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplace.address),
+      function: 'acceptOffer',
+      gasLimit: gas.withdraw,
+      arguments: [new U64Value(new BigNumber(offer.marketplaceOfferId))],
+      tokenTransfers: [transfer],
+    });
+    return query.toPlainObject();
   }
 
   private async acceptOfferAndWithdrawAuction(ownerAddress: string, offerId: number, auctionId: number): Promise<TransactionNode> {
@@ -217,71 +210,76 @@ export class NftMarketplaceAbiService {
       throw new BadRequestError('No marketplace available for this collection');
     }
 
-    const contract = await this.contractLoader.getContract(marketplace.address);
-    return contract.methodsExplicit
-      .withdrawAuctionAndAcceptOffer([
-        new U64Value(new BigNumber(auction.marketplaceAuctionId)),
-        new U64Value(new BigNumber(offer.marketplaceOfferId)),
-      ])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.withdraw)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory();
+    const query = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplace.address),
+      function: 'withdrawAuctionAndAcceptOffer',
+      gasLimit: gas.withdraw,
+      arguments: [new U64Value(new BigNumber(auction.marketplaceAuctionId)), new U64Value(new BigNumber(offer.marketplaceOfferId))],
+    });
+    return query.toPlainObject();
   }
 
   async endAuction(ownerAddress: string, auctionId: number): Promise<TransactionNode> {
-    const { contract, auction } = await this.configureTransactionData(auctionId);
-
-    return contract.methodsExplicit
-      .endAuction([new U64Value(new BigNumber(auction.marketplaceAuctionId))])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.endAuction)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const { marketplaceAddress, auction } = await this.configureTransactionData(auctionId);
+    const factory = await ContractLoader.getFactory();
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplaceAddress),
+      function: 'endAuction',
+      gasLimit: gas.endAuction,
+      arguments: [new U64Value(new BigNumber(auction.marketplaceAuctionId))],
+    });
+    return transaction.toPlainObject();
   }
 
   async buySft(ownerAddress: string, request: BuySftRequest): Promise<TransactionNode> {
-    const { contract, auction } = await this.configureTransactionData(request.auctionId);
+    const { marketplaceAddress, auction } = await this.configureTransactionData(request.auctionId);
     if (request.paymentTokenIdentifier !== auction.paymentToken) throw new BadRequestError('Unaccepted payment token');
 
     return request.paymentTokenIdentifier !== mxConfig.egld
-      ? await this.buySftWithEsdt(ownerAddress, request, contract, auction.marketplaceAuctionId)
-      : await this.buySftWithEgld(ownerAddress, request, contract, auction.marketplaceAuctionId);
+      ? await this.buySftWithEsdt(ownerAddress, request, marketplaceAddress, auction.marketplaceAuctionId)
+      : await this.buySftWithEgld(ownerAddress, request, marketplaceAddress, auction.marketplaceAuctionId);
   }
 
   async getAuctionQuery(auctionId: number, marketplace: Marketplace): Promise<AuctionAbi | ExternalAuctionAbi> {
-    let scContract: SmartContract;
+    let controller: SmartContractController;
     if (MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
-      this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
-      scContract = await this.contractLoader.getContract(marketplace.address);
+      controller = await ContractLoader.getController(this.apiService.getService(), MarketplaceUtils.xoxnoMarketplaceAbiPath);
     } else {
-      const contract = new ContractLoader(MarketplaceUtils.commonMarketplaceAbiPath);
-      scContract = await contract.getContract(marketplace.address);
+      controller = await ContractLoader.getController(this.apiService.getService());
     }
-    let getDataQuery = <Interaction>scContract.methodsExplicit.getFullAuctionData([new U64Value(new BigNumber(auctionId))]);
+    let getDataQuery = await controller.runQuery(
+      new SmartContractQuery({
+        contract: Address.newFromBech32(marketplace.address),
+        function: 'getFullAuctionData',
+        arguments: [new Uint8Array(Buffer.from(new U64Value(new BigNumber(auctionId)).toString()))],
+      }),
+    );
 
-    const response = await this.getFirstQueryResult(getDataQuery);
+    const [response] = controller.parseQueryResponse(getDataQuery);
 
-    const auction: AuctionAbi = response?.firstValue?.valueOf();
+    const auction: AuctionAbi = response;
     return auction;
   }
 
   async getMinMaxAuction(auctionId: number, marketplace: Marketplace): Promise<[BigNumber, BigNumber]> {
-    let scContract: SmartContract;
+    let controller: SmartContractController;
     if (!MarketplaceUtils.isExternalMarketplace(marketplace.type)) {
       return;
     }
+    controller = await ContractLoader.getController(this.apiService.getService(), MarketplaceUtils.xoxnoMarketplaceAbiPath);
 
-    this.contractLoader = new ContractLoader(MarketplaceUtils.xoxnoMarketplaceAbiPath);
-    scContract = await this.contractLoader.getContract(marketplace.address);
+    let getDataQuery = await controller.runQuery(
+      new SmartContractQuery({
+        contract: Address.newFromBech32(marketplace.address),
+        function: 'getMinMaxBid',
+        arguments: [new Uint8Array(Buffer.from(new U64Value(new BigNumber(auctionId)).toString()))],
+      }),
+    );
 
-    let getDataQuery = <Interaction>scContract.methodsExplicit.getMinMaxBid([new U64Value(new BigNumber(auctionId))]);
+    const [response] = controller.parseQueryResponse(getDataQuery);
 
-    const response = await this.getFirstQueryResult(getDataQuery);
-
-    const [minBid, maxBid] = response?.firstValue?.valueOf();
+    const [minBid, maxBid] = response.valueOf();
     return [minBid, maxBid];
   }
 
@@ -316,15 +314,23 @@ export class NftMarketplaceAbiService {
     const auction = await this.auctionsService.getAuctionById(auctionId);
     const marketplaceAddress = await this.marketplaceService.getMarketplaceAddressByKey(auction.marketplaceKey);
 
-    const contract = await this.contractLoader.getContract(marketplaceAddress);
-    return { contract, auction };
+    return { marketplaceAddress, auction };
   }
 
-  private async getCutPercentageMap(contractAddress: string): Promise<string> {
-    const contract = await this.contractLoader.getContract(contractAddress);
-    let getDataQuery = <Interaction>contract.methodsExplicit.getMarketplaceCutPercentage();
-    const response = await this.getFirstQueryResult(getDataQuery);
-    return response.firstValue.valueOf().toFixed();
+  private async getCutPercentageMap(marketplacAddress: string): Promise<string> {
+    let controller: SmartContractController = await ContractLoader.getController(this.apiService.getService());
+
+    let getDataQuery = await controller.runQuery(
+      new SmartContractQuery({
+        contract: Address.newFromBech32(marketplacAddress),
+        function: 'getMarketplaceCutPercentage',
+        arguments: [],
+      }),
+    );
+
+    const [response] = controller.parseQueryResponse(getDataQuery);
+
+    return response.valueOf().toFixed();
   }
 
   private async getCreateOfferArgs(collection: string, nonce: string, request: CreateOfferRequest): Promise<TypedValue[]> {
@@ -348,11 +354,16 @@ export class NftMarketplaceAbiService {
     return returnArgs;
   }
 
-  private async getIsPausedAbi(contractAddress: string): Promise<boolean> {
-    const contract = await this.contractLoader.getContract(contractAddress);
-    let getDataQuery = <Interaction>contract.methodsExplicit.isPaused();
-    const response = await this.getFirstQueryResult(getDataQuery);
-    return response.firstValue.valueOf();
+  private async getIsPausedAbi(marketplacAddress: string): Promise<boolean> {
+    let controller: SmartContractController = await ContractLoader.getController(this.apiService.getService());
+
+    let getDataQuery = await controller.runQuery(
+      new SmartContractQuery({ contract: Address.newFromBech32(marketplacAddress), function: 'isPaused', arguments: [] }),
+    );
+
+    const [response] = controller.parseQueryResponse(getDataQuery);
+
+    return response.valueOf();
   }
 
   private getBuySftArguments(args: BuySftActionArgs, auctionId: number): TypedValue[] {
@@ -388,76 +399,80 @@ export class NftMarketplaceAbiService {
     return returnArgs;
   }
 
-  private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.mxProxyService.getService().queryContract(interaction.buildQuery());
-    let result = this.parser.parseQueryResponse(queryResponse, interaction.getEndpoint());
-    return result;
-  }
-
   private async bidWithEgld(
     ownerAddress: string,
     request: BidRequest,
-    contract: SmartContract,
+    marketplaceAddress: string,
     marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
-    return contract.methodsExplicit
-      .bid([new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)])
-      .withValue(TokenTransfer.egldFromBigInteger(request.price))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.bid)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory();
+
+    const query = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplaceAddress),
+      function: 'bid',
+      gasLimit: gas.bid,
+      arguments: [new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)],
+      nativeTransferAmount: BigInt(request.price),
+    });
+    return query.toPlainObject();
   }
 
   private async bidWithEsdt(
     ownerAddress: string,
     request: BidRequest,
-    contract: SmartContract,
+    marketplaceAddress: string,
     marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
+    const factory = await ContractLoader.getFactory();
 
-    return contract.methodsExplicit
-      .bid([new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)])
-      .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(request.paymentTokenIdentifier, new BigNumber(request.price)))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.bid)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const token = new Token({ identifier: request.paymentTokenIdentifier });
+    const transfer = new TokenTransfer({ token, amount: BigInt(request.price) });
+    const query = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplaceAddress),
+      function: 'bid',
+      gasLimit: gas.bid,
+      arguments: [new U64Value(new BigNumber(marketplaceAuctionId)), BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce)],
+      tokenTransfers: [transfer],
+    });
+    return query.toPlainObject();
   }
 
   private async buySftWithEgld(
     ownerAddress: string,
     request: BuySftRequest,
-    contract: SmartContract,
+    marketplaceAddress: string,
     marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
-    return contract.methodsExplicit
-      .buySft(this.getBuySftArguments(request, marketplaceAuctionId))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.buySft)
-      .withValue(TokenTransfer.egldFromBigInteger(request.price))
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory();
+    const query = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplaceAddress),
+      function: 'buySft',
+      gasLimit: gas.buySft,
+      arguments: this.getBuySftArguments(request, marketplaceAuctionId),
+      nativeTransferAmount: BigInt(request.price),
+    });
+    return query.toPlainObject();
   }
 
   private async buySftWithEsdt(
     ownerAddress: string,
     request: BuySftRequest,
-    contract: SmartContract,
+    marketplaceAddress: string,
     marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
-    return contract.methodsExplicit
-      .buySft(this.getBuySftArguments(request, marketplaceAuctionId))
-      .withSingleESDTTransfer(TokenTransfer.fungibleFromBigInteger(request.paymentTokenIdentifier, new BigNumber(request.price)))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.buySft)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory();
+
+    const token = new Token({ identifier: request.paymentTokenIdentifier });
+    const transfer = new TokenTransfer({ token, amount: BigInt(request.price) });
+    const query = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(marketplaceAddress),
+      function: 'buySft',
+      gasLimit: gas.buySft,
+      arguments: this.getBuySftArguments(request, marketplaceAuctionId),
+      tokenTransfers: [transfer],
+    });
+    return query.toPlainObject();
   }
 }

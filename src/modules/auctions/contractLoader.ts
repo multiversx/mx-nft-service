@@ -1,41 +1,40 @@
-import { AbiRegistry, SmartContract, Address } from '@multiversx/sdk-core';
-import { Logger } from '@nestjs/common';
+import {
+  AbiRegistry,
+  INetworkProvider,
+  SmartContractController,
+  SmartContractTransactionsFactory,
+  TransactionsFactoryConfig,
+} from '@multiversx/sdk-core';
 import * as fs from 'fs';
+import { mxConfig } from 'src/config';
+import { MarketplaceUtils } from './marketplaceUtils';
 
 export class ContractLoader {
-  private readonly abiPath: string;
-  private abi: AbiRegistry | undefined = undefined;
-  private readonly logger: Logger;
-
-  constructor(abiPath: string) {
-    this.abiPath = abiPath;
-    this.logger = new Logger(ContractLoader.name);
-  }
-
-  async getContract(contractAddress: string): Promise<SmartContract> {
-    if (!this.abi) {
-      this.abi = await this.load();
-    }
-
-    return new SmartContract({
-      address: new Address(contractAddress),
-      abi: this.abi,
-    });
-  }
-
-  private async load(): Promise<AbiRegistry> {
+  static async load(abiPath: string): Promise<AbiRegistry> {
     try {
-      const jsonContent: string = await fs.promises.readFile(this.abiPath, { encoding: 'utf8' });
+      const jsonContent: string = await fs.promises.readFile(abiPath, { encoding: 'utf8' });
       const json = JSON.parse(jsonContent);
 
       const abiRegistry = AbiRegistry.create(json);
 
       return abiRegistry;
     } catch (error) {
-      this.logger.error(`Unexpected error when trying to create smart contract from abi`);
-      this.logger.error(error);
-
       throw new Error('Error when creating contract from abi');
     }
+  }
+
+  static async getFactory(abiPath?: string): Promise<SmartContractTransactionsFactory> {
+    return new SmartContractTransactionsFactory({
+      config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }),
+      abi: await ContractLoader.load(abiPath ?? MarketplaceUtils.commonMarketplaceAbiPath),
+    });
+  }
+
+  static async getController(networkProvider: INetworkProvider, abiPath?: string): Promise<SmartContractController> {
+    return new SmartContractController({
+      chainID: mxConfig.chainID,
+      networkProvider: networkProvider,
+      abi: await ContractLoader.load(abiPath ?? MarketplaceUtils.commonMarketplaceAbiPath),
+    });
   }
 }

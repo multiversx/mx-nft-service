@@ -1,14 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { MxApiService } from 'src/common';
 import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Logger, NotFoundException } from '@nestjs/common';
-import { Attribute, CreateNftRequest, TransferNftRequest, UpdateQuantityRequest } from '../models/requests';
-import { AssetsTransactionService } from '../assets-transaction.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { MxApiService } from 'src/common';
+import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
+import { UploadToIpfsResult } from 'src/modules/ipfs/ipfs.model';
 import { PinataService } from 'src/modules/ipfs/pinata.service';
 import { S3Service } from 'src/modules/s3/s3.service';
-import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
+import { AssetsTransactionService } from '../assets-transaction.service';
 import { NftTypeEnum } from '../models';
-import { UploadToIpfsResult } from 'src/modules/ipfs/ipfs.model';
+import { Attribute, CreateNftRequest, TransferNftRequest, UpdateQuantityRequest } from '../models/requests';
 
 describe('Assets Transaction Service', () => {
   let service: AssetsTransactionService;
@@ -99,7 +99,7 @@ describe('Assets Transaction Service', () => {
       const expectedResult = {
         chainID: 'T',
         data: 'RVNEVE5GVFRyYW5zZmVyQDQ3NDU0ZTJkNjU2NjY2MzUzMTYzQDAzQDBhQDZlN2FkNmU3YWQ2ZTdhZDZlN2FkNmU3YWQ2ZTdhZDZlN2FkNmU3YWQ2ZTdhZDZlN2FkNmU3YWQ2ZTdhZDZlN2E=',
-        gasLimit: 1000000,
+        gasLimit: 1210500,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,
@@ -131,13 +131,13 @@ describe('Assets Transaction Service', () => {
         type: NftTypeEnum.SemiFungibleESDT,
         balance: 10,
         identifier: 'GEN-8984e7-01',
-        timestamp: 1691678405,
+        timestamp: 1738851204,
       });
 
       const redisCacheService = module.get<RedisCacheService>(RedisCacheService);
       redisCacheService.getOrSet = jest
         .fn()
-        .mockReturnValueOnce(new MxStats({ epoch: 5957, roundsPassed: 496, roundsPerEpoch: 1200, refreshRate: 6000 }));
+        .mockReturnValueOnce(new MxStats({ epoch: 1684, roundsPassed: 10103, roundsPerEpoch: 14400, refreshRate: 6000 }));
       const expectedResult = {
         chainID: 'T',
         data: 'RVNEVE5GVEJ1cm5ANDc0NTRlMmQ2NTY2NjYzNTMxNjNAMDNAMGE=',
@@ -162,7 +162,7 @@ describe('Assets Transaction Service', () => {
       const expectedResult = {
         chainID: 'T',
         data: 'RVNEVE5GVFRyYW5zZmVyQDQ3NDU0ZTJkNjU2NjY2MzUzMTYzQDAzQDAxQDZlMjI0MTE4ZDkwNjhhZTYyNjg3OGExY2ZiZWJjYjZhOTVhNDcxNWRiODZkMWI1MWUwNmEwNDIyNmNmMzBmZDY=',
-        gasLimit: 1000000,
+        gasLimit: 1210500,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,
@@ -187,7 +187,7 @@ describe('Assets Transaction Service', () => {
       const expectedResult = {
         chainID: 'T',
         data: 'RVNEVE5GVFRyYW5zZmVyQDQ3NDU0ZTJkNjU2NjY2MzUzMTYzQDAzQDBhQDZlMjI0MTE4ZDkwNjhhZTYyNjg3OGExY2ZiZWJjYjZhOTVhNDcxNWRiODZkMWI1MWUwNmEwNDIyNmNmMzBmZDY=',
-        gasLimit: 1000000,
+        gasLimit: 1210500,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,
@@ -223,7 +223,7 @@ describe('Assets Transaction Service', () => {
       const expectedResult = {
         chainID: 'T',
         data: 'RVNEVE5GVENyZWF0ZUA0MzZmNmM2YzY1NjM3NDY5NmY2ZUAwMUA0ZTYxNmQ2NUAwM2U4QDY4NjE3MzY4QDc0NjE2NzczM2E3NDYxNjczYjZkNjU3NDYxNjQ2MTc0NjEzYTY4NjE3MzY4QDc1NzI2Yw==',
-        gasLimit: 3728000,
+        gasLimit: 3228033,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,

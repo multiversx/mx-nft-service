@@ -1,20 +1,20 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import '../../utils/extensions';
-import { Notification, NotificationStatusEnum } from './models';
-import { NotificationEntity } from 'src/db/notifications';
-import { AuctionEntity } from 'src/db/auctions';
-import { NotificationTypeEnum } from './models/Notification-type.enum';
-import { OrdersService } from '../orders/order.service';
-import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
-import { NotificationsCachingService } from './notifications-caching.service';
-import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
-import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
-import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { OrderEntity } from 'src/db/orders';
-import { OfferEntity } from 'src/db/offers';
 import { Address } from '@multiversx/sdk-core';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
+import { AuctionEntity } from 'src/db/auctions';
+import { NotificationEntity } from 'src/db/notifications';
+import { OfferEntity } from 'src/db/offers';
+import { OrderEntity } from 'src/db/orders';
+import '../../utils/extensions';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
 import { NftTypeEnum } from '../assets/models';
 import { AuctionsGetterService } from '../auctions';
+import { OrdersService } from '../orders/order.service';
+import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
+import { CacheEventTypeEnum, ChangedEvent } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { Notification, NotificationStatusEnum } from './models';
+import { NotificationTypeEnum } from './models/Notification-type.enum';
+import { NotificationsCachingService } from './notifications-caching.service';
 
 @Injectable()
 export class NotificationsService {
@@ -248,7 +248,7 @@ export class NotificationsService {
       }
       const assetName = asset ? asset.name : '';
       const address = new Address(asset.ownerAddress);
-      if (!address.isContractAddress()) {
+      if (!address.isSmartContract()) {
         this.saveNotifications([this.getOfferNotification(offer, asset.ownerAddress, assetName)]);
       } else {
         const auction = await this.auctionsGetterService.getAuctionByIdentifierAndMarketplace(offer.identifier, offer.marketplaceKey);

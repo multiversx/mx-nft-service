@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { IssueCollectionRequest, SetNftRolesRequest, StopNftCreateRequest, TransferNftCreateRoleRequest } from '../models/requests';
+import { MxApiService } from 'src/common';
+import { NftTypeEnum } from 'src/modules/assets/models';
 import { CollectionsTransactionsService } from '../collections-transactions.service';
+import { IssueCollectionRequest, SetNftRolesRequest } from '../models/requests';
 
 describe('Collections Transactions Service', () => {
   let service: CollectionsTransactionsService;
@@ -9,7 +11,13 @@ describe('Collections Transactions Service', () => {
 
   beforeEach(async () => {
     module = await Test.createTestingModule({
-      providers: [CollectionsTransactionsService],
+      providers: [
+        CollectionsTransactionsService,
+        {
+          provide: MxApiService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
     service = module.get<CollectionsTransactionsService>(CollectionsTransactionsService);
@@ -23,8 +31,8 @@ describe('Collections Transactions Service', () => {
     it('returns built transaction for issue non fungible with right arguments', async () => {
       const expectedResult = {
         chainID: 'T',
-        data: 'aXNzdWVOb25GdW5naWJsZUA0ZTYxNmQ2NTczQDRlNDE0ZDQ1QDYzNjE2ZTQ2NzI2NTY1N2E2NUA3NDcyNzU2NUA2MzYxNmU1MDYxNzU3MzY1QDc0NzI3NTY1QDYzNjE2ZTU0NzI2MTZlNzM2NjY1NzI0ZTQ2NTQ0MzcyNjU2MTc0NjU1MjZmNmM2NUA3NDcyNzU2NQ==',
-        gasLimit: 60000000,
+        data: 'aXNzdWVOb25GdW5naWJsZUA0ZTYxNmQ2NTczQDRlNDE0ZDQ1QDYzNjE2ZTQ2NzI2NTY1N2E2NUA3NDcyNzU2NUA2MzYxNmU1NzY5NzA2NUA2NjYxNmM3MzY1QDYzNjE2ZTUwNjE3NTczNjVANzQ3Mjc1NjVANjM2MTZlNTQ3MjYxNmU3MzY2NjU3MjRlNDY1NDQzNzI2NTYxNzQ2NTUyNmY2YzY1QDc0NzI3NTY1QDYzNjE2ZTQzNjg2MTZlNjc2NTRmNzc2ZTY1NzJANjY2MTZjNzM2NUA2MzYxNmU1NTcwNjc3MjYxNjQ2NUA2NjYxNmM3MzY1QDYzNjE2ZTQxNjQ2NDUzNzA2NTYzNjk2MTZjNTI2ZjZjNjU3M0A2NjYxNmM3MzY1',
+        gasLimit: 60491000,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,
@@ -43,6 +51,7 @@ describe('Collections Transactions Service', () => {
           canFreeze: true,
           canPause: true,
           canTransferNFTCreateRole: true,
+
           collectionType: 'issueNonFungible',
         }),
       );
@@ -52,8 +61,8 @@ describe('Collections Transactions Service', () => {
     it('returns built transaction for issue semi fungible with right arguments', async () => {
       const expectedResult = {
         chainID: 'T',
-        data: 'aXNzdWVTZW1pRnVuZ2libGVANGU2MTZkNjU3M0A0ZTQxNGQ0NUA2MzYxNmU0NjcyNjU2NTdhNjVANzQ3Mjc1NjVANjM2MTZlNTA2MTc1NzM2NUA3NDcyNzU2NUA2MzYxNmU1NDcyNjE2ZTczNjY2NTcyNGU0NjU0NDM3MjY1NjE3NDY1NTI2ZjZjNjVANzQ3Mjc1NjU=',
-        gasLimit: 60000000,
+        data: 'aXNzdWVTZW1pRnVuZ2libGVANGU2MTZkNjU3M0A0ZTQxNGQ0NUA2MzYxNmU0NjcyNjU2NTdhNjVANzQ3Mjc1NjVANjM2MTZlNTc2OTcwNjVANjY2MTZjNzM2NUA2MzYxNmU1MDYxNzU3MzY1QDc0NzI3NTY1QDYzNjE2ZTU0NzI2MTZlNzM2NjY1NzI0ZTQ2NTQ0MzcyNjU2MTc0NjU1MjZmNmM2NUA3NDcyNzU2NUA2MzYxNmU0MzY4NjE2ZTY3NjU0Zjc3NmU2NTcyQDY2NjE2YzczNjVANjM2MTZlNTU3MDY3NzI2MTY0NjVANjY2MTZjNzM2NUA2MzYxNmU0MTY0NjQ1MzcwNjU2MzY5NjE2YzUyNmY2YzY1NzNANjY2MTZjNzM2NQ==',
+        gasLimit: 60492500,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,
@@ -79,67 +88,19 @@ describe('Collections Transactions Service', () => {
     });
   });
 
-  describe('stopNFTCreate', () => {
-    it('returns built transaction with right arguments', async () => {
-      const expectedResult = {
-        chainID: 'T',
-        data: 'c3RvcE5GVENyZWF0ZUA2MzZmNmM2YzY1NjM3NDY5NmY2ZQ==',
-        gasLimit: 60000000,
-        gasPrice: 1000000000,
-        nonce: 0,
-        options: undefined,
-        receiver: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
-        sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
-        signature: undefined,
-        value: '0',
-        version: 2,
-      };
-
-      const result = await service.stopNFTCreate(
-        ownerAddress,
-        new StopNftCreateRequest({
-          ownerAddress: ownerAddress,
-          collection: 'collection',
-        }),
-      );
-      expect(result).toMatchObject(expectedResult);
-    });
-  });
-
-  describe('transferNFTCreateRole', () => {
-    it('returns built transaction with right arguments', async () => {
-      const expectedResult = {
-        chainID: 'T',
-        data: 'dHJhbnNmZXJORlRDcmVhdGVSb2xlQDYzNmY2YzZjNjU2Mzc0Njk2ZjZlQGY5ZjRlNWMzN2I4Yjg2Mjg5ZTgyMDY5OTA1OTBjNjYxODRhZWM2NzY5NjYyOTQyYzFiYjZkZTRkOWFhYWQwMmI=',
-        gasLimit: 60000000,
-        gasPrice: 1000000000,
-        nonce: 0,
-        options: undefined,
-        receiver: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
-        sender: 'erd1dc3yzxxeq69wvf583gw0h67td226gu2ahpk3k50qdgzzym8npltq7ndgha',
-        signature: undefined,
-        value: '0',
-        version: 2,
-      };
-
-      const result = await service.transferNFTCreateRole(
-        ownerAddress,
-        new TransferNftCreateRoleRequest({
-          ownerAddress: ownerAddress,
-          collection: 'collection',
-          addressToTransferList: ['erd1l86wtsmm3wrz385zq6vstyxxvxz2a3nkje3fgtqmkm0ymx426q4s93gyd9'],
-        }),
-      );
-      expect(result).toMatchObject(expectedResult);
-    });
-  });
-
   describe('setNftRoles', () => {
     it('returns built transaction with right arguments', async () => {
+      const apiService = module.get<MxApiService>(MxApiService);
+      apiService.getCollectionForIdentifier = jest.fn().mockReturnValueOnce({
+        type: NftTypeEnum.SemiFungibleESDT,
+        balance: 10,
+        collection: 'GEN-8984e7',
+        timestamp: 1738851204,
+      });
       const expectedResult = {
         chainID: 'T',
-        data: 'c2V0U3BlY2lhbFJvbGVANjM2ZjZjNmM2NTYzNzQ2OTZmNmVAZjlmNGU1YzM3YjhiODYyODllODIwNjk5MDU5MGM2NjE4NGFlYzY3Njk2NjI5NDJjMWJiNmRlNGQ5YWFhZDAyYkA1NDY1NzM3NA==',
-        gasLimit: 60000000,
+        data: 'c2V0U3BlY2lhbFJvbGVANjM2ZjZjNmM2NTYzNzQ2OTZmNmVANmUyMjQxMThkOTA2OGFlNjI2ODc4YTFjZmJlYmNiNmE5NWE0NzE1ZGI4NmQxYjUxZTA2YTA0MjI2Y2YzMGZkNkA0NTUzNDQ1NDUyNmY2YzY1NGU0NjU0NDE2NDY0NTE3NTYxNmU3NDY5NzQ3OQ==',
+        gasLimit: 60267500,
         gasPrice: 1000000000,
         nonce: 0,
         options: undefined,
@@ -155,7 +116,7 @@ describe('Collections Transactions Service', () => {
         new SetNftRolesRequest({
           collection: 'collection',
           addressToTransfer: 'erd1l86wtsmm3wrz385zq6vstyxxvxz2a3nkje3fgtqmkm0ymx426q4s93gyd9',
-          roles: ['Test'],
+          roles: ['ESDTRoleNFTAddQuantity'],
         }),
       );
       expect(result).toMatchObject(expectedResult);

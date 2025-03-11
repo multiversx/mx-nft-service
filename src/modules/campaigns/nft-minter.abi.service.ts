@@ -1,105 +1,114 @@
-import { Injectable } from '@nestjs/common';
-import '../../utils/extensions';
-import { BuyRandomNftActionArgs } from './models';
-import BigNumber from 'bignumber.js';
 import {
   Address,
+  BigUIntType,
   BigUIntValue,
   BytesValue,
+  CompositeValue,
+  List,
   OptionalValue,
+  SmartContractQuery,
+  Token,
   TokenIdentifierValue,
+  TokenTransfer,
   TypedValue,
   U64Value,
-  BigUIntType,
   VariadicValue,
-  List,
-  Interaction,
-  CompositeValue,
-  ResultsParser,
-  TokenTransfer,
 } from '@multiversx/sdk-core';
-import { mxConfig, gas } from '../../config';
-import { MxProxyService } from 'src/common';
-import { TransactionNode } from '../common/transaction';
-import { BuyRequest, IssueCampaignRequest } from './models/requests';
+import { Injectable } from '@nestjs/common';
+import BigNumber from 'bignumber.js';
+import { MxApiService } from 'src/common';
 import { nominateVal } from 'src/utils';
-import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
-import { UpgradeNftRequest } from './models/requests/UpgradeNftRequest ';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { gas, mxConfig } from '../../config';
+import '../../utils/extensions';
 import { ContractLoader } from '../auctions/contractLoader';
+import { TransactionNode } from '../common/transaction';
+import { BuyRandomNftActionArgs } from './models';
+import { BrandInfoViewResultType } from './models/abi/BrandInfoViewAbi';
+import { BuyRequest, IssueCampaignRequest } from './models/requests';
+import { UpgradeNftRequest } from './models/requests/UpgradeNftRequest ';
 
 @Injectable()
 export class NftMinterAbiService {
-  private readonly parser: ResultsParser;
   private readonly abiPath: string = './src/abis/nft-minter.abi.json';
-  private readonly contract = new ContractLoader(this.abiPath);
 
-  constructor(private mxProxyService: MxProxyService) {
-    this.parser = new ResultsParser();
-  }
+  constructor(private mxApiService: MxApiService) {}
 
   public async getCampaignsForScAddress(address: string) {
-    const contract = await this.contract.getContract(address);
-    let getDataQuery = <Interaction>contract.methodsExplicit.getAllBrandsInfo();
+    const controller = await ContractLoader.getController(this.mxApiService.getService(), this.abiPath);
+    let getDataQuery = await controller.runQuery(
+      new SmartContractQuery({
+        contract: Address.newFromBech32(address),
+        function: 'getAllBrandsInfo',
+        arguments: [],
+      }),
+    );
 
-    const response = await this.getFirstQueryResult(getDataQuery);
-    const campaigns: BrandInfoViewResultType[] = response?.firstValue?.valueOf();
+    const [response] = controller.parseQueryResponse(getDataQuery);
+
+    const campaigns: BrandInfoViewResultType[] = response.valueOf();
     return campaigns;
   }
 
   public async getMaxNftsPerTransaction(address: string) {
-    const contract = await this.contract.getContract(address);
-    let getDataQuery = <Interaction>contract.methodsExplicit.getMaxNftsPerTransaction();
+    const controller = await ContractLoader.getController(this.mxApiService.getService(), this.abiPath);
+    let getDataQuery = await controller.runQuery(
+      new SmartContractQuery({
+        contract: Address.newFromBech32(address),
+        function: 'getMaxNftsPerTransaction',
+        arguments: [],
+      }),
+    );
 
-    const response = await this.getFirstQueryResult(getDataQuery);
-    const maxNftsPerTransaction: BigNumber = response?.firstValue?.valueOf();
-    return maxNftsPerTransaction?.toNumber() ?? 0;
+    const [response] = controller.parseQueryResponse(getDataQuery);
+
+    const maxNftsPerTransaction: BigNumber = response.valueOf();
+    return maxNftsPerTransaction?.toNumber();
   }
 
   async issueToken(request: IssueCampaignRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(request.minterAddress);
-    return contract.methodsExplicit
-      .issueTokenForBrand(this.getIssueCampaignArgs(request))
-      .withSender(Address.fromString(request.ownerAddress))
-      .withChainID(mxConfig.chainID)
-      .withValue(TokenTransfer.egldFromBigInteger(mxConfig.issueNftCost))
-      .withGasLimit(gas.issueCamapaign)
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory(this.abiPath);
+
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(request.ownerAddress), {
+      contract: Address.newFromBech32(request.minterAddress),
+      function: 'issueTokenForBrand',
+      gasLimit: gas.issueCampaign,
+      arguments: this.getIssueCampaignArgs(request),
+      nativeTransferAmount: BigInt(mxConfig.issueNftCost),
+    });
+    return transaction.toPlainObject();
   }
 
   async buyRandomNft(ownerAddress: string, request: BuyRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(request.minterAddress);
-    let buyRandomNft = contract.methodsExplicit
-      .buyRandomNft(this.getBuyNftArguments(request))
-      .withSender(Address.fromString(ownerAddress))
-      .withChainID(mxConfig.chainID)
-      .withValue(TokenTransfer.egldFromBigInteger(request.price))
-      .withGasLimit(gas.endAuction);
+    const factory = await ContractLoader.getFactory(this.abiPath);
 
-    if (parseInt(request.quantity) > 1) {
-      buyRandomNft.withGasLimit(buyRandomNft.getGasLimit().valueOf() + (parseInt(request.quantity) - 1) * gas.endAuction);
-    }
-    return buyRandomNft.buildTransaction().toPlainObject();
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(request.minterAddress),
+      function: 'buyRandomNft',
+      gasLimit: parseInt(request.quantity) > 1 ? gas.endAuction + (parseInt(request.quantity) - 1) * gas.endAuction : gas.endAuction,
+      arguments: this.getBuyNftArguments(request),
+      nativeTransferAmount: BigInt(request.price),
+    });
+
+    return transaction.toPlainObject();
   }
 
   async upgradeNft(ownerAddress: string, request: UpgradeNftRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
-    const contract = await this.contract.getContract(request.minterAddress);
-    return contract.methodsExplicit
-      .nftUpgrade([BytesValue.fromUTF8(request.campaignId)])
-      .withSingleESDTNFTTransfer(TokenTransfer.metaEsdtFromBigInteger(collection, parseInt(nonce, 16), new BigNumber(1)))
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.buySft)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
-  }
 
-  private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.mxProxyService.getService().queryContract(interaction.buildQuery());
-    let result = this.parser.parseQueryResponse(queryResponse, interaction.getEndpoint());
-    return result;
+    const factory = await ContractLoader.getFactory(this.abiPath);
+    const token = new Token({ identifier: collection, nonce: BigInt(parseInt(nonce, 16)) });
+    const transfer = new TokenTransfer({ token, amount: BigInt(1) });
+
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(request.minterAddress),
+      function: 'nftUpgrade',
+      gasLimit: gas.buySft,
+      arguments: [BytesValue.fromUTF8(request.campaignId)],
+      tokenTransfers: [transfer],
+    });
+
+    return transaction.toPlainObject();
   }
 
   private getBuyNftArguments(args: BuyRandomNftActionArgs): TypedValue[] {

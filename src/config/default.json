@@ -31,7 +31,7 @@
     "cdnUrl": "https://ipfs.io/ipfs/"
   },
   "gas": {
-    "nftCreate": 3500000,
+    "nftCreate": 10000000,
     "nftTransfer": 1000000,
     "startAuction": 18000000,
     "endAuction": 12000000,
@@ -45,7 +45,7 @@
     "addBurnQuantity": 200000,
     "buyTickets": 36000000,
     "nftBurn": 10000000,
-    "issueCamapaign": 70000000,
+    "issueCampaign": 70000000,
     "deployMinter": 70000000
   },
   "cronJobs": {

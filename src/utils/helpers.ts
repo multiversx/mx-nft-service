@@ -72,23 +72,36 @@ export const randomBetween = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min) + min);
 };
 
+// If you need both epoch and round:
 export function timestampToEpochAndRound(
   timestamp: number,
-  currentEpoch: number,
-  currentRound: number,
+  epochsPassed: number,
+  roundsPassed: number,
   roundsPerEpoch: number,
-  milisecondsPerRound: number,
+  millisecondsPerRound: number,
 ): [number, number] {
-  const currentTimestamp = new Date();
-  const timeDiffInMs = +currentTimestamp.getTime() - +new Date(timestamp).getTime() * 1000;
+  const genesisTimestamp = calculateGenesisTimestamp(epochsPassed, roundsPassed, roundsPerEpoch, millisecondsPerRound);
 
-  const roundDiff = timeDiffInMs / milisecondsPerRound;
-  const epochDiff = roundDiff / roundsPerEpoch;
+  // Convert timestamp to milliseconds if it's in seconds
+  const timestampMs = timestamp * 1000;
+  const timeSinceGenesis = timestampMs - genesisTimestamp;
+  const roundsSinceGenesis = Math.floor(timeSinceGenesis / millisecondsPerRound);
+  const targetEpoch = Math.floor(roundsSinceGenesis / roundsPerEpoch);
+  const targetRound = roundsSinceGenesis % roundsPerEpoch;
 
-  const epoch = currentEpoch - epochDiff;
-  const round = currentRound - (epochDiff % roundsPerEpoch);
+  return [targetEpoch, targetRound];
+}
 
-  return [Math.trunc(epoch), Math.trunc(round)];
+function calculateGenesisTimestamp(
+  epochsPassed: number,
+  roundsPassed: number,
+  roundsPerEpoch: number,
+  millisecondsPerRound: number,
+): number {
+  const currentTimestamp = new Date().getTime();
+  const totalRounds = epochsPassed * roundsPerEpoch + roundsPassed;
+  const totalMilliseconds = totalRounds * millisecondsPerRound;
+  return currentTimestamp - totalMilliseconds;
 }
 
 export async function sleep(ms: number) {

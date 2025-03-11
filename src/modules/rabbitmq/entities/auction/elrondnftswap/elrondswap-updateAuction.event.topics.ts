@@ -25,7 +25,7 @@ export class ElrondSwapUpdateTopics {
 
   toPlainObject() {
     return {
-      seller: this.seller.bech32(),
+      seller: this.seller.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       auctionId: this.auctionId,
