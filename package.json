@@ -39,7 +39,7 @@
     "@aws-sdk/lib-storage": "^3.438.0",
     "@elastic/elasticsearch": "7.12.0",
     "@golevelup/nestjs-rabbitmq": "5.5.0",
-    "@multiversx/sdk-core": "14.0.0-beta.1",
+    "@multiversx/sdk-core": "14.0.0",
     "@multiversx/sdk-native-auth-server": "1.0.20",
     "@multiversx/sdk-nestjs-cache": "3.7.8",
     "@multiversx/sdk-nestjs-common": "3.7.8",
