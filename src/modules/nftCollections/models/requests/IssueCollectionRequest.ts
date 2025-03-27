@@ -9,8 +9,8 @@ export class IssueCollectionRequest {
   canTransferNFTCreateRole: boolean = false;
   collectionType: 'issueSemiFungible' | 'issueNonFungible';
   canChangeOwner: boolean = false;
-  canUpgrade: boolean = false;
-  canAddSpecialRoles: boolean = false;
+  canUpgrade: boolean = true;
+  canAddSpecialRoles: boolean = true;
 
   constructor(init?: Partial<IssueCollectionRequest>) {
     Object.assign(this, init);
