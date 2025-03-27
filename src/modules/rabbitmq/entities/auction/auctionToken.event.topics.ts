@@ -1,4 +1,4 @@
-import { Address } from '@multiversx/sdk-core/out';
+import { Address } from '@multiversx/sdk-core';
 import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 
 export class AuctionTokenEventsTopics {

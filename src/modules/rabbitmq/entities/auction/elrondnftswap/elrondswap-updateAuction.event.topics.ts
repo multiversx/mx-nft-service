@@ -1,4 +1,4 @@
-import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core/out';
+import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core';
 export class ElrondSwapUpdateTopics {
   private auctionId: string;
   private collection: string;

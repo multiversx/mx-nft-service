@@ -8,7 +8,7 @@ import {
   TransactionsFactoryConfig,
   U32Value,
   VariadicValue,
-} from '@multiversx/sdk-core/out';
+} from '@multiversx/sdk-core';
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
 import { gas, mxConfig } from 'src/config';
