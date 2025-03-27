@@ -34,7 +34,7 @@ export class IssueCollectionArgs {
   @Field(() => Boolean)
   canChangeOwner: boolean = false;
   @Field(() => Boolean)
-  canUpgrade: boolean = false;
+  canUpgrade: boolean = true;
   @Field(() => Boolean)
-  canAddSpecialRoles: boolean = false;
+  canAddSpecialRoles: boolean = true;
 }
