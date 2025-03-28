@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DeployMinterRequest, UpgradeMinterRequest } from '../models/requests/DeployMinterRequest';
-import { MxProxyService } from 'src/common';
+import { MxApiService } from 'src/common';
+import { DeployMinterRequest } from '../models/requests/DeployMinterRequest';
 import { ProxyDeployerAbiService } from '../proxy-deployer.abi.service';
 
 describe('Proxy  Deployer Abi Service', () => {
@@ -12,7 +12,7 @@ describe('Proxy  Deployer Abi Service', () => {
       providers: [
         ProxyDeployerAbiService,
         {
-          provide: MxProxyService,
+          provide: MxApiService,
           useValue: {},
         },
       ],

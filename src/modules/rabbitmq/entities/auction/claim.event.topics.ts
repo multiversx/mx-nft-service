@@ -17,7 +17,7 @@ export class ClaimEventsTopics {
 
   toPlainObject() {
     return {
-      currentWinner: this.currentWinner.bech32(),
+      currentWinner: this.currentWinner.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       auctionId: this.auctionId,

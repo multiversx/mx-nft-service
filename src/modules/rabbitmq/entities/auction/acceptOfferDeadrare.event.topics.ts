@@ -34,8 +34,8 @@ export class AcceptOfferDeadrareEventsTopics {
 
   toPlainObject() {
     return {
-      offerOwner: this.offerOwner.bech32(),
-      nftOwner: this.nftOwner.bech32(),
+      offerOwner: this.offerOwner.toBech32(),
+      nftOwner: this.nftOwner.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       offerId: this.offerId,

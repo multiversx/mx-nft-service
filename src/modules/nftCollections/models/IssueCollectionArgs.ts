@@ -31,4 +31,10 @@ export class IssueCollectionArgs {
   canPause: boolean = false;
   @Field(() => Boolean)
   canTransferNFTCreateRole: boolean = false;
+  @Field(() => Boolean)
+  canChangeOwner: boolean = false;
+  @Field(() => Boolean)
+  canUpgrade: boolean = true;
+  @Field(() => Boolean)
+  canAddSpecialRoles: boolean = true;
 }

@@ -1,19 +1,19 @@
+import { Address, ApiNetworkProvider, TransactionOnNetwork } from '@multiversx/sdk-core';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { Nft, NftMetadata, NftTag } from './models/nft.dto';
-import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
-import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
 import * as Agent from 'agentkeepalive';
 import { constants, mxConfig } from 'src/config';
-import { CollectionApi } from './models/collection.dto';
-import { OwnerApi } from './models/owner.api';
 import { AssetsQuery } from 'src/modules/assets/assets-query';
-import { Token } from '../../../modules/usdPrice/Token.model';
-import { Address, ApiNetworkProvider, TransactionOnNetwork } from '@multiversx/sdk-core';
-import { SmartContractApi } from './models/smart-contract.api';
-import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
+import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
+import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { CustomRank } from 'src/modules/nft-rarity/models/custom-rank.model';
-import { MxStats } from './models/mx-stats.model';
+import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
+import { Token } from '../../../modules/usdPrice/Token.model';
+import { CollectionApi } from './models/collection.dto';
 import { MxApiAbout } from './models/mx-api-about.model';
+import { MxStats } from './models/mx-stats.model';
+import { Nft, NftMetadata, NftTag } from './models/nft.dto';
+import { OwnerApi } from './models/owner.api';
+import { SmartContractApi } from './models/smart-contract.api';
 
 @Injectable()
 export class MxApiService {
@@ -35,7 +35,7 @@ export class MxApiService {
       headers: {
         origin: 'NftService',
       },
-      clientName: "nft-service",
+      clientName: 'nft-service',
     });
   }
 
@@ -393,26 +393,26 @@ export class MxApiService {
     const token = await this.doGetGeneric(this.getTokenData.name, `tokens/${tokenId}?fields=identifier,name,ticker,decimals,price`);
     return token
       ? new Token({
-        ...token,
-        symbol: token.ticker,
-      })
+          ...token,
+          symbol: token.ticker,
+        })
       : undefined;
   }
 
   async getSmartContractOwner(address: string): Promise<{ address: string; owner: string }> {
     let scAddress = new Address(address);
-    while (scAddress.isContractAddress() && scAddress.bech32() !== XOXNO_MINTING_MANAGER) {
+    while (scAddress.isSmartContract() && scAddress.toBech32() !== XOXNO_MINTING_MANAGER) {
       const { ownerAddress } = await this.doGetGeneric(
         this.getSmartContractOwner.name,
-        `accounts/${scAddress.bech32()}?fields=ownerAddress`,
+        `accounts/${scAddress.toBech32()}?fields=ownerAddress`,
       );
-      if (ownerAddress === scAddress.bech32()) {
-        return { address, owner: scAddress.bech32() };
+      if (ownerAddress === scAddress.toBech32()) {
+        return { address, owner: scAddress.toBech32() };
       }
 
-      scAddress = Address.fromString(ownerAddress);
+      scAddress = Address.newFromBech32(ownerAddress);
     }
-    return { address, owner: scAddress.bech32() };
+    return { address, owner: scAddress.toBech32() };
   }
 
   async getTransactionByHash(txHash: string): Promise<TransactionOnNetwork> {

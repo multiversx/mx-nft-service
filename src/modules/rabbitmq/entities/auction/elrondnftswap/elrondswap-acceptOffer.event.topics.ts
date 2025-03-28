@@ -1,4 +1,4 @@
-import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core/out';
+import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core';
 
 export class ElrondSwapAcceptOfferTopics {
   private offerId: number;
@@ -24,7 +24,7 @@ export class ElrondSwapAcceptOfferTopics {
 
   toPlainObject() {
     return {
-      originalOwner: this.originalOwner.bech32(),
+      originalOwner: this.originalOwner.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       offerId: this.offerId,
