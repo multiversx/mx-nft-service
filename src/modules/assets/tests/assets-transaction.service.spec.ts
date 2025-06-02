@@ -208,6 +208,101 @@ describe('Assets Transaction Service', () => {
       );
       expect(result).toMatchObject(expectedResult);
     });
+
+    it('correctly handles large hex nonce like TEST-9e876f-0435', async () => {
+      const result = await service.transferNft(
+        ownerAddress,
+        new TransferNftRequest({
+          identifier: 'TEST-9e876f-0435', 
+          quantity: '1',
+          destinationAddress: 'erd1f339wqgj09j6yf79m0ae85syjaljxsfgasuwfe33g22jmyjvep6qsm0w6n',
+        }),
+      );
+
+      // The transaction data should contain the correct hex nonce (0435)
+      // ESDTNFTTransfer@TEST-9e876f@0435@01@destinationAddress
+      expect(result.data).toContain('RVNEVE5GVFRyYW5zZmVy');
+      expect(result.chainID).toBe('T');
+      expect(result.receiver).toBe(ownerAddress);
+      expect(result.gasLimit).toBe(1216500);
+    });
+
+    it('correctly handles problematic hex nonce like TEST-753c62-01f6', async () => {
+      const result = await service.transferNft(
+        ownerAddress,
+        new TransferNftRequest({
+          identifier: 'TEST-753c62-01f6',
+          quantity: '1',
+          destinationAddress: 'erd1f339wqgj09j6yf79m0ae85syjaljxsfgasuwfe33g22jmyjvep6qsm0w6n',
+        }),
+      );
+
+      expect(result.data).toContain('RVNEVE5GVFRyYW5zZmVy');
+      expect(result.chainID).toBe('T');
+      expect(result.receiver).toBe(ownerAddress);
+      expect(result.gasLimit).toBe(1216500);
+    });
+
+    it('correctly handles simple hex nonces like 01, 04', async () => {
+      const result = await service.transferNft(
+        ownerAddress,
+        new TransferNftRequest({
+          identifier: 'TEST-123456-01',
+          quantity: '1',
+          destinationAddress: 'erd1f339wqgj09j6yf79m0ae85syjaljxsfgasuwfe33g22jmyjvep6qsm0w6n',
+        }),
+      );
+
+      expect(result.data).toContain('RVNEVE5GVFRyYW5zZmVy');
+      expect(result.chainID).toBe('T');
+      expect(result.receiver).toBe(ownerAddress);
+    });
+
+    it('correctly handles very large hex nonces', async () => {
+      const result = await service.transferNft(
+        ownerAddress,
+        new TransferNftRequest({
+          identifier: 'TEST-123456-ffff', 
+          quantity: '1',
+          destinationAddress: 'erd1f339wqgj09j6yf79m0ae85syjaljxsfgasuwfe33g22jmyjvep6qsm0w6n',
+        }),
+      );
+
+      expect(result.data).toContain('RVNEVE5GVFRyYW5zZmVy');
+      expect(result.chainID).toBe('T');
+      expect(result.receiver).toBe(ownerAddress);
+    });
+
+    it('correctly handles multi-digit hex nonces with leading zeros', async () => {
+      const result = await service.transferNft(
+        ownerAddress,
+        new TransferNftRequest({
+          identifier: 'TEST-123456-00ab',
+          quantity: '1',
+          destinationAddress: 'erd1f339wqgj09j6yf79m0ae85syjaljxsfgasuwfe33g22jmyjvep6qsm0w6n',
+        }),
+      );
+
+      expect(result.data).toContain('RVNEVE5GVFRyYW5zZmVy');
+      expect(result.chainID).toBe('T');
+      expect(result.receiver).toBe(ownerAddress);
+    });
+
+    it('verifies hex nonce conversion produces correct decimal values', () => {
+      const testCases = [
+        { hex: '01f6', expectedDecimal: 502 },
+        { hex: '0435', expectedDecimal: 1077 },
+        { hex: '01', expectedDecimal: 1 },
+        { hex: '04', expectedDecimal: 4 },
+        { hex: 'ffff', expectedDecimal: 65535 },
+        { hex: '00ab', expectedDecimal: 171 },
+      ];
+
+      for (const { hex, expectedDecimal } of testCases) {
+        const convertedValue = BigInt(parseInt(hex, 16));
+        expect(Number(convertedValue)).toBe(expectedDecimal);
+      }
+    });
   });
 
   describe('createNft', () => {

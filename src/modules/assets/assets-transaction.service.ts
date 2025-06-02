@@ -94,7 +94,8 @@ export class AssetsTransactionService {
   async transferNft(ownerAddress: string, transferRequest: TransferNftRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(transferRequest.identifier);
 
-    const nft = new Token({ identifier: collection, nonce: BigInt(nonce) });
+    const nonceDecimal = BigInt(parseInt(nonce, 16));
+    const nft = new Token({ identifier: collection, nonce: nonceDecimal });
     const transfer = new TokenTransfer({ token: nft, amount: BigInt(transferRequest.quantity) });
     const factory = new TransferTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
     const transaction = factory.createTransactionForTransfer(Address.newFromBech32(ownerAddress), {
