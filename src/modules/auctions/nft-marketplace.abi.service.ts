@@ -248,11 +248,12 @@ export class NftMarketplaceAbiService {
     } else {
       controller = await ContractLoader.getController(this.apiService.getService());
     }
+
     let getDataQuery = await controller.runQuery(
       new SmartContractQuery({
         contract: Address.newFromBech32(marketplace.address),
         function: 'getFullAuctionData',
-        arguments: [new Uint8Array(Buffer.from(new U64Value(new BigNumber(auctionId)).toString()))],
+        arguments: [this.numberToFixedHexBuffer(auctionId)],
       }),
     );
 
@@ -273,7 +274,7 @@ export class NftMarketplaceAbiService {
       new SmartContractQuery({
         contract: Address.newFromBech32(marketplace.address),
         function: 'getMinMaxBid',
-        arguments: [new Uint8Array(Buffer.from(new U64Value(new BigNumber(auctionId)).toString()))],
+        arguments: [this.numberToFixedHexBuffer(auctionId)],
       }),
     );
 
@@ -474,5 +475,10 @@ export class NftMarketplaceAbiService {
       tokenTransfers: [transfer],
     });
     return transaction.toPlainObject();
+  }
+
+  numberToFixedHexBuffer(num, byteLength = 2) {
+    const hex = num.toString(16).padStart(byteLength * 2, '0'); // ex: "0246"
+    return Buffer.from(hex, 'hex');
   }
 }
