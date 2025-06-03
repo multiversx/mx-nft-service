@@ -23,7 +23,7 @@ import BigNumber from 'bignumber.js';
 import { MxApiService } from 'src/common';
 import { BadRequestError } from 'src/common/models/errors/bad-request-error';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
+import { getCollectionAndNonceFromIdentifier, numberToFixedHexBuffer } from 'src/utils/helpers';
 import { gas, mxConfig } from '../../config';
 import '../../utils/extensions';
 import { NftTypeEnum } from '../assets/models';
@@ -248,11 +248,12 @@ export class NftMarketplaceAbiService {
     } else {
       controller = await ContractLoader.getController(this.apiService.getService());
     }
+
     let getDataQuery = await controller.runQuery(
       new SmartContractQuery({
         contract: Address.newFromBech32(marketplace.address),
         function: 'getFullAuctionData',
-        arguments: [new Uint8Array(Buffer.from(new U64Value(new BigNumber(auctionId)).toString()))],
+        arguments: [numberToFixedHexBuffer(auctionId)],
       }),
     );
 
@@ -273,7 +274,7 @@ export class NftMarketplaceAbiService {
       new SmartContractQuery({
         contract: Address.newFromBech32(marketplace.address),
         function: 'getMinMaxBid',
-        arguments: [new Uint8Array(Buffer.from(new U64Value(new BigNumber(auctionId)).toString()))],
+        arguments: [numberToFixedHexBuffer(auctionId)],
       }),
     );
 

@@ -111,3 +111,8 @@ export async function sleep(ms: number) {
 export function getFilePathFromDist(filename: string): string {
   return `${__dirname.substring(0, __dirname.lastIndexOf('dist/') + 5)}${filename}`;
 }
+
+export function numberToFixedHexBuffer(num: number, byteLength = 2) {
+  const hex = num.toString(16).padStart(byteLength * 2, '0'); // ex: "0246"
+  return Buffer.from(hex, 'hex');
+}
