@@ -817,9 +817,12 @@ input IssueCampaignArgs {
 }
 
 input IssueCollectionArgs {
+  canAddSpecialRoles: Boolean! = true
+  canChangeOwner: Boolean! = false
   canFreeze: Boolean! = false
   canPause: Boolean! = false
   canTransferNFTCreateRole: Boolean! = false
+  canUpgrade: Boolean! = true
   canWipe: Boolean! = false
   tokenName: String!
   tokenTicker: String!
@@ -1013,9 +1016,7 @@ type Mutation {
   setCollectionScamInfo(collection: String!): Boolean!
   setNftScamInfo(identifier: String!, info: String!, type: ScamInfoTypeEnum!): Boolean!
   setRoles(input: SetNftRolesArgs!): TransactionNode!
-  stopNftCreate(input: StopNftCreateArgs!): TransactionNode!
   transferNft(input: TransferNftArgs!): TransactionNode!
-  transferNftCreateRole(input: TransferNftCreateRoleArgs!): TransactionNode!
   trigerScamUpdate(input: ScamUpdateInput!): Boolean!
   updateCollectionRarities(collectionTicker: String!): Boolean!
   updateCollectionTraits(collectionTicker: String!): Boolean!
@@ -1397,11 +1398,6 @@ input Sorting {
   field: String!
 }
 
-input StopNftCreateArgs {
-  collection: String!
-  ownerAddress: String!
-}
-
 type Tag {
   count: Int
   tag: ID!
@@ -1505,12 +1501,6 @@ input TransferNftArgs {
   destinationAddress: String!
   identifier: String!
   quantity: String! = "1"
-}
-
-input TransferNftCreateRoleArgs {
-  addressToTransferList: [String!]!
-  collection: String!
-  ownerAddress: String!
 }
 
 input UpdateMarketplaceArgs {

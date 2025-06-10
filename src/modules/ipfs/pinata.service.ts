@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { fileStorage } from 'src/config';
-import { UploadToIpfsResult } from './ipfs.model';
-import { FileContent } from './file.content';
 import { PinataUploadError } from 'src/common/models/errors/pinata-upload.error';
+import { fileStorage } from 'src/config';
+import { FileContent } from './file.content';
+import { UploadToIpfsResult } from './ipfs.model';
 const axios = require('axios');
 
 const FormData = require('form-data');
@@ -12,7 +12,7 @@ export class PinataService {
   constructor(private readonly logger: Logger) {}
 
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
-    const url = `${process.env.PINATA_API_URL}/pinning/pinFileToIPFS`;
+    const url = `https://uploads.pinata.cloud/v3/files`;
     const readStream = await file.createReadStream();
 
     const data = new FormData();
@@ -27,7 +27,7 @@ export class PinataService {
           Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
       });
-      return this.mapReturnType(response.data.IpfsHash);
+      return this.mapReturnType(response.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
         path: 'PinataService.uploadFile',
