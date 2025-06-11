@@ -12,13 +12,11 @@ export class PinataService {
   constructor(private readonly logger: Logger) {}
 
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
-    const url = `https://uploads.pinata.cloud/v3/files`;
+    const url = `${process.env.PINATA_API_URL}/v3/files`;
     const readStream = await file.createReadStream();
-    console.log(1111111);
     const data = new FormData();
     data.append('file', readStream, file.filename);
     data.append('network', 'public');
-    console.log({ jwt: `Bearer ${process.env.PINATA_JWT}` });
     try {
       const response = await axios.post(url, data, {
         headers: {
@@ -38,10 +36,16 @@ export class PinataService {
   }
 
   async uploadText(fileMetadata: FileContent): Promise<UploadToIpfsResult> {
-    const url = `${process.env.PINATA_API_URL}/pinning/pinJSONToIPFS`;
+    const url = `${process.env.PINATA_API_URL}/v3/files`;
+    const formData = new FormData();
+
+    formData.append('file', fileMetadata);
+
+    formData.append('network', 'public');
     try {
-      const response = await axios.post(url, fileMetadata, {
+      const response = await axios.post(url, formData, {
         headers: {
+          'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
           Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
       });
