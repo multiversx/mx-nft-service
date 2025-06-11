@@ -1,10 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PinataSDK } from 'pinata';
 import { PinataUploadError } from 'src/common/models/errors/pinata-upload.error';
 import { fileStorage } from 'src/config';
 import { FileContent } from './file.content';
 import { UploadToIpfsResult } from './ipfs.model';
-
 const axios = require('axios');
 
 const FormData = require('form-data');
@@ -14,19 +12,21 @@ export class PinataService {
   constructor(private readonly logger: Logger) {}
 
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
-    const pinata = new PinataSDK({
-      pinataJwt: process.env.PINATA_JWT!,
-      pinataGateway: process.env.PINATA_GATEWAY,
-    });
     const url = `https://uploads.pinata.cloud/v3/files`;
     const readStream = await file.createReadStream();
 
     const data = new FormData();
     data.append('file', readStream, file.filename);
+    data.append('network', 'public');
 
     try {
-      const response = await pinata.upload.public.file(file);
-      return this.mapReturnType(response.cid);
+      const response = await axios.post(url, data, {
+        headers: {
+          'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
+          Authorization: `Bearer ${process.env.PINATA_JWT}`,
+        },
+      });
+      return this.mapReturnType(response.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
         path: 'PinataService.uploadFile',
