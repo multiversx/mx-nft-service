@@ -18,7 +18,7 @@ export class PinataService {
     const data = new FormData();
     data.append('file', readStream, file.filename);
     data.append('network', 'public');
-
+    console.log({ jwt: `Bearer ${process.env.PINATA_JWT}` });
     try {
       const response = await axios.post(url, data, {
         headers: {
