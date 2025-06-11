@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PinataUploadError } from 'src/common/models/errors/pinata-upload.error';
 import { fileStorage } from 'src/config';
+import { Readable } from 'stream';
 import { FileContent } from './file.content';
 import { UploadToIpfsResult } from './ipfs.model';
 const axios = require('axios');
@@ -37,9 +38,17 @@ export class PinataService {
 
   async uploadText(fileMetadata: FileContent): Promise<UploadToIpfsResult> {
     const url = `${process.env.PINATA_API_URL}/v3/files`;
-    const formData = new FormData();
+    const jsonString = JSON.stringify(fileMetadata, null, 2);
 
-    formData.append('file', fileMetadata);
+    // 3. Create a readable stream from the string
+    const jsonStream = Readable.from([jsonString]);
+
+    // 4. Create FormData and append the "file" stream
+    const formData = new FormData();
+    formData.append('file', jsonStream, {
+      filename: 'fileContent.json',
+      contentType: 'application/json',
+    });
 
     formData.append('network', 'public');
     try {
