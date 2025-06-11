@@ -14,7 +14,7 @@ export class PinataService {
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
     const url = `https://uploads.pinata.cloud/v3/files`;
     const readStream = await file.createReadStream();
-
+    console.log(1111111);
     const data = new FormData();
     data.append('file', readStream, file.filename);
     data.append('network', 'public');

@@ -143,6 +143,7 @@ export class AssetsTransactionService {
 
   private async uploadFileToPinata(fileUpload: FileUpload) {
     const file = await fileUpload;
+    console.log(1212121212);
     const fileData = await this.pinataService.uploadFile(file);
     await this.s3Service.upload(file, fileData.hash);
     return fileData;
