@@ -46,7 +46,7 @@ export class PinataService {
     // 4. Create FormData and append the "file" stream
     const formData = new FormData();
     formData.append('file', jsonStream, {
-      filename: 'fileContent.json',
+      filename: 'metadata.json',
       contentType: 'application/json',
     });
 
