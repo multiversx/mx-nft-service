@@ -59,7 +59,7 @@ export class PinataService {
         },
       });
 
-      return this.mapReturnType(response.data.IpfsHash);
+      return this.mapReturnType(response.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
         path: 'PinataService.uploadText',
