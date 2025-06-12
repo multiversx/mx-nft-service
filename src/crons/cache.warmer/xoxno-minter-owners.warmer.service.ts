@@ -1,9 +1,9 @@
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
+import { Constants, Locker } from '@multiversx/sdk-nestjs-common';
 import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { ClientProxy } from '@nestjs/microservices';
-import { Constants, Locker } from '@multiversx/sdk-nestjs-common';
-import { CacheService } from '@multiversx/sdk-nestjs-cache';
 
 import { MxApiService } from 'src/common';
 import { XOXNO_MINTING_MANAGER } from 'src/utils/constants';
@@ -48,7 +48,7 @@ export class XoxnoArtistsWarmerService {
       const transaction = await this.mxApiService.getTransactionByHash(contract.deployTxHash);
       response.push({
         address: contract.address,
-        owner: transaction.sender.bech32(),
+        owner: transaction.sender.toBech32(),
       });
     }
 

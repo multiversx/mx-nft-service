@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MxProxyService } from 'src/common';
-import { NftMinterAbiService } from '../nft-minter.abi.service';
+import { MxApiService } from 'src/common';
+import { MediaMimeTypeEnum } from 'src/modules/assets/models/MediaTypes.enum';
 import { BuyRequest, IssueCampaignRequest, TierRequest } from '../models/requests';
 import { UpgradeNftRequest } from '../models/requests/UpgradeNftRequest ';
-import { MediaMimeTypeEnum } from 'src/modules/assets/models/MediaTypes.enum';
+import { NftMinterAbiService } from '../nft-minter.abi.service';
 
 describe('Nft Minter Abi Service', () => {
   let service: NftMinterAbiService;
@@ -14,7 +14,7 @@ describe('Nft Minter Abi Service', () => {
       providers: [
         NftMinterAbiService,
         {
-          provide: MxProxyService,
+          provide: MxApiService,
           useValue: {},
         },
       ],

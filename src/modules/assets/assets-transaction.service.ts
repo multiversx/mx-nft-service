@@ -1,22 +1,31 @@
-import { Address, AddressValue, BytesValue, ContractFunction, U64Value } from '@multiversx/sdk-core';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { MxApiService, getSmartContract } from 'src/common';
-import { mxConfig, gas } from 'src/config';
-import { getCollectionAndNonceFromIdentifier, timestampToEpochAndRound } from 'src/utils/helpers';
-import '../../utils/extensions';
-import { nominateVal } from '../../utils/formatters';
-import { FileContent } from '../ipfs/file.content';
-import { PinataService } from '../ipfs/pinata.service';
-import { S3Service } from '../s3/s3.service';
-import BigNumber from 'bignumber.js';
-import { TransactionNode } from '../common/transaction';
-import { UpdateQuantityRequest, CreateNftRequest, TransferNftRequest, CreateNftWithMultipleFilesRequest } from './models/requests';
-import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
-import { FileUpload } from 'graphql-upload';
-import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
+import {
+  Address,
+  BytesValue,
+  SmartContractTransactionsFactory,
+  Token,
+  TokenManagementTransactionsFactory,
+  TokenTransfer,
+  TransactionsFactoryConfig,
+  TransferTransactionsFactory,
+  U64Value,
+} from '@multiversx/sdk-core';
 import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Constants } from '@multiversx/sdk-nestjs-common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import BigNumber from 'bignumber.js';
+import { FileUpload } from 'graphql-upload';
+import { MxApiService } from 'src/common';
+import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
+import { gas, mxConfig } from 'src/config';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+import { getCollectionAndNonceFromIdentifier, timestampToEpochAndRound } from 'src/utils/helpers';
+import '../../utils/extensions';
+import { TransactionNode } from '../common/transaction';
+import { FileContent } from '../ipfs/file.content';
 import { UploadToIpfsResult } from '../ipfs/ipfs.model';
+import { PinataService } from '../ipfs/pinata.service';
+import { S3Service } from '../s3/s3.service';
+import { CreateNftRequest, CreateNftWithMultipleFilesRequest, TransferNftRequest, UpdateQuantityRequest } from './models/requests';
 
 @Injectable()
 export class AssetsTransactionService {
@@ -30,24 +39,21 @@ export class AssetsTransactionService {
 
   async updateQuantity(ownerAddress: string, request: UpdateQuantityRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
-    const contract = getSmartContract(request.updateQuantityRoleAddress);
-    const transaction = contract.call({
-      func: new ContractFunction(request.functionName),
-      args: [BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce), new U64Value(new BigNumber(request.quantity))],
+    const factory = new SmartContractTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      function: request.functionName,
+      arguments: [BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce), new U64Value(new BigNumber(request.quantity))],
       gasLimit: gas.addBurnQuantity,
-      chainID: mxConfig.chainID,
-      caller: Address.fromString(ownerAddress),
+      contract: Address.newFromBech32(request.updateQuantityRoleAddress),
     });
     return transaction.toPlainObject();
   }
 
   async burnQuantity(ownerAddress: string, request: UpdateQuantityRequest): Promise<TransactionNode> {
     const [nft, mxStats] = await Promise.all([this.mxApiService.getNftByIdentifier(request.identifier), this.getOrSetAproximateMxStats()]);
-
     if (!nft) {
       throw new NotFoundException('NFT not found');
     }
-
     const [epoch] = timestampToEpochAndRound(
       nft.timestamp,
       mxStats.epoch,
@@ -55,7 +61,6 @@ export class AssetsTransactionService {
       mxStats.roundsPerEpoch,
       mxStats.refreshRate,
     );
-
     if (epoch > mxConfig.burnNftActivationEpoch) {
       return await this.updateQuantity(ownerAddress, request);
     }
@@ -88,25 +93,16 @@ export class AssetsTransactionService {
 
   async transferNft(ownerAddress: string, transferRequest: TransferNftRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(transferRequest.identifier);
-    const contract = getSmartContract(ownerAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTTransfer'),
-      args: [
-        BytesValue.fromUTF8(collection),
-        BytesValue.fromHex(nonce),
-        new U64Value(new BigNumber(transferRequest.quantity)),
-        new AddressValue(new Address(transferRequest.destinationAddress)),
-      ],
-      gasLimit: gas.nftTransfer,
-      chainID: mxConfig.chainID,
-      caller: Address.fromString(ownerAddress),
+
+    const nonceDecimal = BigInt(parseInt(nonce, 16));
+    const nft = new Token({ identifier: collection, nonce: nonceDecimal });
+    const transfer = new TokenTransfer({ token: nft, amount: BigInt(transferRequest.quantity) });
+    const factory = new TransferTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
+    const transaction = factory.createTransactionForTransfer(Address.newFromBech32(ownerAddress), {
+      receiver: Address.newFromBech32(transferRequest.destinationAddress),
+      tokenTransfers: [transfer],
     });
-    let response = transaction.toPlainObject();
-    response.gasLimit = Math.max(mxConfig.transferMinCost + response.data.length * mxConfig.pricePerByte, gas.nftTransfer);
-    return {
-      ...response,
-      chainID: mxConfig.chainID,
-    };
+    return transaction.toPlainObject();
   }
 
   private async getCreateNftTransaction(
@@ -116,21 +112,23 @@ export class AssetsTransactionService {
   ) {
     const assetMetadata = await this.uploadFileMetadata(request.attributes.description);
     const attributes = `tags:${request.attributes.tags};metadata:${assetMetadata.hash}`;
-    const contract = getSmartContract(ownerAddress);
-    const transaction = contract.call({
-      func: new ContractFunction('ESDTNFTCreate'),
-      args: this.getCreateNftsArgs(request, filesData, attributes),
-      gasLimit: gas.nftCreate,
-      chainID: mxConfig.chainID,
-      caller: Address.fromString(ownerAddress),
-    });
-    let response = transaction.toPlainObject();
+    const factory = new TokenManagementTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
+    const uris = [];
+    for (const file of filesData) {
+      uris.push(file.url);
+    }
 
-    return {
-      ...response,
-      gasLimit: gas.nftCreate + response.data.length * mxConfig.pricePerByte,
-      chainID: mxConfig.chainID,
-    };
+    const transaction = factory.createTransactionForCreatingNFT(Address.newFromBech32(ownerAddress), {
+      tokenIdentifier: request.collection,
+      initialQuantity: BigInt(request.quantity),
+      name: request.name,
+      royalties: parseInt(request.royalties),
+      hash: filesData[0].hash,
+      attributes: Buffer.from(attributes),
+      uris: uris,
+    });
+
+    return transaction.toPlainObject();
   }
 
   private async uploadFileMetadata(description: string): Promise<any> {
@@ -148,21 +146,6 @@ export class AssetsTransactionService {
     const fileData = await this.pinataService.uploadFile(file);
     await this.s3Service.upload(file, fileData.hash);
     return fileData;
-  }
-
-  private getCreateNftsArgs(request: CreateNftWithMultipleFilesRequest | CreateNftRequest, filesToIpfs: any[], attributes: string) {
-    const args = [
-      BytesValue.fromUTF8(request.collection),
-      new U64Value(new BigNumber(request.quantity)),
-      BytesValue.fromUTF8(request.name),
-      BytesValue.fromHex(nominateVal(parseFloat(request.royalties))),
-      BytesValue.fromUTF8(filesToIpfs[0].hash),
-      BytesValue.fromUTF8(attributes),
-    ];
-    for (const file of filesToIpfs) {
-      args.push(BytesValue.fromUTF8(file.url));
-    }
-    return args;
   }
 
   private async getOrSetAproximateMxStats(): Promise<MxStats> {

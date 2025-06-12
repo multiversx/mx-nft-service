@@ -1,4 +1,4 @@
-import { Address } from '@multiversx/sdk-core/out';
+import { Address } from '@multiversx/sdk-core';
 import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
 
 export class AuctionTokenEventsTopics {
@@ -40,7 +40,7 @@ export class AuctionTokenEventsTopics {
 
   toPlainObject() {
     return {
-      originalOwner: this.originalOwner.bech32(),
+      originalOwner: this.originalOwner.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       auctionId: this.auctionId,

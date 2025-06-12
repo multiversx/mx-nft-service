@@ -1,11 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { S3Client } from '@aws-sdk/client-s3';
-const { Upload } = require('@aws-sdk/lib-storage');
+import { Injectable, Logger } from '@nestjs/common';
 import { Readable } from 'stream';
+const { Upload } = require('@aws-sdk/lib-storage');
 
 @Injectable()
 export class S3Service {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) { }
   AWS_S3_BUCKET = process.env.AWS_S3_BUCKET;
 
   async upload(fileData, filename) {
@@ -29,6 +29,7 @@ export class S3Service {
       Key: key,
       Body: file,
       ContentType: mimetype,
+      ACL: 'public-read',
     };
 
     const s3Client = this.getS3();
@@ -39,10 +40,10 @@ export class S3Service {
     try {
       await parallelUploads3.done();
       return true;
-    } catch (e) {
+    } catch (error) {
       this.logger.error('An error occurred while trying to upload file to s3', {
         path: 'S3Service.upload',
-        exception: e.toString(),
+        exception: error.toString(),
       });
       return false;
     }
@@ -50,10 +51,12 @@ export class S3Service {
 
   getS3() {
     return new S3Client({
+      region: process.env.AWS_S3_REGION,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       },
+      endpoint: process.env.AWS_S3_ENDPOINT,
     });
   }
 }

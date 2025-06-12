@@ -1,11 +1,8 @@
-import { Account, Address } from '@multiversx/sdk-core';
 import BigNumber from 'bignumber.js';
 
 declare global {
   interface String {
     base64ToHex(): string;
-    base64ToBech32(): string;
-    hexToBech32(): string;
     hexBigNumberToString(): string;
     makeId(length: number): string;
     hexToNumber(): number;
@@ -18,14 +15,6 @@ String.prototype.base64ToHex = function () {
   return buffer.toString('hex');
 };
 
-String.prototype.base64ToBech32 = function () {
-  const address = this.base64ToHex();
-  return address.hexToBech32();
-};
-
-String.prototype.hexToBech32 = function () {
-  return new Account(Address.fromHex(this)).address.bech32();
-};
 
 String.prototype.hexToNumber = function () {
   return parseInt(Buffer.from(this, 'hex').toString());
@@ -47,4 +36,5 @@ String.prototype.makeId = function (length) {
 String.prototype.hexBigNumberToString = function () {
   return new BigNumber(this, 16).toString(10).toString();
 };
-export {};
+export { };
+

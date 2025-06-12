@@ -1,6 +1,6 @@
 import { Address } from '@multiversx/sdk-core';
-import '../../../../utils/extensions';
 import { BinaryUtils } from '@multiversx/sdk-nestjs-common';
+import '../../../../utils/extensions';
 
 export class BuySftEventsTopics {
   private collection: string;
@@ -23,7 +23,7 @@ export class BuySftEventsTopics {
 
   toPlainObject() {
     return {
-      currentWinner: this.currentWinner.bech32(),
+      currentWinner: this.currentWinner.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       auctionId: this.auctionId,

@@ -1,26 +1,26 @@
+import { Address } from '@multiversx/sdk-core';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
+import { ElasticQuery, ElasticSortOrder, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { Injectable } from '@nestjs/common';
 import { orderBy } from 'lodash';
-import { Address } from '@multiversx/sdk-core';
-import { constants, genericDescriptions } from 'src/config';
-import { Collection, CollectionAsset } from './models';
-import { CollectionQuery } from './collection-query';
 import { MxApiService, MxElasticService, MxIdentityService } from 'src/common';
+import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { CollectionElastic } from 'src/common/services/mx-communication/elastic-collection.model';
+import { constants, genericDescriptions } from 'src/config';
+import { DocumentDbService } from 'src/document-db/document-db.service';
+import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
+import { randomBetween } from 'src/utils/helpers';
+import { TrendingCollectionsService } from '../analytics/trending/trending-collections.service';
+import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
+import { NftTypeEnum } from '../assets/models';
+import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
+import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 import { CollectionsNftsCountRedisHandler } from './collection-nfts-count.redis-handler';
 import { CollectionsNftsRedisHandler } from './collection-nfts.redis-handler';
-import { CacheService } from '@multiversx/sdk-nestjs-cache';
-import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { SmartContractArtistsService } from '../artists/smart-contract-artist.service';
+import { CollectionQuery } from './collection-query';
+import { Collection, CollectionAsset } from './models';
 import { CollectionsFilter, CollectionsSortingEnum } from './models/Collections-Filters';
-import { randomBetween } from 'src/utils/helpers';
-import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
-import { DocumentDbService } from 'src/document-db/document-db.service';
-import { BlacklistedCollectionsService } from '../blacklist/blacklisted-collections.service';
-import { TrendingCollectionsService } from '../analytics/trending/trending-collections.service';
-import { ELASTIC_TOKENS_INDEX } from 'src/utils/constants';
-import { ElasticQuery, QueryType, ElasticSortOrder } from '@multiversx/sdk-nestjs-elastic';
-import { NftTypeEnum } from '../assets/models';
-import { CollectionElastic } from 'src/common/services/mx-communication/elastic-collection.model';
 
 @Injectable()
 export class CollectionsGetterService {
@@ -315,7 +315,7 @@ export class CollectionsGetterService {
 
   private async mapCollection(collection: CollectionElastic): Promise<Collection> {
     const ownerAddress = new Address(collection.currentOwner);
-    if (ownerAddress.isContractAddress()) {
+    if (ownerAddress.isSmartContract()) {
       const artist = await this.smartContractArtistService.getOrSetArtistForScAddress(collection.currentOwner);
       const followersCount = await this.idService.getFollowersCount(artist?.value?.owner);
       return Collection.fromCollectionElastic(collection, artist?.value?.owner, followersCount?.count);

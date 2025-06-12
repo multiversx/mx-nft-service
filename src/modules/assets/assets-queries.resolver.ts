@@ -1,35 +1,35 @@
-import { Resolver, Query, Args, ResolveField, Parent, Int } from '@nestjs/graphql';
-import { BaseResolver } from '../common/base.resolver';
-import { Asset, AssetsResponse, Metadata, NftTypeEnum } from './models';
-import { Auction } from '../auctions/models';
-import { Account } from '../account-stats/models/Account.dto';
+import { Address } from '@multiversx/sdk-core';
+import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { genericDescriptions, mxConfig } from 'src/config';
+import { randomBetween } from 'src/utils/helpers';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
-import { AssetLikesProvider } from './loaders/asset-likes-count.loader';
-import { AssetAuctionsCountProvider } from './loaders/asset-auctions-count.loader';
-import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
-import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
-import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
-import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
+import { Account } from '../account-stats/models/Account.dto';
+import { ArtistAddressProvider } from '../artists/artists.loader';
+import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
+import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
 import { LowestAuctionProvider } from '../auctions/loaders/lowest-auctions.loader';
+import { Auction } from '../auctions/models';
+import { BaseResolver } from '../common/base.resolver';
 import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
 import { AssetsFilter } from '../common/filters/filtersTypes';
 import PageResponse from '../common/PageResponse';
-import { AssetsViewsLoader } from './loaders/assets-views.loader';
-import { Address } from '@multiversx/sdk-core';
-import { genericDescriptions, mxConfig } from 'src/config';
-import { FeaturedMarketplaceProvider } from '../auctions/loaders/featured-marketplace.loader';
-import { Rarity } from './models/Rarity';
-import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
-import { AssetsGetterService } from './assets-getter.service';
-import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
 import { Marketplace } from '../marketplaces/models';
 import { MarketplaceFilters } from '../marketplaces/models/Marketplace.Filter';
-import { LowestAuctionForMarketplaceProvider } from '../auctions/loaders/lowest-auctions-for-marketplace.loader';
-import { ArtistAddressProvider } from '../artists/artists.loader';
-import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
-import { randomBetween } from 'src/utils/helpers';
-import { ScamInfo } from './models/ScamInfo.dto';
+import { AssetsGetterService } from './assets-getter.service';
+import { AssetAuctionsCountProvider } from './loaders/asset-auctions-count.loader';
+import { AssetAvailableTokensCountProvider } from './loaders/asset-available-tokens-count.loader';
+import { IsAssetLikedProvider } from './loaders/asset-is-liked.loader';
 import { IsTicketProvider } from './loaders/asset-is-ticket.loader';
+import { AssetLikesProvider } from './loaders/asset-likes-count.loader';
+import { AssetRarityInfoProvider } from './loaders/assets-rarity-info.loader';
+import { AssetScamInfoProvider } from './loaders/assets-scam-info.loader';
+import { AssetsSupplyLoader } from './loaders/assets-supply.loader';
+import { AssetsViewsLoader } from './loaders/assets-views.loader';
+import { InternalMarketplaceProvider } from './loaders/internal-marketplace.loader';
+import { Asset, AssetsResponse, Metadata, NftTypeEnum } from './models';
+import { AssetsSortingEnum } from './models/Assets-Sorting.enum';
+import { Rarity } from './models/Rarity';
+import { ScamInfo } from './models/ScamInfo.dto';
 
 @Resolver(() => Asset)
 export class AssetsQueriesResolver extends BaseResolver(Asset) {
@@ -97,7 +97,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   async isLiked(@Parent() asset: Asset, @Args('byAddress') byAddress: string) {
     const { identifier } = asset;
     const assetLikes = await this.isAssetLikedProvider.load(`${identifier}_${byAddress}`);
-    return !!assetLikes?.value ?? false;
+    return !!assetLikes?.value;
   }
 
   @ResolveField('totalRunningAuctions', () => String)
@@ -111,7 +111,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
   async hasAvailableAuctions(@Parent() asset: Asset) {
     const { identifier } = asset;
     const assetAuctions = await this.assetsAuctionsProvider.load(identifier);
-    return !!assetAuctions?.value ?? false;
+    return !!assetAuctions?.value;
   }
 
   @ResolveField('totalAvailableTokens', () => String)
@@ -176,7 +176,7 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
     if (!creatorAddress) return null;
 
-    if (address.isContractAddress()) {
+    if (address.isSmartContract()) {
       const response = await this.artistAddressProvider.load(creatorAddress);
       artistAddress = response?.value ? response?.value?.owner : creatorAddress;
     }
@@ -240,15 +240,15 @@ export class AssetsQueriesResolver extends BaseResolver(Asset) {
 
   private async getMarketplaceForNft(ownerAddress: string, collection: string, identifier: string): Promise<Marketplace[]> {
     if (!ownerAddress) return null;
-    const address = Address.fromString(ownerAddress);
-    if (address.isContractAddress() && !address.equals(new Address(mxConfig.nftMarketplaceAddress))) {
+    const address = Address.newFromBech32(ownerAddress);
+    if (address.isSmartContract() && !address.equals(Address.newFromBech32(mxConfig.nftMarketplaceAddress))) {
       const marketplace = await this.marketplaceProvider.load(ownerAddress);
 
       const mappedMarketplace = Marketplace.fromEntity(marketplace?.value, identifier);
       return mappedMarketplace ? [mappedMarketplace] : null;
     }
 
-    if (address.isContractAddress()) {
+    if (address.isSmartContract()) {
       const marketplace = await this.internalMarketplaceProvider.load(collection);
 
       const mappedMarketplace = Marketplace.fromEntity(marketplace?.value, identifier);

@@ -1,59 +1,79 @@
+import {
+  Address,
+  AddressValue,
+  BytesValue,
+  SmartContractController,
+  SmartContractQuery,
+  SmartContractTransactionsFactory,
+  TransactionsFactoryConfig,
+  U32Value,
+  VariadicValue,
+} from '@multiversx/sdk-core';
 import { Injectable } from '@nestjs/common';
-import { Address, AddressValue, BytesValue, Interaction, List, ResultsParser, U32Value, VariadicValue } from '@multiversx/sdk-core/out';
+import { MxApiService } from 'src/common';
+import { gas, mxConfig } from 'src/config';
+import { ContractLoader } from '../auctions/contractLoader';
 import { MarketplaceUtils } from '../auctions/marketplaceUtils';
 import { TransactionNode } from '../common/transaction';
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
-import { mxConfig, gas } from 'src/config';
-import { MxProxyService } from 'src/common';
-import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()
 export class ProxyDeployerAbiService {
-  private readonly parser: ResultsParser;
-  private contract = new ContractLoader(MarketplaceUtils.proxyDeployerMintersAbiPath);
-
-  constructor(private mxProxyService: MxProxyService) {
-    this.parser = new ResultsParser();
+  constructor(private mxApiService: MxApiService) {}
+  async getFactory(abiPath?: string): Promise<SmartContractTransactionsFactory> {
+    return new SmartContractTransactionsFactory({
+      config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }),
+      abi: await ContractLoader.load(abiPath ?? MarketplaceUtils.commonMarketplaceAbiPath),
+    });
   }
 
+  async getController(abiPath?: string): Promise<SmartContractController> {
+    return new SmartContractController({
+      chainID: mxConfig.chainID,
+      networkProvider: this.mxApiService.getService(),
+      abi: await ContractLoader.load(abiPath ?? MarketplaceUtils.commonMarketplaceAbiPath),
+    });
+  }
   async deployMinterSc(request: DeployMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
+    const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
 
-    return contract.methodsExplicit
-      .contractDeploy([
-        new AddressValue(Address.fromString(process.env.TEMPLATE_MINTER_ADDRESS)),
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(request.ownerAddress), {
+      contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
+      function: 'contractDeploy',
+      gasLimit: gas.deployMinter,
+      arguments: [
+        new AddressValue(Address.newFromBech32(process.env.TEMPLATE_MINTER_ADDRESS)),
         VariadicValue.fromItems(
-          BytesValue.fromHex(Address.fromString(request.royaltiesClaimAddress).hex()),
-          BytesValue.fromHex(Address.fromString(request.mintClaimAddress).hex()),
+          BytesValue.fromHex(Address.newFromBech32(request.royaltiesClaimAddress).hex()),
+          BytesValue.fromHex(Address.newFromBech32(request.mintClaimAddress).hex()),
           new U32Value(request.maxNftsPerTransaction),
-          BytesValue.fromHex(Address.fromString(request.ownerAddress).hex()),
+          BytesValue.fromHex(Address.newFromBech32(request.ownerAddress).hex()),
         ),
-      ])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.deployMinter)
-      .withSender(Address.fromString(request.ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+      ],
+    });
+
+    return transaction.toPlainObject();
   }
 
   async deployBulkSc(ownerAddress: string): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
+    const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
 
-    return contract.methodsExplicit
-      .contractDeploy([
-        new AddressValue(Address.fromString(process.env.TEMPLATE_BULK_ADDRESS)),
-        VariadicValue.fromItems(BytesValue.fromHex(Address.fromString(ownerAddress).hex())),
-      ])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.deployMinter)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
+      function: 'contractDeploy',
+      gasLimit: gas.deployMinter,
+      arguments: [
+        new AddressValue(Address.newFromBech32(process.env.TEMPLATE_BULK_ADDRESS)),
+        VariadicValue.fromItems(BytesValue.fromHex(Address.newFromBech32(ownerAddress).hex())),
+      ],
+    });
+
+    return transaction.toPlainObject();
   }
 
   async deployMarketplaceSc(ownerAddress: string, marketplaceFee: string, paymentTokens?: string[]): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
-    const args: any[] = [new AddressValue(Address.fromString(process.env.TEMPLATE_MARKETPLACE_ADDRESS))];
+    const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
+    const args: any[] = [new AddressValue(Address.newFromBech32(process.env.TEMPLATE_MARKETPLACE_ADDRESS))];
     if (paymentTokens) {
       args.push(
         VariadicValue.fromItems(
@@ -62,56 +82,61 @@ export class ProxyDeployerAbiService {
         ),
       );
     }
-    return contract.methods
-      .contractDeploy(args)
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.deployMinter)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
+      function: 'contractDeploy',
+      gasLimit: gas.deployMinter,
+      arguments: args,
+    });
+
+    return transaction.toPlainObject();
   }
 
   async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
+    const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
 
-    return contract.methodsExplicit
-      .pauseNftMinter([new AddressValue(new Address(request.minterAddress))])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.deployMinter)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
+      function: 'pauseNftMinter',
+      gasLimit: gas.deployMinter,
+      arguments: [new AddressValue(Address.newFromBech32(request.minterAddress))],
+    });
+
+    return transaction.toPlainObject();
   }
 
   async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
+    const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
 
-    return contract.methodsExplicit
-      .resumeNftMinter([new AddressValue(new Address(request.minterAddress))])
-      .withChainID(mxConfig.chainID)
-      .withSender(Address.fromString(ownerAddress))
-      .withGasLimit(gas.deployMinter)
-      .buildTransaction()
-      .toPlainObject();
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
+      function: 'resumeNftMinter',
+      gasLimit: gas.deployMinter,
+      arguments: [new AddressValue(Address.newFromBech32(request.minterAddress))],
+    });
+
+    return transaction.toPlainObject();
   }
 
   public async getDeployedContractsForAddressAndTemplate(address: string, templateAddress: string): Promise<string[]> {
-    const contract = await this.contract.getContract(process.env.PROXY_DEPLOYER_ADDRESS);
-    let getDataQuery = <Interaction>(
-      contract.methodsExplicit.getDeployerContractsByTemplate([
-        new AddressValue(new Address(address)),
-        new AddressValue(new Address(templateAddress)),
-      ])
+    const controller: SmartContractController = await this.getController();
+
+    const getDataQuery = await controller.runQuery(
+      new SmartContractQuery({
+        contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
+        function: 'getDeployerContractsByTemplate',
+        arguments: [
+          new Uint8Array(Buffer.from(new AddressValue(Address.newFromBech32(address)).toString())),
+          new Uint8Array(Buffer.from(new AddressValue(Address.newFromBech32(templateAddress)).toString())),
+        ],
+      }),
     );
 
-    const response = await this.getFirstQueryResult(getDataQuery);
-    const contractAddresses: AddressValue[] = response?.firstValue?.valueOf();
-    return contractAddresses?.map((x) => x.valueOf().bech32());
-  }
+    const [response] = controller.parseQueryResponse(getDataQuery);
 
-  private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.mxProxyService.getService().queryContract(interaction.buildQuery());
-    let result = this.parser.parseQueryResponse(queryResponse, interaction.getEndpoint());
-    return result;
+    const contractAddresses: AddressValue[] = response.valueOf().toFixed();
+
+    return contractAddresses.map((x) => x.valueOf().toBech32());
   }
 }

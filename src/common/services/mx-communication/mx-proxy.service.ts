@@ -1,7 +1,7 @@
-import { ProxyNetworkProvider } from '@multiversx/sdk-network-providers';
-import { mxConfig } from '../../../config';
-import * as Agent from 'agentkeepalive';
+import { ProxyNetworkProvider } from '@multiversx/sdk-core';
 import { Injectable } from '@nestjs/common';
+import * as Agent from 'agentkeepalive';
+import { mxConfig } from '../../../config';
 
 @Injectable()
 export class MxProxyService {
@@ -20,7 +20,7 @@ export class MxProxyService {
       timeout: parseInt(process.env.KEEPALIVE_TIMEOUT_DOWNSTREAM),
       httpAgent: mxConfig.keepAlive ? httpAgent : null,
       httpsAgent: mxConfig.keepAlive ? httpsAgent : null,
-      clientName: "nft-service"
+      clientName: 'nft-service',
     });
   }
 

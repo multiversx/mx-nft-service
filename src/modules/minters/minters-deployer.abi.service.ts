@@ -1,73 +1,70 @@
+import { Address, AddressValue, SmartContractController, SmartContractQuery, U32Value } from '@multiversx/sdk-core';
 import { Injectable } from '@nestjs/common';
-import { Address, AddressValue, Interaction, ResultsParser, U32Value, VariadicType } from '@multiversx/sdk-core/out';
+import { MxApiService } from 'src/common';
+import { gas } from 'src/config';
+import { ContractLoader } from '../auctions/contractLoader';
 import { MarketplaceUtils } from '../auctions/marketplaceUtils';
 import { TransactionNode } from '../common/transaction';
 import { DeployMinterRequest, UpgradeMinterRequest } from './models/requests/DeployMinterRequest';
-import { mxConfig, gas } from 'src/config';
-import { MxProxyService } from 'src/common';
-import { ContractLoader } from '../auctions/contractLoader';
 
 @Injectable()
 export class MintersDeployerAbiService {
-  private readonly parser: ResultsParser;
-  private contract = new ContractLoader(MarketplaceUtils.deployerMintersAbiPath);
-
-  constructor(private mxProxyService: MxProxyService) {
-    this.parser = new ResultsParser();
-  }
-
+  constructor(private mxApiService: MxApiService) {}
   async deployMinter(request: DeployMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
-
-    return contract.methodsExplicit
-      .createNftMinter([
-        new AddressValue(new Address(request.royaltiesClaimAddress)),
-        new AddressValue(new Address(request.mintClaimAddress)),
+    const factory = await ContractLoader.getFactory(MarketplaceUtils.deployerMintersAbiPath);
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(request.ownerAddress), {
+      contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
+      function: 'createNftMinter',
+      gasLimit: gas.deployMinter,
+      arguments: [
+        new AddressValue(Address.newFromBech32(request.royaltiesClaimAddress)),
+        new AddressValue(Address.newFromBech32(request.mintClaimAddress)),
         new U32Value(request.maxNftsPerTransaction),
-      ])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.deployMinter)
-      .withSender(Address.fromString(request.ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+      ],
+    });
+    return transaction.toPlainObject();
   }
 
   async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
-
-    return contract.methodsExplicit
-      .pauseNftMinter([new AddressValue(new Address(request.minterAddress))])
-      .withChainID(mxConfig.chainID)
-      .withGasLimit(gas.deployMinter)
-      .withSender(Address.fromString(ownerAddress))
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory(MarketplaceUtils.deployerMintersAbiPath);
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
+      function: 'pauseNftMinter',
+      gasLimit: gas.deployMinter,
+      arguments: [new AddressValue(Address.newFromBech32(request.minterAddress))],
+    });
+    return transaction.toPlainObject();
   }
 
   async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
-
-    return contract.methodsExplicit
-      .resumeNftMinter([new AddressValue(new Address(request.minterAddress))])
-      .withChainID(mxConfig.chainID)
-      .withSender(Address.fromString(ownerAddress))
-      .withGasLimit(gas.deployMinter)
-      .buildTransaction()
-      .toPlainObject();
+    const factory = await ContractLoader.getFactory(MarketplaceUtils.deployerMintersAbiPath);
+    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
+      function: 'resumeNftMinter',
+      gasLimit: gas.deployMinter,
+      arguments: [new AddressValue(new Address(request.minterAddress))],
+    });
+    return transaction.toPlainObject();
   }
 
   public async getMintersForAddress(address: string): Promise<string[]> {
-    const contract = await this.contract.getContract(process.env.DEPLOYER_ADDRESS);
-    let getDataQuery = <Interaction>contract.methodsExplicit.getUserNftMinterContracts([new AddressValue(new Address(address))]);
+    const controller: SmartContractController = await ContractLoader.getController(
+      this.mxApiService.getService(),
+      MarketplaceUtils.deployerMintersAbiPath,
+    );
 
-    const response = await this.getFirstQueryResult(getDataQuery);
-    const contractAddresses: AddressValue[] = response?.firstValue?.valueOf();
-    return contractAddresses.map((x) => x.valueOf().bech32());
-  }
+    const getDataQuery = await controller.runQuery(
+      new SmartContractQuery({
+        contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
+        function: 'getUserNftMinterContracts',
+        arguments: [new Uint8Array(Buffer.from(new AddressValue(Address.newFromBech32(address)).toString()))],
+      }),
+    );
 
-  private async getFirstQueryResult(interaction: Interaction) {
-    let queryResponse = await this.mxProxyService.getService().queryContract(interaction.buildQuery());
-    let result = this.parser.parseQueryResponse(queryResponse, interaction.getEndpoint());
-    return result;
+    const [response] = controller.parseQueryResponse(getDataQuery);
+
+    const contractAddresses: AddressValue[] = response.valueOf().toFixed();
+
+    return contractAddresses.map((x) => x.valueOf().toBech32());
   }
 }

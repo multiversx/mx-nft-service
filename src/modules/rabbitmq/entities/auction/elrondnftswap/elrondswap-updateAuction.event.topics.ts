@@ -1,4 +1,4 @@
-import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core/out';
+import { Address, BinaryCodec, FieldDefinition, StructType, TokenIdentifierType, U64Type } from '@multiversx/sdk-core';
 export class ElrondSwapUpdateTopics {
   private auctionId: string;
   private collection: string;
@@ -25,7 +25,7 @@ export class ElrondSwapUpdateTopics {
 
   toPlainObject() {
     return {
-      seller: this.seller.bech32(),
+      seller: this.seller.toBech32(),
       collection: this.collection,
       nonce: this.nonce,
       auctionId: this.auctionId,

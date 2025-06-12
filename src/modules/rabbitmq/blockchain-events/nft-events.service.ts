@@ -7,6 +7,7 @@ import { MintEvent } from '../entities/auction/mint.event';
 import { MultiTransferEvent, TransferEvent } from '../entities/auction/transfer.event';
 import { FeedEventsSenderService } from './feed-events.service';
 import { BurnEvent } from '../entities/auction/burn.event';
+import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
 
 @Injectable()
 export class NftEventsService {
@@ -14,7 +15,7 @@ export class NftEventsService {
     private feedEventsSenderService: FeedEventsSenderService,
     private mxApiService: MxApiService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
-  ) {}
+  ) { }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
@@ -71,8 +72,23 @@ export class NftEventsService {
               }
             }
           }
-
           break;
+
+        case NftEventEnum.ESDTModifyCreator:
+        case NftEventEnum.ESDTMetaDataRecreate:
+        case NftEventEnum.ESDTMetaDataUpdate:
+        case NftEventEnum.ESDTNFTUpdateAttributes:
+          const updateEvent = new UpdateAttributesEvent(event);
+          const updateTopics = updateEvent.getTopics();
+          const collectionUpdateInfo = await this.mxApiService.getCollectionByIdentifierForQuery(updateTopics.collection, 'fields=name,type');
+          if (collectionUpdateInfo?.type === NftTypeEnum.NonFungibleESDT || collectionUpdateInfo?.type === NftTypeEnum.SemiFungibleESDT) {
+            await this.triggerCacheInvalidation(
+              `${updateTopics.collection}-${updateTopics.nonce}`,
+              CacheEventTypeEnum.AssetRefresh,
+            );
+          }
+          break;
+
       }
     }
   }

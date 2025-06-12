@@ -1,100 +1,84 @@
+import {
+  Address,
+  SemiFungibleSpecialRoleInput,
+  SpecialRoleInput,
+  TokenManagementTransactionsFactory,
+  TransactionsFactoryConfig,
+} from '@multiversx/sdk-core';
 import { Injectable } from '@nestjs/common';
-import { Address, AddressValue, BytesValue, ContractFunction, TokenPayment, TokenTransfer, TypedValue } from '@multiversx/sdk-core';
-import { mxConfig, gas } from 'src/config';
-import { SetNftRolesArgs } from './models/SetNftRolesArgs';
-import { getSmartContract } from 'src/common';
+import { MxApiService } from 'src/common';
+import { mxConfig } from 'src/config';
+import { NftTypeEnum } from '../assets/models';
 import { TransactionNode } from '../common/transaction';
-import { IssueCollectionRequest, StopNftCreateRequest, TransferNftCreateRoleRequest, SetNftRolesRequest } from './models/requests';
+import { IssueCollectionRequest, SetNftRolesRequest } from './models/requests';
 
 @Injectable()
 export class CollectionsTransactionsService {
+  constructor(private apiService: MxApiService) {}
   async issueToken(ownerAddress: string, request: IssueCollectionRequest) {
-    let transactionArgs = this.getIssueTokenArguments(request);
-
-    const transaction = this.esdtSmartContract.call({
-      func: new ContractFunction(request.collectionType),
-      value: TokenPayment.egldFromBigInteger(mxConfig.issueNftCost),
-      args: transactionArgs,
-      gasLimit: gas.issueToken,
-      chainID: mxConfig.chainID,
-      caller: Address.fromString(ownerAddress),
-    });
-    return transaction.toPlainObject();
-  }
-
-  async stopNFTCreate(ownerAddress: string, request: StopNftCreateRequest): Promise<TransactionNode> {
-    const smartContract = getSmartContract(request.ownerAddress);
-    const transaction = smartContract.call({
-      func: new ContractFunction('stopNFTCreate'),
-      args: [BytesValue.fromUTF8(request.collection)],
-      gasLimit: gas.stopNFTCreate,
-      chainID: mxConfig.chainID,
-      caller: Address.fromString(ownerAddress),
-    });
-    return transaction.toPlainObject();
-  }
-
-  async transferNFTCreateRole(ownerAddress: string, request: TransferNftCreateRoleRequest): Promise<TransactionNode> {
-    const smartContract = getSmartContract(request.ownerAddress);
-    let transactionArgs = this.getTransferCreateRoleArgs(request);
-    const transaction = smartContract.call({
-      func: new ContractFunction('transferNFTCreateRole'),
-      args: transactionArgs,
-      gasLimit: gas.transferNFTCreateRole,
-      chainID: mxConfig.chainID,
-      caller: Address.fromString(ownerAddress),
+    const factory = new TokenManagementTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
+    if (request.collectionType === 'issueNonFungible') {
+      const transaction = factory.createTransactionForIssuingNonFungible(Address.newFromBech32(ownerAddress), {
+        tokenName: request.tokenName,
+        tokenTicker: request.tokenTicker,
+        canFreeze: request.canFreeze,
+        canWipe: request.canWipe,
+        canPause: request.canPause,
+        canTransferNFTCreateRole: request.canTransferNFTCreateRole,
+        canChangeOwner: request.canChangeOwner,
+        canUpgrade: request.canUpgrade,
+        canAddSpecialRoles: request.canAddSpecialRoles,
+      });
+      return transaction.toPlainObject();
+    }
+    const transaction = factory.createTransactionForIssuingSemiFungible(Address.newFromBech32(ownerAddress), {
+      tokenName: request.tokenName,
+      tokenTicker: request.tokenTicker,
+      canFreeze: request.canFreeze,
+      canWipe: request.canWipe,
+      canPause: request.canPause,
+      canTransferNFTCreateRole: request.canTransferNFTCreateRole,
+      canChangeOwner: request.canChangeOwner,
+      canUpgrade: request.canUpgrade,
+      canAddSpecialRoles: request.canAddSpecialRoles,
     });
     return transaction.toPlainObject();
   }
 
   async setNftRoles(ownerAddress: string, args: SetNftRolesRequest): Promise<TransactionNode> {
-    let transactionArgs = this.getSetRolesArgs(args);
-    const transaction = this.esdtSmartContract.call({
-      func: new ContractFunction('setSpecialRole'),
-      args: transactionArgs,
-      gasLimit: gas.setRoles,
-      chainID: mxConfig.chainID,
-      caller: Address.fromString(ownerAddress),
+    const factory = new TokenManagementTransactionsFactory({
+      config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }),
     });
-    return transaction.toPlainObject();
-  }
 
-  private getIssueTokenArguments(args: IssueCollectionRequest) {
-    let transactionArgs = [BytesValue.fromUTF8(args.tokenName), BytesValue.fromUTF8(args.tokenTicker)];
-    if (args.canFreeze) {
-      transactionArgs.push(BytesValue.fromUTF8('canFreeze'));
-      transactionArgs.push(BytesValue.fromUTF8(args.canFreeze.toString()));
-    }
-    if (args.canWipe) {
-      transactionArgs.push(BytesValue.fromUTF8('canWipe'));
-      transactionArgs.push(BytesValue.fromUTF8(args.canWipe.toString()));
-    }
-    if (args.canPause) {
-      transactionArgs.push(BytesValue.fromUTF8('canPause'));
-      transactionArgs.push(BytesValue.fromUTF8(args.canPause.toString()));
-    }
-    if (args.canTransferNFTCreateRole) {
-      transactionArgs.push(BytesValue.fromUTF8('canTransferNFTCreateRole'));
-      transactionArgs.push(BytesValue.fromUTF8(args.canTransferNFTCreateRole.toString()));
-    }
-    return transactionArgs;
-  }
+    const collection = await this.apiService.getCollectionForIdentifier(args.collection);
+    const userAddress = Address.newFromBech32(ownerAddress);
 
-  private getSetRolesArgs(args: SetNftRolesArgs) {
-    let transactionArgs = [BytesValue.fromUTF8(args.collection), new AddressValue(new Address(args.addressToTransfer))];
-    args.roles.forEach((role) => {
-      transactionArgs.push(BytesValue.fromUTF8(role));
-    });
-    return transactionArgs;
-  }
+    if (collection.type === NftTypeEnum.NonFungibleESDT) {
+      const nftInput: SpecialRoleInput = {
+        user: userAddress,
+        tokenIdentifier: args.collection,
+        addRoleNFTCreate: args.roles.includes('ESDTRoleNFTCreate'),
+        addRoleNFTBurn: args.roles.includes('ESDTRoleNFTBurn'),
+        addRoleNFTUpdateAttributes: args.roles.includes('ESDTRoleNFTUpdateAttributes'),
+        addRoleNFTAddURI: args.roles.includes('ESDTRoleNFTAddURI'),
+        addRoleESDTTransferRole: args.roles.includes('ESDTTransferRole'),
+        addRoleESDTModifyCreator: args.roles.includes('ESDTRoleModifyCreator'),
+        addRoleNFTRecreate: args.roles.includes('ESDTRoleNFTRecreate'),
+        addRoleESDTModifyRoyalties: args.roles.includes('ESDTRoleModifyRoyalties'),
+      };
 
-  private getTransferCreateRoleArgs(args: TransferNftCreateRoleRequest) {
-    let transactionArgs: TypedValue[] = [BytesValue.fromUTF8(args.collection)];
-    args.addressToTransferList.forEach((address) => {
-      transactionArgs.push(new AddressValue(new Address(address)));
-    });
-    return transactionArgs;
-  }
+      return factory.createTransactionForSettingSpecialRoleOnNonFungibleToken(userAddress, nftInput).toPlainObject();
+    }
 
-  private readonly esdtSmartContract = getSmartContract(mxConfig.esdtNftAddress);
+    const sftInput: SemiFungibleSpecialRoleInput = {
+      user: userAddress,
+      tokenIdentifier: args.collection,
+      addRoleNFTCreate: args.roles.includes('ESDTRoleNFTCreate'),
+      addRoleNFTBurn: args.roles.includes('ESDTRoleNFTBurn'),
+      addRoleESDTTransferRole: args.roles.includes('ESDTTransferRole'),
+      addRoleNFTAddQuantity: args.roles.includes('ESDTRoleNFTAddQuantity'),
+    };
+
+    return factory.createTransactionForSettingSpecialRoleOnSemiFungibleToken(userAddress, sftInput).toPlainObject();
+  }
 }

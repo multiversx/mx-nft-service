@@ -1,22 +1,22 @@
-import { Resolver, Args, Query, ResolveField, Parent, Int } from '@nestjs/graphql';
-import { BaseResolver } from '../common/base.resolver';
-import { Collection, CollectionAsset } from './models';
-import CollectionResponse from './models/CollectionResponse';
+import { Address } from '@multiversx/sdk-core';
+import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Nft } from 'src/common';
 import { AccountsProvider } from '../account-stats/loaders/accounts.loader';
 import { Account } from '../account-stats/models';
-import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
-import PageResponse from '../common/PageResponse';
-import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
-import { Address } from '@multiversx/sdk-core';
 import { ArtistAddressProvider } from '../artists/artists.loader';
+import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
 import { AssetsCollectionsProvider } from '../assets/loaders/assets-collection.loader';
 import { Asset, AssetsResponse } from '../assets/models';
-import { Nft } from 'src/common';
-import { AssetsCollectionFilter, CollectionsFilter, CollectionsSortingEnum } from './models/Collections-Filters';
+import { BaseResolver } from '../common/base.resolver';
+import ConnectionArgs, { getPagingParameters } from '../common/filters/ConnectionArgs';
+import PageResponse from '../common/PageResponse';
+import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
 import { CollectionsGetterService } from './collections-getter.service';
 import { CollectionAssetsCountProvider } from './loaders/collection-assets-count.loader';
-import { AssetsCollectionsForOwnerProvider } from '../assets/loaders/assets-collection-for-owner.loader';
-import { CollectionNftTrait } from '../nft-traits/models/collection-traits.model';
+import { OnSaleAssetsCountForCollectionProvider } from './loaders/onsale-assets-count.loader';
+import { Collection, CollectionAsset } from './models';
+import CollectionResponse from './models/CollectionResponse';
+import { AssetsCollectionFilter, CollectionsFilter, CollectionsSortingEnum } from './models/Collections-Filters';
 
 @Resolver(() => Collection)
 export class CollectionsQueriesResolver extends BaseResolver(Collection) {
@@ -80,9 +80,9 @@ export class CollectionsQueriesResolver extends BaseResolver(Collection) {
 
     if (!ownerAddress) return null;
 
-    const address = Address.fromString(ownerAddress);
+    const address = Address.newFromBech32(ownerAddress);
     let artist: string = ownerAddress;
-    if (address.isContractAddress()) {
+    if (address.isSmartContract()) {
       const response = await this.artistAddressProvider.load(ownerAddress);
       artist = response?.value ? response?.value?.owner : ownerAddress;
     }

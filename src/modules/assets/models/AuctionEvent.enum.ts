@@ -49,6 +49,9 @@ export enum NftEventEnum {
   ESDTNFTCreate = 'ESDTNFTCreate',
   ESDTNFTBurn = 'ESDTNFTBurn',
   ESDTNFTUpdateAttributes = 'ESDTNFTUpdateAttributes',
+  ESDTMetaDataUpdate = 'ESDTMetaDataUpdate',
+  ESDTMetaDataRecreate = 'ESDTMetaDataRecreate',
+  ESDTModifyCreator = 'ESDTModifyCreator',
 }
 
 export enum NftEventTypeEnum {
