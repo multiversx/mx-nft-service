@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Upload } from 'graphql-upload-ts';
 import { PinataUploadError } from 'src/common/models/errors/pinata-upload.error';
 import { fileStorage } from 'src/config';
 import { Readable } from 'stream';
@@ -12,11 +13,14 @@ const FormData = require('form-data');
 export class PinataService {
   constructor(private readonly logger: Logger) {}
 
-  async uploadFile(file: any): Promise<UploadToIpfsResult> {
+  async uploadFile(file: Upload): Promise<UploadToIpfsResult> {
     const url = `${process.env.PINATA_API_URL}/v3/files`;
-    const readStream = await file.createReadStream();
+
+    const { createReadStream, filename } = file.file;
+
+    const readStream = await createReadStream();
     const data = new FormData();
-    data.append('file', readStream, file.filename);
+    data.append('file', readStream, filename);
     data.append('network', 'public');
     try {
       const response = await axios.post(url, data, {
