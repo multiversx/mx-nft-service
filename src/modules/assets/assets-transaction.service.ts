@@ -117,7 +117,15 @@ export class AssetsTransactionService {
     for (const file of filesData) {
       uris.push(file.url);
     }
-
+    console.log({
+      col: request.collection,
+      q: request.quantity,
+      n: request.name,
+      r: request.royalties,
+      has: filesData[0].hash,
+      attributes,
+      uris,
+    });
     const transaction = factory.createTransactionForCreatingNFT(Address.newFromBech32(ownerAddress), {
       tokenIdentifier: request.collection,
       initialQuantity: BigInt(request.quantity),

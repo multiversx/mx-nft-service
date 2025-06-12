@@ -25,6 +25,7 @@ export class PinataService {
           Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
       });
+
       return this.mapReturnType(response.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
@@ -75,6 +76,7 @@ export class PinataService {
   }
 
   private mapReturnType(path: any): UploadToIpfsResult | PromiseLike<UploadToIpfsResult> {
+    console.log({ path, url: this.getUrl(path) });
     return new UploadToIpfsResult({
       hash: path,
       url: this.getUrl(path),
