@@ -1,24 +1,24 @@
 import { ValidationPipe } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
-import BigNumber from 'bignumber.js';
-import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import BigNumber from 'bignumber.js';
+import { graphqlUploadExpress } from 'graphql-upload-ts';
+import { AppModule } from './app.module';
+import { ports } from './config';
 import { CacheWarmerModule } from './crons/cache.warmer/cache.warmer.module';
 import { ClaimableModule } from './crons/claimable/claimable.auction.module';
-import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
-import { PrivateAppModule } from './private.app.module';
-import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
 import { ElasticNsfwUpdaterModule } from './crons/elastic.updater/elastic-nsfw.updater.module';
 import { ElasticRarityUpdaterModule } from './crons/elastic.updater/elastic-rarity.updater.module';
-import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
-import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ElasticNftScamUpdaterModule } from './crons/elastic.updater/elastic-scam.updater.module';
-import { ports } from './config';
-import { LoggerService } from './utils/LoggerService';
-import { graphqlUploadExpress } from 'graphql-upload';
-import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
+import { ElasticTraitsUpdaterModule } from './crons/elastic.updater/elastic-traits.updater.module';
 import { ApiConfigModule } from './modules/common/api-config/api.config.module';
 import { ApiConfigService } from './modules/common/api-config/api.config.service';
+import { LoggingInterceptor } from './modules/metrics/logging.interceptor';
+import { CacheEventsModule } from './modules/rabbitmq/cache-invalidation/cache-events.module';
+import { PrivateAppModule } from './private.app.module';
+import { PubSubListenerModule } from './pubsub/pub.sub.listener.module';
+import { RabbitMqProcessorModule } from './rabbitmq.processor.module';
+import { LoggerService } from './utils/LoggerService';
 
 async function bootstrap() {
   BigNumber.config({ EXPONENTIAL_AT: [-100, 100] });

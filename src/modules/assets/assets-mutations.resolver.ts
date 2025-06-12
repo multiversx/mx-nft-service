@@ -1,17 +1,17 @@
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { BaseResolver } from '../common/base.resolver';
-import { AssetsTransactionService } from '.';
-import { Asset, CreateNftArgs, TransferNftArgs, HandleQuantityArgs, AddLikeArgs, RemoveLikeArgs } from './models';
-import { GraphQLUpload, FileUpload } from 'graphql-upload';
-import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
-import { ContentValidation } from './content.validation.service';
-import { TransactionNode } from '../common/transaction';
-import { CreateNftRequest, UpdateQuantityRequest, TransferNftRequest, CreateNftWithMultipleFilesRequest } from './models/requests';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { GraphQLUpload, Upload } from 'graphql-upload-ts';
+import { AssetsTransactionService } from '.';
 import { AuthorizationHeader } from '../auth/authorization-header';
-import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { UserAuthResult } from '../auth/userAuthResult';
+import { BaseResolver } from '../common/base.resolver';
+import { TransactionNode } from '../common/transaction';
+import { AssetsLikesService } from './assets-likes.service';
+import { ContentValidation } from './content.validation.service';
+import { AddLikeArgs, Asset, CreateNftArgs, HandleQuantityArgs, RemoveLikeArgs, TransferNftArgs } from './models';
+import { CreateNftRequest, CreateNftWithMultipleFilesRequest, TransferNftRequest, UpdateQuantityRequest } from './models/requests';
 
 @Resolver(() => Asset)
 export class AssetsMutationsResolver extends BaseResolver(Asset) {
@@ -27,7 +27,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @UseGuards(JwtOrNativeAuthGuard)
   async createNft(
     @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
-    @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
+    @Args({ name: 'file', type: () => GraphQLUpload }) file: Upload,
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = CreateNftRequest.fromArgs(input, file);
@@ -38,7 +38,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   @UseGuards(JwtOrNativeAuthGuard)
   async createNftWithMultipleFiles(
     @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
-    @Args({ name: 'files', type: () => [GraphQLUpload] }) files: [FileUpload],
+    @Args({ name: 'files', type: () => [GraphQLUpload] }) files: [Upload],
     @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
     const request = CreateNftWithMultipleFilesRequest.fromArgs(input, files);
@@ -47,7 +47,7 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
 
   @Mutation(() => Boolean)
   @UseGuards(JwtOrNativeAuthGuard)
-  async verifyContent(@Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload): Promise<Boolean> {
+  async verifyContent(@Args({ name: 'file', type: () => GraphQLUpload }) file: Upload): Promise<Boolean> {
     const fileData = await file;
 
     const contentStatus = (await this.contentValidation.checkContentType(fileData).checkContentSensitivity(fileData)).getStatus();

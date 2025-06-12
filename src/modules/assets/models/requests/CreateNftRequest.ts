@@ -1,4 +1,4 @@
-import { FileUpload } from 'graphql-upload';
+import { Upload } from 'graphql-upload-ts';
 import { CreateNftArgs } from '../CreateNftArgs';
 
 export class CreateNftRequest {
@@ -7,13 +7,13 @@ export class CreateNftRequest {
   name: string;
   royalties: string = '0';
   attributes: Attribute;
-  file: FileUpload;
+  file: Upload;
 
   constructor(init?: Partial<CreateNftRequest>) {
     Object.assign(this, init);
   }
 
-  static fromArgs(nftArgs: CreateNftArgs, file: FileUpload) {
+  static fromArgs(nftArgs: CreateNftArgs, file: Upload) {
     return new CreateNftRequest({
       collection: nftArgs.collection,
       quantity: nftArgs.quantity,
@@ -39,13 +39,13 @@ export class CreateNftWithMultipleFilesRequest {
   name: string;
   royalties: string = '0';
   attributes: Attribute;
-  files: FileUpload[];
+  files: Upload[];
 
   constructor(init?: Partial<CreateNftWithMultipleFilesRequest>) {
     Object.assign(this, init);
   }
 
-  static fromArgs(nftArgs: CreateNftArgs, files: FileUpload[]) {
+  static fromArgs(nftArgs: CreateNftArgs, files: Upload[]) {
     return new CreateNftWithMultipleFilesRequest({
       collection: nftArgs.collection,
       quantity: nftArgs.quantity,
