@@ -24,15 +24,14 @@ export class AssetsMutationsResolver extends BaseResolver(Asset) {
   }
 
   @Mutation(() => TransactionNode)
-  // @UseGuards(JwtOrNativeAuthGuard)
+  @UseGuards(JwtOrNativeAuthGuard)
   async createNft(
     @Args('input', { type: () => CreateNftArgs }) input: CreateNftArgs,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-    // @AuthUser() user: UserAuthResult,
+    @AuthUser() user: UserAuthResult,
   ): Promise<TransactionNode> {
-    console.log(1313131);
     const request = CreateNftRequest.fromArgs(input, file);
-    return await this.assetsTransactionService.createNft('erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th', request);
+    return await this.assetsTransactionService.createNft(user.address, request);
   }
 
   @Mutation(() => TransactionNode)

@@ -117,15 +117,6 @@ export class AssetsTransactionService {
     for (const file of filesData) {
       uris.push(file.url);
     }
-    console.log({
-      col: request.collection,
-      q: request.quantity,
-      n: request.name,
-      r: request.royalties,
-      has: filesData[0].hash,
-      attributes,
-      uris,
-    });
     const transaction = factory.createTransactionForCreatingNFT(Address.newFromBech32(ownerAddress), {
       tokenIdentifier: request.collection,
       initialQuantity: BigInt(request.quantity),
@@ -150,7 +141,6 @@ export class AssetsTransactionService {
   }
 
   private async uploadFileToPinata(fileUpload: FileUpload) {
-    console.log(3333);
     const fileData = await this.pinataService.uploadFile(fileUpload);
     await this.s3Service.upload(fileUpload, fileData.hash);
     return fileData;

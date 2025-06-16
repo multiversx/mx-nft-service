@@ -26,8 +26,7 @@ export class PinataService {
         },
       });
 
-      console.log({ response });
-      return this.mapReturnType(response.data.cid);
+      return this.mapReturnType(response.data.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
         path: 'PinataService.uploadFile',
@@ -61,7 +60,7 @@ export class PinataService {
         },
       });
 
-      return this.mapReturnType(response.data.cid);
+      return this.mapReturnType(response.data.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
         path: 'PinataService.uploadText',
@@ -77,7 +76,6 @@ export class PinataService {
   }
 
   private mapReturnType(path: any): UploadToIpfsResult | PromiseLike<UploadToIpfsResult> {
-    console.log({ path, url: this.getUrl(path) });
     return new UploadToIpfsResult({
       hash: path,
       url: this.getUrl(path),
