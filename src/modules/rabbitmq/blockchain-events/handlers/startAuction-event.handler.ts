@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { mxConfig } from 'src/config';
 import { AuctionEntity } from 'src/db/auctions';
 import { AssetByIdentifierService } from 'src/modules/assets';
-import { KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from 'src/modules/assets/models';
+import { ExternalAuctionEventEnum, KroganSwapAuctionEventEnum } from 'src/modules/assets/models';
 import { AuctionsGetterService, AuctionsSetterService } from 'src/modules/auctions';
 import { ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
 import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.service';
@@ -22,6 +22,7 @@ export class StartAuctionEventHandler {
     private auctionsSetterService: AuctionsSetterService,
     private auctionsGetterService: AuctionsGetterService,
     private feedEventsSenderService: FeedEventsSenderService,
+    @Inject(forwardRef(() => AssetByIdentifierService))
     private assetByIdentifierService: AssetByIdentifierService,
     private usdPriceService: UsdPriceService,
     @Inject(forwardRef(() => MarketplacesService))

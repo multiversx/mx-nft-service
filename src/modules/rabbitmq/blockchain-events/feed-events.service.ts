@@ -1,21 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CollectionApi } from 'src/common';
-import { MxFeedService } from 'src/common/services/mx-communication/mx-feed.service';
 import { EventEnum, Feed } from 'src/common/services/mx-communication/models/feed.dto';
+import { MxFeedService } from 'src/common/services/mx-communication/mx-feed.service';
 import { AuctionEntity } from 'src/db/auctions';
+import { OfferEntity } from 'src/db/offers';
 import { OrderEntity } from 'src/db/orders';
 import { AssetByIdentifierService } from 'src/modules/assets';
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { Order } from 'src/modules/orders/models';
+import { Token } from 'src/modules/usdPrice/Token.model';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
 import { MintEvent } from '../entities/auction/mint.event';
-import { OfferEntity } from 'src/db/offers';
-import { Token } from 'src/modules/usdPrice/Token.model';
 
 @Injectable()
 export class FeedEventsSenderService {
   constructor(
     private accountFeedService: MxFeedService,
+    @Inject(forwardRef(() => AssetByIdentifierService))
     private assetByIdentifierService: AssetByIdentifierService,
     private readonly usdPriceService: UsdPriceService,
   ) {}
