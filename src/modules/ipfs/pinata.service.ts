@@ -15,10 +15,10 @@ export class PinataService {
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
     const url = `${process.env.PINATA_API_URL}/v3/files`;
     console.log({ file });
-    const readStream = file.createReadStream();
-    console.log({ readStream });
+    const { createReadStream, filename /*, fieldName, mimetype, encoding */ } = await file;
+    console.log({ filename });
     const data = new FormData();
-    data.append('file', readStream, file.filename);
+    data.append('file', createReadStream, filename);
     data.append('network', 'public');
     try {
       const response = await axios.post(url, data, {
