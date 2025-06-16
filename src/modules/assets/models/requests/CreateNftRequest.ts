@@ -1,4 +1,4 @@
-import { FileUpload } from 'graphql-upload';
+import { FileUpload } from 'graphql-upload-ts';
 import { CreateNftArgs } from '../CreateNftArgs';
 
 export class CreateNftRequest {

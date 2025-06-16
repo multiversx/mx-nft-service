@@ -1,17 +1,17 @@
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { BaseResolver } from '../common/base.resolver';
-import { AssetsTransactionService } from '.';
-import { Asset, CreateNftArgs, TransferNftArgs, HandleQuantityArgs, AddLikeArgs, RemoveLikeArgs } from './models';
-import { GraphQLUpload, FileUpload } from 'graphql-upload';
-import { AssetsLikesService } from './assets-likes.service';
 import { UseGuards } from '@nestjs/common';
-import { ContentValidation } from './content.validation.service';
-import { TransactionNode } from '../common/transaction';
-import { CreateNftRequest, UpdateQuantityRequest, TransferNftRequest, CreateNftWithMultipleFilesRequest } from './models/requests';
+import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { FileUpload, GraphQLUpload } from 'graphql-upload-ts';
+import { AssetsTransactionService } from '.';
 import { AuthorizationHeader } from '../auth/authorization-header';
-import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { AuthUser } from '../auth/authUser';
+import { JwtOrNativeAuthGuard } from '../auth/jwt.or.native.auth-guard';
 import { UserAuthResult } from '../auth/userAuthResult';
+import { BaseResolver } from '../common/base.resolver';
+import { TransactionNode } from '../common/transaction';
+import { AssetsLikesService } from './assets-likes.service';
+import { ContentValidation } from './content.validation.service';
+import { AddLikeArgs, Asset, CreateNftArgs, HandleQuantityArgs, RemoveLikeArgs, TransferNftArgs } from './models';
+import { CreateNftRequest, CreateNftWithMultipleFilesRequest, TransferNftRequest, UpdateQuantityRequest } from './models/requests';
 
 @Resolver(() => Asset)
 export class AssetsMutationsResolver extends BaseResolver(Asset) {

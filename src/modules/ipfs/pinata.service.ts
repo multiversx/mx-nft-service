@@ -14,9 +14,9 @@ export class PinataService {
 
   async uploadFile(file: any): Promise<UploadToIpfsResult> {
     const url = `${process.env.PINATA_API_URL}/v3/files`;
-    const readStream = await file.createReadStream();
+    const { createReadStream, filename /*, fieldName, mimetype, encoding */ } = await file;
     const data = new FormData();
-    data.append('file', readStream, file.filename);
+    data.append('file', createReadStream(), filename);
     data.append('network', 'public');
     try {
       const response = await axios.post(url, data, {
@@ -25,7 +25,8 @@ export class PinataService {
           Authorization: `Bearer ${process.env.PINATA_JWT}`,
         },
       });
-      return this.mapReturnType(response.data.cid);
+
+      return this.mapReturnType(response.data.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
         path: 'PinataService.uploadFile',
@@ -59,7 +60,7 @@ export class PinataService {
         },
       });
 
-      return this.mapReturnType(response.data.cid);
+      return this.mapReturnType(response.data.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
         path: 'PinataService.uploadText',
