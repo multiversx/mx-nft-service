@@ -13,7 +13,7 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { Constants } from '@multiversx/sdk-nestjs-common';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import BigNumber from 'bignumber.js';
-import { Upload } from 'graphql-upload-ts';
+import { FileUpload } from 'graphql-upload-ts';
 import { MxApiService } from 'src/common';
 import { MxStats } from 'src/common/services/mx-communication/models/mx-stats.model';
 import { gas, mxConfig } from 'src/config';
@@ -149,10 +149,10 @@ export class AssetsTransactionService {
     return assetMetadata;
   }
 
-  private async uploadFileToPinata(fileUpload: Upload) {
-    const file = await fileUpload;
-    const fileData = await this.pinataService.uploadFile(file);
-    await this.s3Service.upload(file, fileData.hash);
+  private async uploadFileToPinata(fileUpload: FileUpload) {
+    console.log(3333);
+    const fileData = await this.pinataService.uploadFile(fileUpload);
+    await this.s3Service.upload(fileUpload, fileData.hash);
     return fileData;
   }
 
