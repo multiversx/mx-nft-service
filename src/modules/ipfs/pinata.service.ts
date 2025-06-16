@@ -16,9 +16,9 @@ export class PinataService {
     const url = `${process.env.PINATA_API_URL}/v3/files`;
     console.log({ file });
     const { createReadStream, filename /*, fieldName, mimetype, encoding */ } = await file;
-    console.log({ filename });
+    console.log({ filename, CRS: createReadStream() });
     const data = new FormData();
-    data.append('file', createReadStream, filename);
+    data.append('file', createReadStream(), filename);
     data.append('network', 'public');
     try {
       const response = await axios.post(url, data, {
