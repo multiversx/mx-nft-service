@@ -26,6 +26,7 @@ export class PinataService {
         },
       });
 
+      console.log({ response });
       return this.mapReturnType(response.data.cid);
     } catch (error) {
       this.logger.error('An error occurred while trying to add file to pinata.', {
