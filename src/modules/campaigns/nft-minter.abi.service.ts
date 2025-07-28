@@ -69,7 +69,7 @@ export class NftMinterAbiService {
   async issueToken(request: IssueCampaignRequest): Promise<TransactionNode> {
     const factory = await ContractLoader.getFactory(this.abiPath);
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(request.ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(request.ownerAddress), {
       contract: Address.newFromBech32(request.minterAddress),
       function: 'issueTokenForBrand',
       gasLimit: gas.issueCampaign,
@@ -82,7 +82,7 @@ export class NftMinterAbiService {
   async buyRandomNft(ownerAddress: string, request: BuyRequest): Promise<TransactionNode> {
     const factory = await ContractLoader.getFactory(this.abiPath);
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(request.minterAddress),
       function: 'buyRandomNft',
       gasLimit: parseInt(request.quantity) > 1 ? gas.endAuction + (parseInt(request.quantity) - 1) * gas.endAuction : gas.endAuction,
@@ -100,7 +100,7 @@ export class NftMinterAbiService {
     const token = new Token({ identifier: collection, nonce: BigInt(parseInt(nonce, 16)) });
     const transfer = new TokenTransfer({ token, amount: BigInt(1) });
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(request.minterAddress),
       function: 'nftUpgrade',
       gasLimit: gas.buySft,

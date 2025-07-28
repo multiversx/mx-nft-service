@@ -12,7 +12,7 @@ export class MintersDeployerAbiService {
   constructor(private mxApiService: MxApiService) {}
   async deployMinter(request: DeployMinterRequest): Promise<TransactionNode> {
     const factory = await ContractLoader.getFactory(MarketplaceUtils.deployerMintersAbiPath);
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(request.ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(request.ownerAddress), {
       contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
       function: 'createNftMinter',
       gasLimit: gas.deployMinter,
@@ -27,7 +27,7 @@ export class MintersDeployerAbiService {
 
   async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
     const factory = await ContractLoader.getFactory(MarketplaceUtils.deployerMintersAbiPath);
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
       function: 'pauseNftMinter',
       gasLimit: gas.deployMinter,
@@ -38,7 +38,7 @@ export class MintersDeployerAbiService {
 
   async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
     const factory = await ContractLoader.getFactory(MarketplaceUtils.deployerMintersAbiPath);
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
       function: 'resumeNftMinter',
       gasLimit: gas.deployMinter,

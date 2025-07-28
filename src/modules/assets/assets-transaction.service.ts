@@ -40,7 +40,7 @@ export class AssetsTransactionService {
   async updateQuantity(ownerAddress: string, request: UpdateQuantityRequest): Promise<TransactionNode> {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
     const factory = new SmartContractTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       function: request.functionName,
       arguments: [BytesValue.fromUTF8(collection), BytesValue.fromHex(nonce), new U64Value(new BigNumber(request.quantity))],
       gasLimit: gas.addBurnQuantity,
@@ -98,7 +98,7 @@ export class AssetsTransactionService {
     const nft = new Token({ identifier: collection, nonce: nonceDecimal });
     const transfer = new TokenTransfer({ token: nft, amount: BigInt(transferRequest.quantity) });
     const factory = new TransferTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
-    const transaction = factory.createTransactionForTransfer(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForTransfer(Address.newFromBech32(ownerAddress), {
       receiver: Address.newFromBech32(transferRequest.destinationAddress),
       tokenTransfers: [transfer],
     });
@@ -117,7 +117,7 @@ export class AssetsTransactionService {
     for (const file of filesData) {
       uris.push(file.url);
     }
-    const transaction = factory.createTransactionForCreatingNFT(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForCreatingNFT(Address.newFromBech32(ownerAddress), {
       tokenIdentifier: request.collection,
       initialQuantity: BigInt(request.quantity),
       name: request.name,

@@ -44,10 +44,10 @@ export class ProxyDeployerAbiService {
       arguments: [
         new AddressValue(Address.newFromBech32(process.env.TEMPLATE_MINTER_ADDRESS)),
         VariadicValue.fromItems(
-          BytesValue.fromHex(Address.newFromBech32(request.royaltiesClaimAddress).hex()),
-          BytesValue.fromHex(Address.newFromBech32(request.mintClaimAddress).hex()),
+          BytesValue.fromHex(Address.newFromBech32(request.royaltiesClaimAddress).toHex()),
+          BytesValue.fromHex(Address.newFromBech32(request.mintClaimAddress).toHex()),
           new U32Value(request.maxNftsPerTransaction),
-          BytesValue.fromHex(Address.newFromBech32(request.ownerAddress).hex()),
+          BytesValue.fromHex(Address.newFromBech32(request.ownerAddress).toHex()),
         ),
       ],
     });
@@ -58,13 +58,13 @@ export class ProxyDeployerAbiService {
   async deployBulkSc(ownerAddress: string): Promise<TransactionNode> {
     const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
       function: 'contractDeploy',
       gasLimit: gas.deployMinter,
       arguments: [
         new AddressValue(Address.newFromBech32(process.env.TEMPLATE_BULK_ADDRESS)),
-        VariadicValue.fromItems(BytesValue.fromHex(Address.newFromBech32(ownerAddress).hex())),
+        VariadicValue.fromItems(BytesValue.fromHex(Address.newFromBech32(ownerAddress).toHex())),
       ],
     });
 
@@ -83,7 +83,7 @@ export class ProxyDeployerAbiService {
       );
     }
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
       function: 'contractDeploy',
       gasLimit: gas.deployMinter,
@@ -96,7 +96,7 @@ export class ProxyDeployerAbiService {
   async pauseNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
     const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
       function: 'pauseNftMinter',
       gasLimit: gas.deployMinter,
@@ -109,7 +109,7 @@ export class ProxyDeployerAbiService {
   async resumeNftMinter(ownerAddress: string, request: UpgradeMinterRequest): Promise<TransactionNode> {
     const factory = await this.getFactory(MarketplaceUtils.proxyDeployerMintersAbiPath);
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
       function: 'resumeNftMinter',
       gasLimit: gas.deployMinter,
