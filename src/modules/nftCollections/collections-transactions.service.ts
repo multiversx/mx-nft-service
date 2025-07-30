@@ -18,7 +18,7 @@ export class CollectionsTransactionsService {
   async issueToken(ownerAddress: string, request: IssueCollectionRequest) {
     const factory = new TokenManagementTransactionsFactory({ config: new TransactionsFactoryConfig({ chainID: mxConfig.chainID }) });
     if (request.collectionType === 'issueNonFungible') {
-      const transaction = factory.createTransactionForIssuingNonFungible(Address.newFromBech32(ownerAddress), {
+      const transaction = await factory.createTransactionForIssuingNonFungible(Address.newFromBech32(ownerAddress), {
         tokenName: request.tokenName,
         tokenTicker: request.tokenTicker,
         canFreeze: request.canFreeze,
@@ -31,7 +31,7 @@ export class CollectionsTransactionsService {
       });
       return transaction.toPlainObject();
     }
-    const transaction = factory.createTransactionForIssuingSemiFungible(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForIssuingSemiFungible(Address.newFromBech32(ownerAddress), {
       tokenName: request.tokenName,
       tokenTicker: request.tokenTicker,
       canFreeze: request.canFreeze,
@@ -67,7 +67,8 @@ export class CollectionsTransactionsService {
         addRoleESDTModifyRoyalties: args.roles.includes('ESDTRoleModifyRoyalties'),
       };
 
-      return factory.createTransactionForSettingSpecialRoleOnNonFungibleToken(userAddress, nftInput).toPlainObject();
+      const transaction = await factory.createTransactionForSettingSpecialRoleOnNonFungibleToken(userAddress, nftInput);
+      return transaction.toPlainObject();
     }
 
     const sftInput: SemiFungibleSpecialRoleInput = {
@@ -79,6 +80,7 @@ export class CollectionsTransactionsService {
       addRoleNFTAddQuantity: args.roles.includes('ESDTRoleNFTAddQuantity'),
     };
 
-    return factory.createTransactionForSettingSpecialRoleOnSemiFungibleToken(userAddress, sftInput).toPlainObject();
+    const transaction = await factory.createTransactionForSettingSpecialRoleOnSemiFungibleToken(userAddress, sftInput);
+    return transaction.toPlainObject();
   }
 }

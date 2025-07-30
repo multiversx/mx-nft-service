@@ -68,7 +68,7 @@ export class NftMarketplaceAbiService {
     const factory = await ContractLoader.getFactory();
     const token = new Token({ identifier: collection, nonce: BigInt(parseInt(nonce, 16)) });
     const transfer = new TokenTransfer({ token, amount: BigInt(args.quantity) });
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplace.address),
       function: 'auctionToken',
       gasLimit: gas.startAuction,
@@ -90,7 +90,7 @@ export class NftMarketplaceAbiService {
   async withdraw(ownerAddress: string, auctionId: number): Promise<TransactionNode> {
     const { marketplaceAddress, auction } = await this.configureTransactionData(auctionId);
     const factory = await ContractLoader.getFactory();
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplaceAddress),
       function: 'withdraw',
       gasLimit: gas.withdraw,
@@ -115,7 +115,7 @@ export class NftMarketplaceAbiService {
       const token = new Token({ identifier: request.paymentToken });
       const transfer = new TokenTransfer({ token, amount: BigInt(request.paymentAmount) });
 
-      const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+      const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
         contract: Address.newFromBech32(marketplace.address),
         function: 'sendOffer',
         gasLimit: gas.bid,
@@ -124,7 +124,7 @@ export class NftMarketplaceAbiService {
       });
       return transaction.toPlainObject();
     }
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplace.address),
       function: 'sendOffer',
       gasLimit: gas.bid,
@@ -143,7 +143,7 @@ export class NftMarketplaceAbiService {
     }
 
     const factory = await ContractLoader.getFactory();
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplace.address),
       function: 'withdrawOffer',
       gasLimit: gas.withdraw,
@@ -187,7 +187,7 @@ export class NftMarketplaceAbiService {
       token,
       amount: asset.type === NftTypeEnum.SemiFungibleESDT ? BigInt(offer.boughtTokensNo) : BigInt(1),
     });
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplace.address),
       function: 'acceptOffer',
       gasLimit: gas.withdraw,
@@ -211,7 +211,7 @@ export class NftMarketplaceAbiService {
     }
 
     const factory = await ContractLoader.getFactory();
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplace.address),
       function: 'withdrawAuctionAndAcceptOffer',
       gasLimit: gas.withdraw,
@@ -223,7 +223,7 @@ export class NftMarketplaceAbiService {
   async endAuction(ownerAddress: string, auctionId: number): Promise<TransactionNode> {
     const { marketplaceAddress, auction } = await this.configureTransactionData(auctionId);
     const factory = await ContractLoader.getFactory();
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplaceAddress),
       function: 'endAuction',
       gasLimit: gas.endAuction,
@@ -409,7 +409,7 @@ export class NftMarketplaceAbiService {
     const { collection, nonce } = getCollectionAndNonceFromIdentifier(request.identifier);
     const factory = await ContractLoader.getFactory();
 
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplaceAddress),
       function: 'bid',
       gasLimit: gas.bid,
@@ -430,7 +430,7 @@ export class NftMarketplaceAbiService {
 
     const token = new Token({ identifier: request.paymentTokenIdentifier });
     const transfer = new TokenTransfer({ token, amount: BigInt(request.price) });
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplaceAddress),
       function: 'bid',
       gasLimit: gas.bid,
@@ -447,7 +447,7 @@ export class NftMarketplaceAbiService {
     marketplaceAuctionId: number,
   ): Promise<TransactionNode> {
     const factory = await ContractLoader.getFactory();
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplaceAddress),
       function: 'buySft',
       gasLimit: gas.buySft,
@@ -467,7 +467,7 @@ export class NftMarketplaceAbiService {
 
     const token = new Token({ identifier: request.paymentTokenIdentifier });
     const transfer = new TokenTransfer({ token, amount: BigInt(request.price) });
-    const transaction = factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
+    const transaction = await factory.createTransactionForExecute(Address.newFromBech32(ownerAddress), {
       contract: Address.newFromBech32(marketplaceAddress),
       function: 'buySft',
       gasLimit: gas.buySft,
