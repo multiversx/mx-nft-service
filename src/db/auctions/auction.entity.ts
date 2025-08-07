@@ -1,6 +1,6 @@
 import { U64Value } from '@multiversx/sdk-core';
 import { mxConfig } from 'src/config';
-import { AuctionTypeEnum, AuctionStatusEnum, AuctionAbi, ExternalAuctionAbi, ElrondSwapAuctionTypeEnum } from 'src/modules/auctions/models';
+import { AuctionAbi, AuctionStatusEnum, AuctionTypeEnum, ElrondSwapAuctionTypeEnum, ExternalAuctionAbi } from 'src/modules/auctions/models';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
 import { ENEFTOR_KEY } from 'src/utils/constants';
 import { DateUtils } from 'src/utils/date-utils';
@@ -170,6 +170,7 @@ export class AuctionEntity extends BaseEntity {
       price: string;
       paymentToken: string;
       paymentTokenNonce: string;
+      paymentNonce: string;
       auctionType: string;
       deadline: number;
     },
@@ -192,7 +193,7 @@ export class AuctionEntity extends BaseEntity {
           ? AuctionTypeEnum.Nft
           : AuctionTypeEnum.SftOnePerPayment,
       paymentToken: topicsAuctionToken.paymentToken,
-      paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce),
+      paymentNonce: parseInt(topicsAuctionToken.paymentTokenNonce ?? topicsAuctionToken.paymentNonce),
       ownerAddress: topicsAuctionToken.originalOwner,
       minBid: topicsAuctionToken.price,
       minBidDenominated: BigNumberUtils.denominateAmount(topicsAuctionToken.price, decimals),

@@ -1,0 +1,2127 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.80.0-nightly",
+            "commitHash": "da159eb331b27df528185c616b394bb0e1d2a4bd",
+            "commitDate": "2024-05-28",
+            "channel": "Nightly",
+            "short": "rustc 1.80.0-nightly (da159eb33 2024-05-28)"
+        },
+        "contractCrate": {
+            "name": "oox-marketplace",
+            "version": "1.4.1"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.53.1"
+        }
+    },
+    "name": "EsdtNftMarketplace",
+    "upgradeConstructor": {
+        "inputs": [
+            {
+                "name": "bid_cut_percentage",
+                "type": "u64"
+            },
+            {
+                "name": "tokens_to_whitelist",
+                "type": "variadic<EgldOrEsdtTokenIdentifier>",
+                "multi_arg": true
+            }
+        ],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "setCutPercentage",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_cut_percentage",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "auctionToken",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "min_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "max_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64"
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "opt_min_bid_diff",
+                    "type": "optional<BigUint>",
+                    "multi_arg": true
+                },
+                {
+                    "name": "opt_sft_max_one_per_payment",
+                    "type": "optional<bool>",
+                    "multi_arg": true
+                },
+                {
+                    "name": "opt_accepted_payment_token_nonce",
+                    "type": "optional<u64>",
+                    "multi_arg": true
+                },
+                {
+                    "name": "opt_start_time",
+                    "type": "optional<u64>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<u64>"
+                }
+            ],
+            "allow_multiple_var_args": true
+        },
+        {
+            "name": "endAuction",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "withdraw",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "modifyAuctionPrice",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "new_min_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "opt_new_max_bid",
+                    "type": "optional<BigUint>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "modifyMultiAuctionPrice",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_min_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "auction_ids",
+                    "type": "variadic<u64>",
+                    "multi_arg": true
+                },
+                {
+                    "name": "opt_new_max_bid",
+                    "type": "optional<BigUint>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [],
+            "allow_multiple_var_args": true
+        },
+        {
+            "name": "getFullAuctionData",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Auction"
+                }
+            ]
+        },
+        {
+            "name": "getLastValidAuctionId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getMarketplaceCutPercentage",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getAuctionsByOwner",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "owner",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<Auction>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getAuctionsByCollection",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "collection",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<Auction>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getAllActiveAuctions",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<Auction>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "sendOffer",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "desired_nft_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "desired_nft_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "desired_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64"
+                },
+                {
+                    "name": "nft_owner",
+                    "type": "Address"
+                },
+                {
+                    "name": "opt_auction_id",
+                    "type": "optional<u64>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "sendGlobalSftOffer",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "desired_nft_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "desired_nft_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "desired_amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "sendGlobalOffer",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "collection_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "withdrawOffer",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "withdrawGlobalOffer",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "acceptOffer",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "withdrawAuctionAndAcceptOffer",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "acceptGlobalOffer",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getFullOfferData",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "OfferV2"
+                }
+            ]
+        },
+        {
+            "name": "getOffersByOwner",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "owner",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<OfferV2>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getOffersByNftOwner",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "nft_owner",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<OfferV2>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getFullGlobalOfferData",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "GlobalOffer"
+                }
+            ]
+        },
+        {
+            "name": "getAllGlobalOffers",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<GlobalOffer>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getGlobalOffersByType",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "offer_type",
+                    "type": "OfferType"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<GlobalOffer>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "bid",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "nft_type",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nft_nonce",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "buy",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "nft_type",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nft_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "opt_sft_buy_amount",
+                    "type": "optional<BigUint>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "bulkBuy",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "purchases",
+                    "type": "variadic<BuyStruct>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "claimContractTokens",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "claim_destination",
+                    "type": "Address"
+                },
+                {
+                    "name": "claim_contract",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_nonce_pairs",
+                    "type": "variadic<multi<EgldOrEsdtTokenIdentifier,u64>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                },
+                {
+                    "type": "List<EsdtTokenPayment>"
+                }
+            ]
+        },
+        {
+            "name": "claimTokens",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "claim_destination",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_nonce_pairs",
+                    "type": "variadic<multi<EgldOrEsdtTokenIdentifier,u64>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                },
+                {
+                    "type": "List<EsdtTokenPayment>"
+                }
+            ]
+        },
+        {
+            "name": "getClaimableAmount",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_id",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "addTokensToWhitelist",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "tokens_to_add",
+                    "type": "variadic<EgldOrEsdtTokenIdentifier>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeTokensFromWhitelist",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "tokens_to_remove",
+                    "type": "variadic<EgldOrEsdtTokenIdentifier>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getWhitelistedTokens",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<EgldOrEsdtTokenIdentifier>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getVendingMachineWithNfts",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "tuple<VendingMachine,List<NftData>>"
+                }
+            ]
+        },
+        {
+            "name": "getAllVendingMachines",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "variadic<tuple<VendingMachine,List<NftData>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getUserVendingMachines",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<tuple<VendingMachine,List<NftData>>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "createVendingMachine",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "start_date",
+                    "type": "optional<u64>",
+                    "multi_arg": true
+                },
+                {
+                    "name": "end_date",
+                    "type": "optional<u64>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ],
+            "allow_multiple_var_args": true
+        },
+        {
+            "name": "mintFromMachine",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeVendingMachine",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setVendingMachinePrice",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "new_price",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "addNftsToMachine",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setVoteToken",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setVotePrice",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "price",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "vote",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "nft_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nft_nonce",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getLastVote",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "key",
+                    "type": "tuple<Address,TokenIdentifier,u64>"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getVotes",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "key",
+                    "type": "tuple<TokenIdentifier,u64>"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "pause",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "unpause",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "isPaused",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "bool"
+                }
+            ]
+        }
+    ],
+    "events": [
+        {
+            "identifier": "auction_token_event",
+            "inputs": [
+                {
+                    "name": "auction_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "auctioned_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auctioned_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "seller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "min_bid",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "max_bid",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "accepted_payment_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_type",
+                    "type": "AuctionType",
+                    "indexed": true
+                },
+                {
+                    "name": "creator_royalties_percentage",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "identifier": "bid_event",
+            "inputs": [
+                {
+                    "name": "auction_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "auctioned_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "nr_auctioned_tokens",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "bidder",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "bid_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "end_auction_event",
+            "inputs": [
+                {
+                    "name": "auction_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "auctioned_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "nr_auctioned_tokens",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_winner",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "winning_bid_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "buy_event",
+            "inputs": [
+                {
+                    "name": "auction_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "auctioned_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "nr_bought_tokens",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "buyer",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "bid_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_event",
+            "inputs": [
+                {
+                    "name": "auction_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "auctioned_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "nr_auctioned_tokens",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "seller",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "modify_auction_price_event",
+            "inputs": [
+                {
+                    "name": "auction_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "auction_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "auctioned_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "new_min_bid",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "new_max_bid",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "seller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "offer_token_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_token_type",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "buyer",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_offer_token_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_token_type",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "buyer",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "accept_offer_token_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_token_type",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "buyer",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "seller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "create_vending_machine_event",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "name",
+                    "type": "bytes",
+                    "indexed": true
+                },
+                {
+                    "name": "creator",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "price",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nft_count",
+                    "type": "u32",
+                    "indexed": true
+                },
+                {
+                    "name": "start_date",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "end_date",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "mint_from_machine_event",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "buyer",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "payment_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "remove_vending_machine_event",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "creator",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "nft_count",
+                    "type": "u32",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "add_nfts_to_machine_event",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "creator",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "added_count",
+                    "type": "u32",
+                    "indexed": true
+                },
+                {
+                    "name": "total_count",
+                    "type": "u32",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "update_machine_price_event",
+            "inputs": [
+                {
+                    "name": "machine_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "creator",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "old_price",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "new_price",
+                    "type": "BigUint",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "global_nft_offer_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_id",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "collection_offer_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "collection_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_id",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "accept_global_nft_offer_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_id",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "seller",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "accept_collection_offer_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_id",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "seller",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_global_nft_offer_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "wanted_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_id",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "withdraw_collection_offer_event",
+            "inputs": [
+                {
+                    "name": "offer_id",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "collection_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_id",
+                    "type": "EgldOrEsdtTokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "offered_token_amount",
+                    "type": "BigUint",
+                    "indexed": true
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address",
+                    "indexed": true
+                }
+            ]
+        },
+        {
+            "identifier": "vote_event",
+            "inputs": [
+                {
+                    "name": "caller",
+                    "type": "Address",
+                    "indexed": true
+                },
+                {
+                    "name": "nft_id",
+                    "type": "TokenIdentifier",
+                    "indexed": true
+                },
+                {
+                    "name": "nft_nonce",
+                    "type": "u64",
+                    "indexed": true
+                },
+                {
+                    "name": "amount",
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "identifier": "pauseContract",
+            "inputs": []
+        },
+        {
+            "identifier": "unpauseContract",
+            "inputs": []
+        }
+    ],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {
+        "Auction": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "auctioned_tokens",
+                    "type": "EsdtTokenPayment"
+                },
+                {
+                    "name": "auction_type",
+                    "type": "AuctionType"
+                },
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "payment_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "min_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "max_bid",
+                    "type": "Option<BigUint>"
+                },
+                {
+                    "name": "min_bid_diff",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64"
+                },
+                {
+                    "name": "original_owner",
+                    "type": "Address"
+                },
+                {
+                    "name": "current_bid",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "current_winner",
+                    "type": "Address"
+                },
+                {
+                    "name": "marketplace_cut_percentage",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "creator_royalties_percentage",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "AuctionType": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "None",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Nft",
+                    "discriminant": 1
+                },
+                {
+                    "name": "SftAll",
+                    "discriminant": 2
+                },
+                {
+                    "name": "SftOnePerPayment",
+                    "discriminant": 3
+                }
+            ]
+        },
+        "BuyStruct": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "auction_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "nft_type",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nft_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "opt_sft_buy_amount",
+                    "type": "Option<BigUint>"
+                }
+            ]
+        },
+        "EgldOrEsdtTokenPayment": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_identifier",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "EsdtTokenData": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_type",
+                    "type": "EsdtTokenType"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "frozen",
+                    "type": "bool"
+                },
+                {
+                    "name": "hash",
+                    "type": "bytes"
+                },
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "attributes",
+                    "type": "bytes"
+                },
+                {
+                    "name": "creator",
+                    "type": "Address"
+                },
+                {
+                    "name": "royalties",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "uris",
+                    "type": "List<bytes>"
+                }
+            ]
+        },
+        "EsdtTokenPayment": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_identifier",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "token_nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "amount",
+                    "type": "BigUint"
+                }
+            ]
+        },
+        "EsdtTokenType": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Fungible",
+                    "discriminant": 0
+                },
+                {
+                    "name": "NonFungible",
+                    "discriminant": 1
+                },
+                {
+                    "name": "SemiFungible",
+                    "discriminant": 2
+                },
+                {
+                    "name": "Meta",
+                    "discriminant": 3
+                },
+                {
+                    "name": "Invalid",
+                    "discriminant": 4
+                }
+            ]
+        },
+        "GlobalOffer": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "offer_token",
+                    "type": "EsdtTokenPayment"
+                },
+                {
+                    "name": "payment",
+                    "type": "EgldOrEsdtTokenPayment"
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64"
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address"
+                },
+                {
+                    "name": "offer_type",
+                    "type": "OfferType"
+                }
+            ]
+        },
+        "NftData": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64"
+                },
+                {
+                    "name": "token_data",
+                    "type": "EsdtTokenData"
+                }
+            ]
+        },
+        "OfferType": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "GlobalForNft",
+                    "discriminant": 0
+                },
+                {
+                    "name": "GlobalForCollection",
+                    "discriminant": 1
+                }
+            ]
+        },
+        "OfferV2": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "offer_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "offer_token",
+                    "type": "EsdtTokenPayment"
+                },
+                {
+                    "name": "payment",
+                    "type": "EgldOrEsdtTokenPayment"
+                },
+                {
+                    "name": "start_time",
+                    "type": "u64"
+                },
+                {
+                    "name": "deadline",
+                    "type": "u64"
+                },
+                {
+                    "name": "offer_owner",
+                    "type": "Address"
+                },
+                {
+                    "name": "nft_owner",
+                    "type": "Address"
+                }
+            ]
+        },
+        "VendingMachine": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "machine_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "name",
+                    "type": "bytes"
+                },
+                {
+                    "name": "creator",
+                    "type": "Address"
+                },
+                {
+                    "name": "price",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "accepted_payment_token",
+                    "type": "EgldOrEsdtTokenIdentifier"
+                },
+                {
+                    "name": "nft_count",
+                    "type": "u32"
+                },
+                {
+                    "name": "start_date",
+                    "type": "Option<u64>"
+                },
+                {
+                    "name": "end_date",
+                    "type": "Option<u64>"
+                }
+            ]
+        }
+    }
+}

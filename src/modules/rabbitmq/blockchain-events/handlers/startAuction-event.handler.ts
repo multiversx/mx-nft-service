@@ -9,7 +9,7 @@ import { MarketplacesService } from 'src/modules/marketplaces/marketplaces.servi
 import { Marketplace } from 'src/modules/marketplaces/models';
 import { MarketplaceTypeEnum } from 'src/modules/marketplaces/models/MarketplaceType.enum';
 import { UsdPriceService } from 'src/modules/usdPrice/usd-price.service';
-import { ELRONDNFTSWAP_KEY, ENEFTOR_KEY } from 'src/utils/constants';
+import { ELRONDNFTSWAP_KEY, ENEFTOR_KEY, OOX_KEY } from 'src/utils/constants';
 import { AuctionTokenEvent } from '../../entities/auction';
 import { ElrondSwapAuctionEvent } from '../../entities/auction/elrondnftswap/elrondswap-auction.event';
 import { ListNftEvent } from '../../entities/auction/listNft.event';
@@ -52,7 +52,7 @@ export class StartAuctionEventHandler {
 
   private async saveAuction(topics: any, marketplace: Marketplace, hash: string) {
     const auctionIdentifier = `${topics.collection}-${topics.nonce}`;
-    if (marketplace.key === ELRONDNFTSWAP_KEY || marketplace.key === ENEFTOR_KEY) {
+    if (marketplace.key === ELRONDNFTSWAP_KEY || marketplace.key === ENEFTOR_KEY || marketplace.key === OOX_KEY) {
       if (topics.auctionId === '0') {
         let auctionId = await this.auctionsGetterService.getLastAuctionIdForMarketplace(marketplace.key);
         topics.auctionId = (auctionId && auctionId > 0 ? auctionId + 1 : 1).toString(16);
@@ -73,7 +73,7 @@ export class StartAuctionEventHandler {
     const asset = await this.assetByIdentifierService.getAsset(auctionIdentifier);
     if (topics.paymentToken !== mxConfig.egld) {
       const paymentToken = await this.usdPriceService.getToken(topics.paymentToken);
-      decimals = paymentToken.decimals;
+      decimals = paymentToken?.decimals;
     }
     return await this.auctionsSetterService.saveAuctionEntity(
       AuctionEntity.fromWithdrawTopics(topics, asset.tags?.toString(), hash, auctionTokenEventMarketplace.key, decimals),
