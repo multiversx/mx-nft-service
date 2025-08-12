@@ -47,6 +47,13 @@ export const isValidAddress = (address: string): boolean => {
   }
 };
 
+export function base64ToBech32(topic: string) {
+  if (topic) {
+    return Address.newFromHex(Buffer.from(topic, 'base64').toString('hex')).toBech32();
+  }
+  return '';
+}
+
 export const removeCredentialsFromUrl = (url: string): string => {
   const urlCredentialsRegex = new RegExp('(?<=//).*(?<=@)');
   const credentials = url.match(urlCredentialsRegex);
