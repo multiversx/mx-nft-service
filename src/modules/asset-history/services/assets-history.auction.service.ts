@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AssetActionEnum, AuctionEventEnum } from 'src/modules/assets/models';
+import { base64ToBech32 } from 'src/utils/helpers';
 import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-history-log-input';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class AssetsHistoryAuctionService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
-          address: event.topics[5].base64ToBech32(),
+          address: base64ToBech32(event.topics[5]),
           itemsCount: event.topics[2],
           sender: event.address,
         });
@@ -22,7 +23,7 @@ export class AssetsHistoryAuctionService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.ClosedAuction,
-          address: event.topics[5]?.base64ToBech32() || '',
+          address: base64ToBech32(event.topics[5]),
           itemsCount: event.topics[4],
         });
       }
@@ -32,7 +33,7 @@ export class AssetsHistoryAuctionService {
           return new AssetHistoryLogInput({
             event: mainEvent,
             action: AssetActionEnum.Bought,
-            address: address.base64ToBech32(),
+            address: base64ToBech32(address),
             itemsCount: itemsCount,
             price: price,
           });
@@ -40,7 +41,7 @@ export class AssetsHistoryAuctionService {
           return new AssetHistoryLogInput({
             event: mainEvent,
             action: AssetActionEnum.EndedAuction,
-            address: address.base64ToBech32(),
+            address: base64ToBech32(address),
             itemsCount: itemsCount,
             price: price,
           });
@@ -51,7 +52,7 @@ export class AssetsHistoryAuctionService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Bought,
-          address: address.base64ToBech32(),
+          address: base64ToBech32(address),
           itemsCount: itemsCount,
           price: price,
         });

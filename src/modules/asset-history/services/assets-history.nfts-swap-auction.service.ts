@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AssetActionEnum, KroganSwapAuctionEventEnum } from 'src/modules/assets/models';
+import { base64ToBech32 } from 'src/utils/helpers';
 import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-history-log-input';
 
 @Injectable()
@@ -12,7 +13,7 @@ export class AssetsHistoryElrondNftsSwapEventsService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.StartedAuction,
-          address: mainEvent.events[0].topics[3].base64ToBech32(),
+          address: base64ToBech32(mainEvent.events[0].topics[3]),
           itemsCount: mainEvent.events[0].topics[2],
           sender: mainEvent.events[1].address,
         });
@@ -20,7 +21,7 @@ export class AssetsHistoryElrondNftsSwapEventsService {
       case KroganSwapAuctionEventEnum.WithdrawSwap: {
         const withdrawSwap = mainEvent.events.find((event) => event.identifier === eventType);
         const quantity = withdrawSwap.topics[4];
-        const txSender = withdrawSwap.topics[5].base64ToBech32();
+        const txSender = base64ToBech32(withdrawSwap.topics[5]);
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.ClosedAuction,
@@ -34,7 +35,7 @@ export class AssetsHistoryElrondNftsSwapEventsService {
         return new AssetHistoryLogInput({
           event: mainEvent,
           action: AssetActionEnum.Bought,
-          address: purchaseEvent.topics[5].base64ToBech32(),
+          address: base64ToBech32(purchaseEvent.topics[5]),
           itemsCount: purchaseEvent.topics[3],
           sender: purchaseEvent.address,
         });
