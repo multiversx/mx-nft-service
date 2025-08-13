@@ -49,7 +49,7 @@ export const isValidAddress = (address: string): boolean => {
 
 export function base64ToBech32(topic: string) {
   if (topic) {
-    return Address.newFromHex(Buffer.from(topic, 'base64').toString('hex')).toBech32();
+    return new Address(topic).toBech32();
   }
   return '';
 }
