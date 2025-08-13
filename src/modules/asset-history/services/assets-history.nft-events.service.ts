@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { mxConfig } from 'src/config';
-import { NftEventEnum, AssetActionEnum } from 'src/modules/assets/models';
+import { AssetActionEnum, NftEventEnum } from 'src/modules/assets/models';
+import { base64ToBech32 } from 'src/utils/helpers';
 import { AssetHistoryInput as AssetHistoryLogInput } from '../models/asset-history-log-input';
 
 @Injectable()
@@ -31,18 +32,16 @@ export class AssetsHistoryNftEventService {
           action: AssetActionEnum.Created,
           address: event.address,
           itemsCount: event.topics[2],
-          sender: transferEvent?.topics[3]?.base64ToBech32(),
+          sender: base64ToBech32(transferEvent?.topics[3]),
         });
       }
       case NftEventEnum.ESDTNFTTransfer: {
-        if (
-          mainEvent.address === mainEvent?.events[0].address &&
-          transferEvent.topics[3].base64ToBech32() !== mxConfig.nftMarketplaceAddress
-        ) {
+        const address = base64ToBech32(transferEvent?.topics[3]);
+        if (mainEvent.address === mainEvent?.events[0].address && address !== mxConfig.nftMarketplaceAddress) {
           return new AssetHistoryLogInput({
             event: mainEvent,
             action: AssetActionEnum.Received,
-            address: transferEvent.topics[3].base64ToBech32(),
+            address: address,
             itemsCount: transferEvent.topics[2],
             sender: transferEvent.address,
           });
@@ -50,7 +49,7 @@ export class AssetsHistoryNftEventService {
       }
       case NftEventEnum.MultiESDTNFTTransfer: {
         const senderAddress = transferEvent.address;
-        const receiverAddress = transferEvent.topics[3].base64ToBech32();
+        const receiverAddress = base64ToBech32(transferEvent.topics[3]);
         if (senderAddress !== receiverAddress) {
           return new AssetHistoryLogInput({
             event: mainEvent,
