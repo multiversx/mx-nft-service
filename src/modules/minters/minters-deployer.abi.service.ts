@@ -1,4 +1,4 @@
-import { Address, AddressValue, SmartContractController, SmartContractQuery, U32Value } from '@multiversx/sdk-core';
+import { Address, AddressValue, SmartContractController, U32Value } from '@multiversx/sdk-core';
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
 import { gas } from 'src/config';
@@ -52,19 +52,12 @@ export class MintersDeployerAbiService {
       this.mxApiService.getService(),
       MarketplaceUtils.deployerMintersAbiPath,
     );
+    const queryResult = await controller.query({
+      contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
+      function: 'getUserNftMinterContracts',
+      arguments: [new AddressValue(Address.newFromBech32(address))],
+    });
 
-    const getDataQuery = await controller.runQuery(
-      new SmartContractQuery({
-        contract: Address.newFromBech32(process.env.DEPLOYER_ADDRESS),
-        function: 'getUserNftMinterContracts',
-        arguments: [new Uint8Array(Buffer.from(new AddressValue(Address.newFromBech32(address)).toString()))],
-      }),
-    );
-
-    const [response] = controller.parseQueryResponse(getDataQuery);
-
-    const contractAddresses: AddressValue[] = response.valueOf().toFixed();
-
-    return contractAddresses.map((x) => x.valueOf().toBech32());
+    return queryResult[0].map((x: Address) => x.toBech32());
   }
 }
