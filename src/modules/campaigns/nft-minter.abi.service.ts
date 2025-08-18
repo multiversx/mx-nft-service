@@ -52,18 +52,13 @@ export class NftMinterAbiService {
 
   public async getMaxNftsPerTransaction(address: string) {
     const controller = await ContractLoader.getController(this.mxApiService.getService(), this.abiPath);
-    let getDataQuery = await controller.runQuery(
-      new SmartContractQuery({
-        contract: Address.newFromBech32(address),
-        function: 'getMaxNftsPerTransaction',
-        arguments: [],
-      }),
-    );
+    let getMaxNfts = await controller.query({
+      contract: Address.newFromBech32(address),
+      function: 'getMaxNftsPerTransaction',
+      arguments: [],
+    });
 
-    const [response] = controller.parseQueryResponse(getDataQuery);
-
-    const maxNftsPerTransaction: BigNumber = response.valueOf();
-    return maxNftsPerTransaction?.toNumber();
+    return getMaxNfts;
   }
 
   async issueToken(request: IssueCampaignRequest): Promise<TransactionNode> {
