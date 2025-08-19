@@ -1,9 +1,9 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { mxConfig } from 'src/config';
 import { MarketplaceEntity } from 'src/db/marketplaces';
 import { NftTypeEnum } from 'src/modules/assets/models';
 import { Token } from 'src/modules/usdPrice/Token.model';
-import { DEADRARE_KEY, ELRONDNFTSWAP_KEY, FRAMEIT_KEY, ICI_KEY, XOXNO_KEY } from 'src/utils/constants';
+import { DEADRARE_KEY, ELRONDNFTSWAP_KEY, FRAMEIT_KEY, ICI_KEY, OOX_KEY, XOXNO_KEY } from 'src/utils/constants';
 import { getCollectionAndNonceFromIdentifier } from 'src/utils/helpers';
 import { MarketplaceState, MarketplaceTypeEnum } from './MarketplaceType.enum';
 @ObjectType()
@@ -96,6 +96,8 @@ export class Marketplace {
           return `${entity.url}${identifier}`;
         case DEADRARE_KEY:
           return `${entity.url}${identifier}`;
+        case OOX_KEY:
+          return `${entity.url}${identifier}?auctionId=${marketplaceAuctionId}`;
         default:
           let url = identifier ? `${entity.url}${identifier}` : entity.url;
           if (entity.type === MarketplaceTypeEnum.Internal) {
