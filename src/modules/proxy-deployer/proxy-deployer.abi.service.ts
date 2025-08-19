@@ -3,7 +3,6 @@ import {
   AddressValue,
   BytesValue,
   SmartContractController,
-  SmartContractQuery,
   SmartContractTransactionsFactory,
   TransactionsFactoryConfig,
   U32Value,
@@ -122,21 +121,12 @@ export class ProxyDeployerAbiService {
   public async getDeployedContractsForAddressAndTemplate(address: string, templateAddress: string): Promise<string[]> {
     const controller: SmartContractController = await this.getController();
 
-    const getDataQuery = await controller.runQuery(
-      new SmartContractQuery({
-        contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
-        function: 'getDeployerContractsByTemplate',
-        arguments: [
-          new Uint8Array(Buffer.from(new AddressValue(Address.newFromBech32(address)).toString())),
-          new Uint8Array(Buffer.from(new AddressValue(Address.newFromBech32(templateAddress)).toString())),
-        ],
-      }),
-    );
+    const getDataQuery = await controller.query({
+      contract: Address.newFromBech32(process.env.PROXY_DEPLOYER_ADDRESS),
+      function: 'getDeployerContractsByTemplate',
+      arguments: [new AddressValue(Address.newFromBech32(address)), new AddressValue(Address.newFromBech32(templateAddress))],
+    });
 
-    const [response] = controller.parseQueryResponse(getDataQuery);
-
-    const contractAddresses: AddressValue[] = response.valueOf().toFixed();
-
-    return contractAddresses.map((x) => x.valueOf().toBech32());
+    return getDataQuery[0].map((x: Address) => x.toBech32());
   }
 }
