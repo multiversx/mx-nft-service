@@ -1,12 +1,12 @@
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { Injectable } from '@nestjs/common';
 import { MxApiService } from 'src/common';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
-import { mxConfig } from 'src/config';
-import { computeUsdAmount } from 'src/utils/helpers';
-import { CacheService } from '@multiversx/sdk-nestjs-cache';
-import { Token } from './Token.model';
 import { MxDataApiService } from 'src/common/services/mx-communication/mx-data.service';
+import { mxConfig } from 'src/config';
 import { DateUtils } from 'src/utils/date-utils';
+import { computeUsdAmount } from 'src/utils/helpers';
+import { Token } from './Token.model';
 
 @Injectable()
 export class UsdPriceService {
@@ -22,7 +22,7 @@ export class UsdPriceService {
     }
 
     const tokenData = await this.getToken(token);
-    if (!tokenData.priceUsd) {
+    if (!tokenData?.priceUsd) {
       return;
     }
     return computeUsdAmount(tokenData.priceUsd, amount, tokenData.decimals);
@@ -41,7 +41,7 @@ export class UsdPriceService {
   }
 
   public async getToken(tokenId: string): Promise<Token> {
-    if (tokenId === mxConfig.egld || tokenId === mxConfig.wegld) {
+    if (tokenId === mxConfig.egld || tokenId === mxConfig.wegld || tokenId === 'xEGLD') {
       return new Token({
         identifier: mxConfig.egld,
         symbol: mxConfig.egld,
