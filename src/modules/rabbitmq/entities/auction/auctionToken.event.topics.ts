@@ -22,12 +22,12 @@ export class AuctionTokenEventsTopics {
     this.nrAuctionTokens = parseInt(Buffer.from(rawTopics[4], 'base64').toString('hex'), 16).toString();
     this.originalOwner = new Address(Buffer.from(rawTopics[5], 'base64'));
 
-    this.minBid = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[6])).toString();
+    this.minBid = BinaryUtils.hexToBigInt(BinaryUtils.base64ToHex(rawTopics[6])).toString();
     this.maxBid = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[7])).toString();
     this.startTime = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[8]));
     this.endTime = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[9]));
     this.paymentToken = BinaryUtils.base64Decode(rawTopics[10]);
-    this.paymentNonce = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[11]));
+    this.paymentNonce = rawTopics[11] === '' ? 0 : BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[11]));
     this.auctionType = BinaryUtils.hexToNumber(BinaryUtils.base64ToHex(rawTopics[12])).toString();
 
     if (this.startTime.toString().length > 10) {

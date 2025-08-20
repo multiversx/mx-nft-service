@@ -16,6 +16,7 @@ export const XOXNO_MINTING_MANAGER = 'erd1qqqqqqqqqqqqqpgqg9fa0dmpn8fu3fnleeqn5z
 export const DEADRARE_KEY = 'deadrare';
 export const ELRONDNFTSWAP_KEY = 'elrondnftswap';
 export const ENEFTOR_KEY = 'eneftor';
+export const OOX_KEY = 'oox';
 export const FRAMEIT_KEY = 'frameit';
 export const ICI_KEY = 'ici';
 
