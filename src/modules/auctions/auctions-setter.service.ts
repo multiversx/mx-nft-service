@@ -1,19 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Auction, AuctionAbi, AuctionStatusEnum, AuctionTypeEnum, ExternalAuctionAbi } from './models';
-import '../../utils/extensions';
-import { AuctionEntity } from 'src/db/auctions';
-import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
-import { PerformanceProfiler } from '../metrics/performance.profiler';
-import { MetricsCollector } from '../metrics/metrics.collector';
-import { AuctionEventEnum } from '../assets/models';
-import { TagEntity } from 'src/db/auctions/tags.entity';
-import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
-import { MarketplaceUtils } from './marketplaceUtils';
-import { Marketplace } from '../marketplaces/models';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
-import { UsdPriceService } from '../usdPrice/usd-price.service';
 import { mxConfig } from 'src/config';
+import { AuctionEntity } from 'src/db/auctions';
+import { TagEntity } from 'src/db/auctions/tags.entity';
 import { BigNumberUtils } from 'src/utils/bigNumber-utils';
+import '../../utils/extensions';
+import { AssetByIdentifierService } from '../assets/asset-by-identifier.service';
+import { AuctionEventEnum } from '../assets/models';
+import { Marketplace } from '../marketplaces/models';
+import { MetricsCollector } from '../metrics/metrics.collector';
+import { PerformanceProfiler } from '../metrics/performance.profiler';
+import { UsdPriceService } from '../usdPrice/usd-price.service';
+import { MarketplaceUtils } from './marketplaceUtils';
+import { Auction, AuctionAbi, AuctionStatusEnum, AuctionTypeEnum, ExternalAuctionAbi } from './models';
+import { NftMarketplaceAbiService } from './nft-marketplace.abi.service';
 
 @Injectable()
 export class AuctionsSetterService {
@@ -78,11 +78,12 @@ export class AuctionsSetterService {
       }
       return;
     } catch (error) {
-      this.logger.error('An error occurred while savind an auction', error, {
+      this.logger.error('An error occurred while savind an auction', {
         path: 'AuctionsService.saveAuction',
         auctionId,
         exception: error,
       });
+      this.logger.error(error);
     } finally {
       profiler.stop();
       MetricsCollector.setAuctionEventsDuration(AuctionEventEnum.AuctionTokenEvent, profiler.duration);
