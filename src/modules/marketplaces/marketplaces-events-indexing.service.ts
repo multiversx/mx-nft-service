@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplacesService } from './marketplaces.service';
-import { MxElasticService } from 'src/common';
+import { ElasticEventsMapper, MxElasticService } from 'src/common';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 import { BinaryUtils, Locker } from '@multiversx/sdk-nestjs-common';
@@ -12,6 +12,7 @@ import { getMarketplaceEventsElasticQuery, getMarketplaceTransactionsElasticQuer
 import { AuctionEventEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from '../assets/models';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
+import { ELASTIC_EVENTS_INDEX } from 'src/utils/constants';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -109,9 +110,9 @@ export class MarketplaceEventsIndexingService {
   private async addElasticEventsToDbAndReturnNewestTimestamp(input: MarketplaceEventsIndexingRequest): Promise<number> {
     return await this.addGenericElasticDataToDbAndReturnNewestTimestamp(
       getMarketplaceEventsElasticQuery(input),
-      'logs',
+      ELASTIC_EVENTS_INDEX,
       input.marketplaceAddress,
-      this.filterEventsAndSaveToDb.bind(this),
+      async (events: any[], marketplaceAddress: string) => await this.filterEventsAndSaveToDb(ElasticEventsMapper.toLogs(events), marketplaceAddress),
       input.stopIfDuplicates,
     );
   }

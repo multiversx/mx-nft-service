@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { HitResponse, SearchResponse } from './models/elastic-search';
 import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
@@ -9,6 +8,8 @@ import { ApiSettings } from './models/api-settings';
 import { constants } from 'src/config';
 import { HoldersCount } from 'src/modules/analytics/models/general-stats.model';
 import { NftTypeEnum } from 'src/modules/assets/models';
+import { ELASTIC_EVENTS_INDEX } from 'src/utils/constants';
+import { ElasticEventsMapper } from './elastic-events.mapper';
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -18,87 +19,6 @@ export interface AddressTransactionCount {
 export class MxElasticService {
   private readonly url = process.env.ELROND_ELASTICSEARCH;
   constructor(private readonly apiService: ApiService, private readonly logger: Logger) {}
-
-  async getNftHistory(
-    collection: string,
-    nonce: string,
-    size: number,
-    timestamp: number | string,
-  ): Promise<[HitResponse[], number, number]> {
-    const url = `${this.url}/logs/_search`;
-    const body = {
-      size: 2 * size,
-      query: {
-        bool: {
-          must: [
-            {
-              range: {
-                timestamp: {
-                  lt: timestamp,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'events',
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match: {
-                          'events.topics': collection,
-                        },
-                      },
-                      {
-                        match: {
-                          'events.topics': nonce,
-                        },
-                      },
-                    ],
-                    must_not: [
-                      {
-                        match: {
-                          'events.identifier': 'bid',
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          ],
-        },
-      },
-      sort: [
-        {
-          timestamp: {
-            order: 'desc',
-          },
-        },
-      ],
-    };
-    try {
-      const response = await this.apiService.post(url, body);
-      const data: SearchResponse = response?.data;
-      let responseMap: HitResponse[] = [];
-      data?.hits?.hits.forEach((hit) => {
-        for (const event of hit._source.events) {
-          if (event.topics[0] === collection && event.topics[1] === nonce) {
-            responseMap.push(hit);
-            break;
-          }
-        }
-      });
-      return [responseMap, data?.hits?.total.value, data?.hits?.hits[data?.hits?.hits?.length - 1]?._source.timestamp];
-    } catch (e) {
-      this.logger.error('Fail to get logs', {
-        path: `${MxElasticService.name}.${this.getNftHistory.name}`,
-        address: nonce,
-        exception: e.toString(),
-      });
-      return [[], 0, 0];
-    }
-  }
 
   async setCustomValue<T>(collection: string, identifier: string, body: any, urlParams: string = null): Promise<void> {
     const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
@@ -424,6 +344,26 @@ export class MxElasticService {
     return JSON.stringify({
       properties: properties,
     });
+  }
+
+  async getLogsByTxHashes(txHashes: string[]): Promise<any[]> {
+    const batchSize = 50;
+    const events = [];
+
+    for (let i = 0; i < txHashes.length; i += batchSize) {
+      const batch = txHashes.slice(i, i + batchSize);
+      const query = ElasticQuery.create()
+        .withMustCondition(
+          QueryType.Should(batch.flatMap((txHash) => [QueryType.Match('txHash', txHash), QueryType.Match('originalTxHash', txHash)])),
+        )
+        .withPagination({ from: 0, size: constants.getLogsFromElasticBatchSize });
+
+      await this.getScrollableList(ELASTIC_EVENTS_INDEX, '_id', query, async (items) => {
+        events.push(...items);
+      });
+    }
+
+    return ElasticEventsMapper.toLogs(events).sort((a, b) => b.timestamp - a.timestamp);
   }
 
   async getList(collection: string, key: string, elasticQuery: ElasticQuery): Promise<any[]> {

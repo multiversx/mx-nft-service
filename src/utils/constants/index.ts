@@ -21,6 +21,7 @@ export const FRAMEIT_KEY = 'frameit';
 export const ICI_KEY = 'ici';
 
 export const ELASTIC_TOKENS_INDEX = 'tokens';
+export const ELASTIC_EVENTS_INDEX = 'events';
 export const ELASTIC_NFT_NSFW = 'nft_nsfw_mark';
 export const ELASTIC_NFT_RANK_CUSTOM = 'nft_rank_custom';
 export const ELASTIC_NFT_RANK_HASH = 'nft_custom_ranks_hash';
