@@ -346,24 +346,60 @@ export class MxElasticService {
     });
   }
 
-  async getLogsByTxHashes(txHashes: string[]): Promise<any[]> {
+  /**
+   * Scrolls the events index and returns, for every page, the full logs (all events of a transaction)
+   * of the transactions that have at least one event matching the query, same as the legacy logs index.
+   */
+  async getScrollableLogs(elasticQuery: ElasticQuery, action: (logs: any[]) => Promise<boolean | any>): Promise<void> {
+    const processedTxHashes = new Set<string>();
+
+    await this.getScrollableList(ELASTIC_EVENTS_INDEX, '_id', elasticQuery, async (events) => {
+      const txHashes = this.getNewTxHashes(events, processedTxHashes);
+      if (events.length > 0 && txHashes.length === 0) {
+        return;
+      }
+
+      return await action(await this.getLogsByTxHashes(txHashes));
+    });
+  }
+
+  async getLogs(elasticQuery: ElasticQuery): Promise<any[]> {
+    const events = await this.getList(ELASTIC_EVENTS_INDEX, '_id', elasticQuery);
+    return await this.getLogsByTxHashes(this.getNewTxHashes(events, new Set<string>()));
+  }
+
+  private getNewTxHashes(events: any[], processedTxHashes: Set<string>): string[] {
+    const txHashes: string[] = [];
+    for (const event of events) {
+      if (!processedTxHashes.has(event.txHash)) {
+        processedTxHashes.add(event.txHash);
+        txHashes.push(event.txHash);
+      }
+    }
+    return txHashes;
+  }
+
+  private async getLogsByTxHashes(txHashes: string[]): Promise<any[]> {
     const batchSize = 50;
-    const events = [];
-
+    const batches: string[][] = [];
     for (let i = 0; i < txHashes.length; i += batchSize) {
-      const batch = txHashes.slice(i, i + batchSize);
-      const query = ElasticQuery.create()
-        .withMustCondition(
-          QueryType.Should(batch.flatMap((txHash) => [QueryType.Match('txHash', txHash), QueryType.Match('originalTxHash', txHash)])),
-        )
-        .withPagination({ from: 0, size: constants.getLogsFromElasticBatchSize });
-
-      await this.getScrollableList(ELASTIC_EVENTS_INDEX, '_id', query, async (items) => {
-        events.push(...items);
-      });
+      batches.push(txHashes.slice(i, i + batchSize));
     }
 
-    return ElasticEventsMapper.toLogs(events).sort((a, b) => b.timestamp - a.timestamp);
+    const eventsBatches = await Promise.all(
+      batches.map((batch) =>
+        this.getList(
+          ELASTIC_EVENTS_INDEX,
+          '_id',
+          ElasticQuery.create()
+            .withMustCondition(QueryType.Should(batch.map((txHash) => QueryType.Match('txHash', txHash))))
+            .withPagination({ from: 0, size: 10000 }),
+        ),
+      ),
+    );
+
+    const txHashesOrder = new Map(txHashes.map((txHash, index) => [txHash, index]));
+    return ElasticEventsMapper.toLogs(eventsBatches.flat()).sort((a, b) => txHashesOrder.get(a.identifier) - txHashesOrder.get(b.identifier));
   }
 
   async getList(collection: string, key: string, elasticQuery: ElasticQuery): Promise<any[]> {

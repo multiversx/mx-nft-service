@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import '../../utils/extensions';
 import { PersistenceService } from 'src/common/persistence/persistence.service';
 import { MarketplacesService } from './marketplaces.service';
-import { ElasticEventsMapper, MxElasticService } from 'src/common';
+import { MxElasticService } from 'src/common';
 import { MarketplaceEventsEntity } from 'src/db/marketplaces/marketplace-events.entity';
 import { MarketplaceEventsIndexingRequest } from './models/MarketplaceEventsIndexingRequest';
 import { BinaryUtils, Locker } from '@multiversx/sdk-nestjs-common';
@@ -12,7 +12,6 @@ import { getMarketplaceEventsElasticQuery, getMarketplaceTransactionsElasticQuer
 import { AuctionEventEnum, KroganSwapAuctionEventEnum, ExternalAuctionEventEnum } from '../assets/models';
 import { CacheEventsPublisherService } from '../rabbitmq/cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { ChangedEvent, CacheEventTypeEnum } from '../rabbitmq/cache-invalidation/events/changed.event';
-import { ELASTIC_EVENTS_INDEX } from 'src/utils/constants';
 
 @Injectable()
 export class MarketplaceEventsIndexingService {
@@ -100,7 +99,7 @@ export class MarketplaceEventsIndexingService {
   private async addElasticTxToDbAndReturnNewestTimestamp(input: MarketplaceEventsIndexingRequest): Promise<number> {
     return await this.addGenericElasticDataToDbAndReturnNewestTimestamp(
       getMarketplaceTransactionsElasticQuery(input),
-      'transactions',
+      (query, action) => this.mxElasticService.getScrollableList('transactions', 'identifier', query, action),
       input.marketplaceAddress,
       this.saveTxToDb.bind(this),
       input.stopIfDuplicates,
@@ -110,23 +109,23 @@ export class MarketplaceEventsIndexingService {
   private async addElasticEventsToDbAndReturnNewestTimestamp(input: MarketplaceEventsIndexingRequest): Promise<number> {
     return await this.addGenericElasticDataToDbAndReturnNewestTimestamp(
       getMarketplaceEventsElasticQuery(input),
-      ELASTIC_EVENTS_INDEX,
+      (query, action) => this.mxElasticService.getScrollableLogs(query, action),
       input.marketplaceAddress,
-      async (events: any[], marketplaceAddress: string) => await this.filterEventsAndSaveToDb(ElasticEventsMapper.toLogs(events), marketplaceAddress),
+      this.filterEventsAndSaveToDb.bind(this),
       input.stopIfDuplicates,
     );
   }
 
   private async addGenericElasticDataToDbAndReturnNewestTimestamp(
     elasticQuery: ElasticQuery,
-    elasticCollection: string,
+    scrollElastic: (elasticQuery: ElasticQuery, action: (items: any[]) => Promise<boolean | any>) => Promise<void>,
     marketplaceAddress: string,
     saveToDbFunction: (items: any[], marketplaceAddress: string) => Promise<[number, number]>,
     stopIfDuplicates?: boolean,
   ): Promise<number> {
     let newestTimestamp: number;
 
-    await this.mxElasticService.getScrollableList(elasticCollection, 'identifier', elasticQuery, async (items) => {
+    await scrollElastic(elasticQuery, async (items) => {
       if (!items || items.length === 0) {
         return false;
       }

@@ -1,7 +1,6 @@
 import { ElasticQuery, ElasticSortOrder, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { Injectable } from '@nestjs/common';
-import { ElasticEventsMapper, MxElasticService } from 'src/common';
-import { ELASTIC_EVENTS_INDEX } from 'src/utils/constants';
+import { MxElasticService } from 'src/common';
 
 @Injectable()
 export class ElasticAnalyticsService {
@@ -20,11 +19,10 @@ export class ElasticAnalyticsService {
     const elasticQuery = ElasticQuery.create()
       .withPagination({ from: 0, size: 500 })
       .withMustCondition(QueryType.Should(eventNames.map((eventName) => QueryType.Match('identifier', eventName))))
-      .withMustCondition(QueryType.Should(addresses.map((address) => QueryType.Match('address', address))))
       .withDateRangeFilter('timestamp', lte, gte)
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
-    await this.elasticService.getScrollableList(ELASTIC_EVENTS_INDEX, '_id', elasticQuery, async (events) => {
-      await action(ElasticEventsMapper.toLogs(events));
+    await this.elasticService.getScrollableLogs(elasticQuery, async (logs) => {
+      await action(logs.filter((log) => addresses.length === 0 || log.events.some((event) => addresses.includes(event.address))));
     });
   }
 
@@ -42,11 +40,10 @@ export class ElasticAnalyticsService {
 
   private async getTransactionsLogs(eventName: string, gte: number, lte: number): Promise<any[]> {
     const elasticQuery = ElasticQuery.create()
-      .withMustCondition(QueryType.Match('identifier', eventName))
+      .withMustCondition(QueryType.Should([eventName].map((eventName) => QueryType.Match('identifier', eventName))))
       .withDateRangeFilter('timestamp', lte, gte)
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
 
-    const events = await this.elasticService.getList(ELASTIC_EVENTS_INDEX, '', elasticQuery);
-    return ElasticEventsMapper.toLogs(events);
+    return await this.elasticService.getLogs(elasticQuery);
   }
 }
