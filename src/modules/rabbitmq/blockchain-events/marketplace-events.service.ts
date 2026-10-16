@@ -15,6 +15,8 @@ import { AcceptOfferEventHandler } from './handlers/acceptOffer-event.handler';
 import { WithdrawOfferEventHandler } from './handlers/withdrawOffer-event.handler';
 import { UpdateListingEventHandler } from './handlers/updateListing-event.handler';
 
+const SLOW_EVENT_THRESHOLD_MS = 1000;
+
 @Injectable()
 export class MarketplaceEventsService {
   private readonly logger = new Logger(MarketplaceEventsService.name);
@@ -37,6 +39,7 @@ export class MarketplaceEventsService {
 
   public async handleNftAuctionEvents(auctionEvents: any[], hash: string, marketplaceType: MarketplaceTypeEnum) {
     for (let event of auctionEvents) {
+      const startTime = Date.now();
       switch (event.identifier) {
         case AuctionEventEnum.BidEvent:
         case KroganSwapAuctionEventEnum.Bid:
@@ -121,6 +124,11 @@ export class MarketplaceEventsService {
         case MarketplaceEventEnum.SCUpgrade: {
           await this.slackReportService.sendScUpgradeNotification(event.address);
         }
+      }
+
+      const duration = Date.now() - startTime;
+      if (duration >= SLOW_EVENT_THRESHOLD_MS) {
+        this.logger.warn(`Slow ${marketplaceType} marketplace event '${event.identifier}' ${duration}ms for hash '${hash}' and address '${event.address}'`);
       }
     }
   }
