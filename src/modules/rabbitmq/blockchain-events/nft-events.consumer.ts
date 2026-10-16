@@ -12,7 +12,7 @@ import { AnalyticsEventsService } from './analytics-events.service';
 import { MintersService } from 'src/modules/minters/minters.service';
 import { DisabledMarketplaceEventsService } from './disable-marketplace/disable-marketplace-events.service';
 
-const SLOW_BATCH_THRESHOLD_MS = 1000;
+const SLOW_BATCH_THRESHOLD_MS = 600;
 
 @Injectable()
 export class NftEventsConsumer {
