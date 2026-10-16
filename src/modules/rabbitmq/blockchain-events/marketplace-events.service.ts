@@ -128,7 +128,7 @@ export class MarketplaceEventsService {
 
       const duration = Date.now() - startTime;
       if (duration >= SLOW_EVENT_THRESHOLD_MS) {
-        this.logger.warn(`Slow ${marketplaceType} marketplace event '${event.identifier}' ${duration}ms for hash '${hash}' and address '${event.address}'`);
+        this.logger.error(`Slow ${marketplaceType} marketplace event '${event.identifier}' ${duration}ms for hash '${hash}' and address '${event.address}'`);
       }
     }
   }

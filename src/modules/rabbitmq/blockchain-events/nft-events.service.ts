@@ -102,7 +102,7 @@ export class NftEventsService {
 
       const duration = Date.now() - startTime;
       if (duration >= SLOW_EVENT_THRESHOLD_MS) {
-        this.logger.warn(`Slow NFT event '${event.identifier}' ${duration}ms for hash '${hash}'`);
+        this.logger.error(`Slow NFT event '${event.identifier}' ${duration}ms for hash '${hash}'`);
       }
     }
   }
