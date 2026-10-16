@@ -1,5 +1,5 @@
 import { MxApiService } from 'src/common';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { CacheEventTypeEnum, ChangedEvent } from '../cache-invalidation/events/changed.event';
@@ -12,8 +12,12 @@ import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
+const SLOW_EVENT_THRESHOLD_MS = 1000;
+
 @Injectable()
 export class NftEventsService {
+  private readonly logger = new Logger(NftEventsService.name);
+
   constructor(
     private feedEventsSenderService: FeedEventsSenderService,
     private mxApiService: MxApiService,
@@ -23,6 +27,7 @@ export class NftEventsService {
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
+      const startTime = Date.now();
       switch (event.identifier) {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
@@ -93,6 +98,11 @@ export class NftEventsService {
           }
           break;
 
+      }
+
+      const duration = Date.now() - startTime;
+      if (duration >= SLOW_EVENT_THRESHOLD_MS) {
+        this.logger.warn(`Slow NFT event '${event.identifier}' ${duration}ms for hash '${hash}'`);
       }
     }
   }
