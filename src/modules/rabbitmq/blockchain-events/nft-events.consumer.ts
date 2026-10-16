@@ -33,10 +33,13 @@ export class NftEventsConsumer {
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
-    if (nftAuctionEvents?.events) {
-      const internalMarketplaces = await this.marketplaceService.getInternalMarketplacesAddreses();
-      const externalMarketplaces = await this.marketplaceService.getExternalMarketplacesAddreses();
-      const disabledMarketplaces = await this.marketplaceService.getDisabledMarketplacesAddreses();
+    if (nftAuctionEvents?.events?.length > 0) {
+      const [internalMarketplaces, externalMarketplaces, disabledMarketplaces, minters] = await Promise.all([
+        this.marketplaceService.getInternalMarketplacesAddreses(),
+        this.marketplaceService.getExternalMarketplacesAddreses(),
+        this.marketplaceService.getDisabledMarketplacesAddreses(),
+        this.mintersService.getMintersAddresses(),
+      ]);
 
       const disabledMarketplacesEvents = nftAuctionEvents?.events?.filter(
         (e: { address: any }) => disabledMarketplaces.includes(e.address) === true,
@@ -49,7 +52,6 @@ export class NftEventsConsumer {
         (e: { address: any }) => externalMarketplaces.includes(e.address) === true,
       );
 
-      const minters = await this.mintersService.getMintersAddresses();
       await this.nftEventsService.handleNftMintEvents(
         nftAuctionEvents?.events?.filter(
           (e: { identifier: NftEventEnum }) =>
