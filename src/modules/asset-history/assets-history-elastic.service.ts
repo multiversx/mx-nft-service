@@ -12,9 +12,11 @@ export class AssetsHistoryElasticService {
     const encodedCollection = Buffer.from(collection).toString('base64');
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
     const hexCollection = Buffer.from(collection).toString('hex');
+    const hexNonce = Buffer.from(nonce, 'hex').toString('hex');
 
     const query = ElasticQuery.create()
       .withMustCondition(QueryType.Match('topics', hexCollection))
+      .withMustCondition(QueryType.Match('topics', hexNonce))
       .withRangeFilter('timestamp', new RangeLowerThan(beforeTimestamp))
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
       .withPagination({

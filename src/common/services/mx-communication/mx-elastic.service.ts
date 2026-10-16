@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { ElasticQuery, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, ElasticSortOrder, QueryType, TermsQuery } from '@multiversx/sdk-nestjs-elastic';
 import { ElasticMetricType } from '@multiversx/sdk-nestjs-monitoring';
 import { ApiSettings } from './models/api-settings';
 import { constants } from 'src/config';
@@ -380,26 +380,26 @@ export class MxElasticService {
   }
 
   private async getLogsByTxHashes(txHashes: string[]): Promise<any[]> {
-    const batchSize = 50;
-    const batches: string[][] = [];
-    for (let i = 0; i < txHashes.length; i += batchSize) {
-      batches.push(txHashes.slice(i, i + batchSize));
+    if (txHashes.length === 0) {
+      return [];
     }
 
-    const eventsBatches = await Promise.all(
-      batches.map((batch) =>
-        this.getList(
-          ELASTIC_EVENTS_INDEX,
-          '_id',
-          ElasticQuery.create()
-            .withMustCondition(QueryType.Should(batch.map((txHash) => QueryType.Match('txHash', txHash))))
-            .withPagination({ from: 0, size: 10000 }),
-        ),
-      ),
-    );
+    const maxResults = 10000;
+    const query = ElasticQuery.create()
+      .withTerms(new TermsQuery('txHash', txHashes))
+      .withSort([{ name: '_doc', order: ElasticSortOrder.ascending }])
+      .withPagination({ from: 0, size: maxResults });
+
+    let events = await this.getList(ELASTIC_EVENTS_INDEX, '_id', query);
+    if (events.length >= maxResults) {
+      events = [];
+      await this.getScrollableList(ELASTIC_EVENTS_INDEX, '_id', query, async (items) => {
+        events.push(...items);
+      });
+    }
 
     const txHashesOrder = new Map(txHashes.map((txHash, index) => [txHash, index]));
-    return ElasticEventsMapper.toLogs(eventsBatches.flat()).sort((a, b) => txHashesOrder.get(a.identifier) - txHashesOrder.get(b.identifier));
+    return ElasticEventsMapper.toLogs(events).sort((a, b) => txHashesOrder.get(a.identifier) - txHashesOrder.get(b.identifier));
   }
 
   async getList(collection: string, key: string, elasticQuery: ElasticQuery): Promise<any[]> {
