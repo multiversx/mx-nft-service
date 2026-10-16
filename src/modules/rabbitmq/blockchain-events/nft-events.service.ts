@@ -8,7 +8,7 @@ import { MultiTransferEvent, TransferEvent } from '../entities/auction/transfer.
 import { FeedEventsSenderService } from './feed-events.service';
 import { BurnEvent } from '../entities/auction/burn.event';
 import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
-import { RedisCacheService } from '@multiversx/sdk-nestjs-cache';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
 import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
 import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
 
@@ -22,7 +22,7 @@ export class NftEventsService {
     private feedEventsSenderService: FeedEventsSenderService,
     private mxApiService: MxApiService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
-    private readonly redisCacheService: RedisCacheService,
+    private readonly cacheService: CacheService,
   ) { }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
@@ -45,7 +45,7 @@ export class NftEventsService {
           const transferTopics = transferEvent.getTopics();
           const collectionType = await this.getCollectionType(transferTopics.collection);
           if (collectionType === NftTypeEnum.NonFungibleESDT || collectionType === NftTypeEnum.SemiFungibleESDT) {
-            await this.triggerCacheInvalidationWithOwner(
+            this.triggerCacheInvalidationWithOwner(
               `${transferTopics.collection}-${transferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
               transferEvent.getAddress(),
@@ -112,7 +112,7 @@ export class NftEventsService {
   }
 
   private async getCollectionType(collection: string): Promise<string> {
-    return await this.redisCacheService.getOrSet<string>(
+    return await this.cacheService.getOrSet<string>(
       generateCacheKeyFromParams(CacheInfo.CollectionTypes.key, collection),
       async () => (await this.mxApiService.getCollectionByIdentifierForQuery(collection, 'fields=type'))?.type,
       CacheInfo.CollectionTypes.ttl,
