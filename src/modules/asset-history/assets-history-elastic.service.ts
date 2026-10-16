@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
-import { ElasticQuery, ElasticSortOrder, MatchQuery, QueryType, RangeLowerThan } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, ElasticSortOrder, QueryType, RangeLowerThan } from '@multiversx/sdk-nestjs-elastic';
 import { constants } from 'src/config';
 
 @Injectable()
@@ -11,14 +11,12 @@ export class AssetsHistoryElasticService {
     let elasticLogs = [];
     const encodedCollection = Buffer.from(collection).toString('base64');
     const encodedNonce = Buffer.from(nonce, 'hex').toString('base64');
+    const hexCollection = Buffer.from(collection).toString('hex');
+    const hexNonce = Buffer.from(nonce, 'hex').toString('hex');
 
     const query = ElasticQuery.create()
-      .withMustCondition(
-        QueryType.Nested('events', [new MatchQuery('events.topics', encodedCollection )]) ,
-      )
-      .withMustCondition(
-        QueryType.Nested('events', [new MatchQuery('events.topics', encodedCollection )]),
-      )
+      .withMustCondition(QueryType.Match('topics', hexCollection))
+      .withMustCondition(QueryType.Match('topics', hexNonce))
       .withRangeFilter('timestamp', new RangeLowerThan(beforeTimestamp))
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.descending }])
       .withPagination({
@@ -26,7 +24,7 @@ export class AssetsHistoryElasticService {
         size: constants.getLogsFromElasticBatchSize,
       });
 
-    await this.mxElasticService.getScrollableList('logs', 'identifier', query, async (logs) => {
+    await this.mxElasticService.getScrollableLogs(query, async (logs) => {
       logs.map((log) => {
         const anyMatchingEvent = log.events.find((event) => event.topics?.[0] === encodedCollection && event.topics?.[1] === encodedNonce);
         if (anyMatchingEvent) {
