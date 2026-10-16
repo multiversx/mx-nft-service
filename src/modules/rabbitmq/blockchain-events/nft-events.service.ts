@@ -57,10 +57,14 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTBurn:
           const burnEvent = new BurnEvent(event);
           const burnTopics = burnEvent.getTopics();
-          await new Promise((resolve) => setTimeout(resolve, 500));
           const burnCollectionType = await this.getCollectionType(burnTopics.collection);
           if (burnCollectionType === NftTypeEnum.NonFungibleESDT || burnCollectionType === NftTypeEnum.SemiFungibleESDT) {
-            await this.triggerCacheInvalidation(`${burnTopics.collection}-${burnTopics.nonce}`, CacheEventTypeEnum.AssetRefresh);
+            const burnIdentifier = `${burnTopics.collection}-${burnTopics.nonce}`;
+            setTimeout(() => {
+              this.triggerCacheInvalidation(burnIdentifier, CacheEventTypeEnum.AssetRefresh).catch((error) =>
+                this.logger.error(`An error occurred while triggering cache invalidation for burned NFT '${burnIdentifier}'`, error),
+              );
+            }, 500);
           }
           break;
 
@@ -102,7 +106,7 @@ export class NftEventsService {
 
       const duration = Date.now() - startTime;
       if (duration >= SLOW_EVENT_THRESHOLD_MS) {
-        this.logger.error(`Slow NFT event '${event.identifier}' ${duration}ms for hash '${hash}'`);
+        this.logger.warn(`Slow NFT event '${event.identifier}' ${duration}ms for hash '${hash}'`);
       }
     }
   }

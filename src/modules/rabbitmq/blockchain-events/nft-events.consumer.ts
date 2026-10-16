@@ -109,7 +109,7 @@ export class NftEventsConsumer {
 
       const totalDuration = Date.now() - startTime;
       if (totalDuration >= SLOW_BATCH_THRESHOLD_MS) {
-        this.logger.error(
+        this.logger.warn(
           `Slow events batch ${totalDuration}ms for hash '${nftAuctionEvents.hash}' (${nftAuctionEvents.events.length} events, ` +
             `${internalMarketplaceEvents.length} internal, ${externalMarketplaceEvents.length} external): ${JSON.stringify(durations)}`,
         );
