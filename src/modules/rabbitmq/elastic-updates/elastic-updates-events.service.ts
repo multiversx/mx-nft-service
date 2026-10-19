@@ -26,7 +26,7 @@ export class ElasticUpdatesEventsService {
   ) { }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     for (let event of mintEvents) {
       switch (event.identifier) {
         case NftEventEnum.ESDTNFTCreate:
@@ -43,7 +43,7 @@ export class ElasticUpdatesEventsService {
   }
 
   public async handleTraitsForNftMintBurnAndUpdateEvents(events: any[]): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+    await new Promise((resolve) => setTimeout(resolve, 600));
     let nftsOrCollectionsToUpdate: string[] = [];
     let collectionTypes: { [key: string]: string } = {};
 
@@ -65,7 +65,7 @@ export class ElasticUpdatesEventsService {
   }
 
   public async handleRaritiesForNftMintBurnAndUpdateEvents(mintEvents: any[]): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
     let collectionsToUpdate: string[] = [];
     let nftsToDelete: string[] = [];
@@ -111,7 +111,7 @@ export class ElasticUpdatesEventsService {
   }
 
   public async handleScamInfoForNftMintBurnAndUpdateEvents(mintEvents: any[]): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     let nftsToUpdate: Asset[] = [];
     let nftsToDelete: string[] = [];
