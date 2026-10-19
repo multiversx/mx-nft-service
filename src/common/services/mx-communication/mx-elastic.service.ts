@@ -347,6 +347,18 @@ export class MxElasticService {
   }
 
   /**
+   * Scrolls the events index and returns, for every page, only the matching events grouped in the legacy logs shape.
+   */
+  async getScrollableMatchingLogs(elasticQuery: ElasticQuery, action: (logs: any[]) => Promise<boolean | any>): Promise<void> {
+    await this.getScrollableList(
+      ELASTIC_EVENTS_INDEX,
+      '_id',
+      elasticQuery,
+      async (events) => await action(ElasticEventsMapper.toLogs(events)),
+    );
+  }
+
+  /**
    * Scrolls the events index and returns, for every page, the full logs (all events of a transaction)
    * of the transactions that have at least one event matching the query, same as the legacy logs index.
    */

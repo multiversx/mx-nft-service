@@ -19,11 +19,10 @@ export class ElasticAnalyticsService {
     const elasticQuery = ElasticQuery.create()
       .withPagination({ from: 0, size: 500 })
       .withMustCondition(QueryType.Should(eventNames.map((eventName) => QueryType.Match('identifier', eventName))))
+      .withMustCondition(QueryType.Should(addresses.map((address) => QueryType.Match('address', address))))
       .withDateRangeFilter('timestamp', lte, gte)
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
-    await this.elasticService.getScrollableLogs(elasticQuery, async (logs) => {
-      await action(logs.filter((log) => addresses.length === 0 || log.events.some((event) => addresses.includes(event.address))));
-    });
+    await this.elasticService.getScrollableMatchingLogs(elasticQuery, action);
   }
 
   public async getEventsOrderedByTimestamp(gte: number, lte: number, eventNames: string[]): Promise<any> {
