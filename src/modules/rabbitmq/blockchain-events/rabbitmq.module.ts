@@ -14,6 +14,7 @@ export class RabbitMqModule {
             return {
               name: 'default',
               uri: process.env.RABBITMQ_URL,
+              prefetchCount: 100,
               exchanges: [
                 {
                   name: process.env.RABBITMQ_EXCHANGE,
