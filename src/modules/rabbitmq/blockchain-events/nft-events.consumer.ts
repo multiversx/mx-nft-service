@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { NftEventEnum } from 'src/modules/assets/models';
 import { ApiConfigService } from 'src/modules/common/api-config/api.config.service';
 import { MarketplaceEventsIndexingService } from 'src/modules/marketplaces/marketplaces-events-indexing.service';
@@ -12,8 +12,12 @@ import { AnalyticsEventsService } from './analytics-events.service';
 import { MintersService } from 'src/modules/minters/minters.service';
 import { DisabledMarketplaceEventsService } from './disable-marketplace/disable-marketplace-events.service';
 
+const SLOW_BATCH_THRESHOLD_MS = 600;
+
 @Injectable()
 export class NftEventsConsumer {
+  private readonly logger = new Logger(NftEventsConsumer.name);
+
   constructor(
     private readonly apiConfigService: ApiConfigService,
     private readonly nftEventsService: NftEventsService,
@@ -33,54 +37,88 @@ export class NftEventsConsumer {
     dlqExchange: process.env.RABBITMQ_DLQ_EXCHANGE,
   })
   async consumeAuctionEvents(nftAuctionEvents: any) {
-    if (nftAuctionEvents?.events) {
-      const internalMarketplaces = await this.marketplaceService.getInternalMarketplacesAddreses();
-      const externalMarketplaces = await this.marketplaceService.getExternalMarketplacesAddreses();
-      const disabledMarketplaces = await this.marketplaceService.getDisabledMarketplacesAddreses();
+    if (nftAuctionEvents?.events?.length > 0) {
+      const durations: { [step: string]: number } = {};
+      const startTime = Date.now();
+      let stepTime = startTime;
+      const endStep = (step: string) => {
+        const now = Date.now();
+        durations[step] = now - stepTime;
+        stepTime = now;
+      };
+
+      const [internalMarketplaces, externalMarketplaces, disabledMarketplaces, minters] = await Promise.all([
+        this.marketplaceService.getInternalMarketplacesAddreses(),
+        this.marketplaceService.getExternalMarketplacesAddreses(),
+        this.marketplaceService.getDisabledMarketplacesAddreses(),
+        this.mintersService.getMintersAddresses(),
+      ]);
+      endStep('lookups');
 
       const disabledMarketplacesEvents = nftAuctionEvents?.events?.filter(
         (e: { address: any }) => disabledMarketplaces.includes(e.address) === true,
       );
-
       const internalMarketplaceEvents = nftAuctionEvents?.events?.filter(
         (e: { address: any }) => internalMarketplaces.includes(e.address) === true,
       );
       const externalMarketplaceEvents = nftAuctionEvents?.events?.filter(
         (e: { address: any }) => externalMarketplaces.includes(e.address) === true,
       );
+      const marketplaceEvents = internalMarketplaceEvents.concat(externalMarketplaceEvents);
+      const nftEvents = nftAuctionEvents?.events?.filter(
+        (e: { identifier: NftEventEnum }) =>
+          e.identifier === NftEventEnum.ESDTNFTCreate ||
+          e.identifier === NftEventEnum.ESDTNFTTransfer ||
+          e.identifier === NftEventEnum.ESDTNFTBurn ||
+          e.identifier === NftEventEnum.MultiESDTNFTTransfer,
+      );
+      const minterEvents = nftAuctionEvents?.events?.filter((e: { address: any }) => minters?.includes(e.address) === true);
 
-      const minters = await this.mintersService.getMintersAddresses();
-      await this.nftEventsService.handleNftMintEvents(
-        nftAuctionEvents?.events?.filter(
-          (e: { identifier: NftEventEnum }) =>
-            e.identifier === NftEventEnum.ESDTNFTCreate ||
-            e.identifier === NftEventEnum.ESDTNFTTransfer ||
-            e.identifier === NftEventEnum.ESDTNFTBurn ||
-            e.identifier === NftEventEnum.MultiESDTNFTTransfer,
-        ),
-        nftAuctionEvents.hash,
-      );
-      await this.marketplaceEventsService.handleNftAuctionEvents(
-        internalMarketplaceEvents,
-        nftAuctionEvents.hash,
-        MarketplaceTypeEnum.Internal,
-      );
-      await this.marketplaceEventsService.handleNftAuctionEvents(
-        externalMarketplaceEvents,
-        nftAuctionEvents.hash,
-        MarketplaceTypeEnum.External,
-      );
-      await this.disabledMarketplaceService.handleAuctionEventsForDisableMarketplace(disabledMarketplacesEvents, nftAuctionEvents.hash);
-      await this.minterEventsService.handleNftMinterEvents(
-        nftAuctionEvents?.events?.filter((e: { address: any }) => minters?.includes(e.address) === true),
-        nftAuctionEvents.hash,
-      );
+      if (nftEvents.length > 0) {
+        await this.nftEventsService.handleNftMintEvents(nftEvents, nftAuctionEvents.hash);
+        endStep('nftEvents');
+      }
+      if (internalMarketplaceEvents.length > 0) {
+        await this.marketplaceEventsService.handleNftAuctionEvents(
+          internalMarketplaceEvents,
+          nftAuctionEvents.hash,
+          MarketplaceTypeEnum.Internal,
+        );
+        endStep('internalMarketplaceEvents');
+      }
+      if (externalMarketplaceEvents.length > 0) {
+        await this.marketplaceEventsService.handleNftAuctionEvents(
+          externalMarketplaceEvents,
+          nftAuctionEvents.hash,
+          MarketplaceTypeEnum.External,
+        );
+        endStep('externalMarketplaceEvents');
+      }
+      if (disabledMarketplacesEvents.length > 0) {
+        await this.disabledMarketplaceService.handleAuctionEventsForDisableMarketplace(disabledMarketplacesEvents, nftAuctionEvents.hash);
+        endStep('disabledMarketplaceEvents');
+      }
+      if (minterEvents.length > 0) {
+        await this.minterEventsService.handleNftMinterEvents(minterEvents, nftAuctionEvents.hash);
+        endStep('minterEvents');
+      }
+      if (marketplaceEvents.length > 0) {
+        await this.analyticsEventsService.handleBuyEvents(marketplaceEvents);
+        endStep('analytics');
 
-      await this.analyticsEventsService.handleBuyEvents([...internalMarketplaceEvents, ...externalMarketplaceEvents]);
+        if (this.apiConfigService.isReindexMarketplaceEventsFlagActive()) {
+          await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(marketplaceEvents);
+          endStep('reindex');
+        }
+      }
 
-      if (this.apiConfigService.isReindexMarketplaceEventsFlagActive()) {
-        await this.marketplaceEventsIndexingService.reindexLatestMarketplacesEvents(
-          internalMarketplaceEvents.concat(externalMarketplaceEvents),
+      const totalDuration = Date.now() - startTime;
+      if (totalDuration >= SLOW_BATCH_THRESHOLD_MS) {
+        this.logger.warn(
+          `Slow events batch ${totalDuration}ms for hash '${nftAuctionEvents.hash}' (${nftAuctionEvents.events.length} events, ` +
+            `${nftEvents.length} nft, ${internalMarketplaceEvents.length} internal, ${
+              externalMarketplaceEvents.length
+            } external): ${JSON.stringify(durations)}`,
         );
       }
     }

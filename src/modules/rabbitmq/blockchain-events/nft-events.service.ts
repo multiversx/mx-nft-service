@@ -1,5 +1,5 @@
 import { MxApiService } from 'src/common';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { NftEventEnum, NftTypeEnum } from 'src/modules/assets/models';
 import { CacheEventsPublisherService } from '../cache-invalidation/cache-invalidation-publisher/change-events-publisher.service';
 import { CacheEventTypeEnum, ChangedEvent } from '../cache-invalidation/events/changed.event';
@@ -8,17 +8,26 @@ import { MultiTransferEvent, TransferEvent } from '../entities/auction/transfer.
 import { FeedEventsSenderService } from './feed-events.service';
 import { BurnEvent } from '../entities/auction/burn.event';
 import { UpdateAttributesEvent } from '../entities/auction/update-attributes.event';
+import { CacheService } from '@multiversx/sdk-nestjs-cache';
+import { CacheInfo } from 'src/common/services/caching/entities/cache.info';
+import { generateCacheKeyFromParams } from 'src/utils/generate-cache-key';
+
+const SLOW_EVENT_THRESHOLD_MS = 1000;
 
 @Injectable()
 export class NftEventsService {
+  private readonly logger = new Logger(NftEventsService.name);
+
   constructor(
     private feedEventsSenderService: FeedEventsSenderService,
     private mxApiService: MxApiService,
     private readonly cacheEventsPublisherService: CacheEventsPublisherService,
+    private readonly cacheService: CacheService,
   ) { }
 
   public async handleNftMintEvents(mintEvents: any[], hash: string) {
     for (let event of mintEvents) {
+      const startTime = Date.now();
       switch (event.identifier) {
         case NftEventEnum.ESDTNFTCreate:
           const mintEvent = new MintEvent(event);
@@ -34,9 +43,9 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTTransfer:
           const transferEvent = new TransferEvent(event);
           const transferTopics = transferEvent.getTopics();
-          const collectionInfo = await this.mxApiService.getCollectionByIdentifierForQuery(transferTopics.collection, 'fields=name,type');
-          if (collectionInfo?.type === NftTypeEnum.NonFungibleESDT || collectionInfo?.type === NftTypeEnum.SemiFungibleESDT) {
-            await this.triggerCacheInvalidationWithOwner(
+          const collectionType = await this.getCollectionType(transferTopics.collection);
+          if (collectionType === NftTypeEnum.NonFungibleESDT || collectionType === NftTypeEnum.SemiFungibleESDT) {
+            this.triggerCacheInvalidationWithOwner(
               `${transferTopics.collection}-${transferTopics.nonce}`,
               CacheEventTypeEnum.OwnerChanged,
               transferEvent.getAddress(),
@@ -48,10 +57,14 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTBurn:
           const burnEvent = new BurnEvent(event);
           const burnTopics = burnEvent.getTopics();
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          const burnCollection = await this.mxApiService.getCollectionByIdentifierForQuery(burnTopics.collection, 'fields=name,type');
-          if (burnCollection?.type === NftTypeEnum.NonFungibleESDT || burnCollection?.type === NftTypeEnum.SemiFungibleESDT) {
-            await this.triggerCacheInvalidation(`${burnTopics.collection}-${burnTopics.nonce}`, CacheEventTypeEnum.AssetRefresh);
+          const burnCollectionType = await this.getCollectionType(burnTopics.collection);
+          if (burnCollectionType === NftTypeEnum.NonFungibleESDT || burnCollectionType === NftTypeEnum.SemiFungibleESDT) {
+            const burnIdentifier = `${burnTopics.collection}-${burnTopics.nonce}`;
+            setTimeout(() => {
+              this.triggerCacheInvalidation(burnIdentifier, CacheEventTypeEnum.AssetRefresh).catch((error) =>
+                this.logger.error(`An error occurred while triggering cache invalidation for burned NFT '${burnIdentifier}'`, error),
+              );
+            }, 500);
           }
           break;
 
@@ -61,8 +74,8 @@ export class NftEventsService {
           const multiTransferTopics = multiTransferEvent.getTopics();
           for (const pair of multiTransferTopics.pairs) {
             if (pair.nonce !== '') {
-              const collectionDetails = await this.mxApiService.getCollectionByIdentifierForQuery(pair.collection, 'fields=name,type');
-              if (collectionDetails?.type === NftTypeEnum.NonFungibleESDT || collectionDetails?.type === NftTypeEnum.SemiFungibleESDT) {
+              const pairCollectionType = await this.getCollectionType(pair.collection);
+              if (pairCollectionType === NftTypeEnum.NonFungibleESDT || pairCollectionType === NftTypeEnum.SemiFungibleESDT) {
                 this.triggerCacheInvalidationWithOwner(
                   `${pair.collection}-${pair.nonce}`,
                   CacheEventTypeEnum.OwnerChanged,
@@ -80,8 +93,8 @@ export class NftEventsService {
         case NftEventEnum.ESDTNFTUpdateAttributes:
           const updateEvent = new UpdateAttributesEvent(event);
           const updateTopics = updateEvent.getTopics();
-          const collectionUpdateInfo = await this.mxApiService.getCollectionByIdentifierForQuery(updateTopics.collection, 'fields=name,type');
-          if (collectionUpdateInfo?.type === NftTypeEnum.NonFungibleESDT || collectionUpdateInfo?.type === NftTypeEnum.SemiFungibleESDT) {
+          const updateCollectionType = await this.getCollectionType(updateTopics.collection);
+          if (updateCollectionType === NftTypeEnum.NonFungibleESDT || updateCollectionType === NftTypeEnum.SemiFungibleESDT) {
             await this.triggerCacheInvalidation(
               `${updateTopics.collection}-${updateTopics.nonce}`,
               CacheEventTypeEnum.AssetRefresh,
@@ -90,7 +103,20 @@ export class NftEventsService {
           break;
 
       }
+
+      const duration = Date.now() - startTime;
+      if (duration >= SLOW_EVENT_THRESHOLD_MS) {
+        this.logger.warn(`Slow NFT event '${event.identifier}' ${duration}ms for hash '${hash}'`);
+      }
     }
+  }
+
+  private async getCollectionType(collection: string): Promise<string> {
+    return await this.cacheService.getOrSet<string>(
+      generateCacheKeyFromParams(CacheInfo.CollectionTypes.key, collection),
+      async () => (await this.mxApiService.getCollectionByIdentifierForQuery(collection, 'fields=type'))?.type,
+      CacheInfo.CollectionTypes.ttl,
+    );
   }
 
   private async triggerCacheInvalidation(id: string, eventType: CacheEventTypeEnum) {

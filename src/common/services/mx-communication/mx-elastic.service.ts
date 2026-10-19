@@ -1,14 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { HitResponse, SearchResponse } from './models/elastic-search';
 import { ApiService } from './api.service';
 import { PerformanceProfiler } from 'src/modules/metrics/performance.profiler';
 import { MetricsCollector } from 'src/modules/metrics/metrics.collector';
-import { ElasticQuery, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, ElasticSortOrder, QueryType, TermsQuery } from '@multiversx/sdk-nestjs-elastic';
 import { ElasticMetricType } from '@multiversx/sdk-nestjs-monitoring';
 import { ApiSettings } from './models/api-settings';
 import { constants } from 'src/config';
 import { HoldersCount } from 'src/modules/analytics/models/general-stats.model';
 import { NftTypeEnum } from 'src/modules/assets/models';
+import { ELASTIC_EVENTS_INDEX } from 'src/utils/constants';
+import { ElasticEventsMapper } from './elastic-events.mapper';
 export interface AddressTransactionCount {
   contractAddress: string;
   transactionCount: number;
@@ -18,87 +19,6 @@ export interface AddressTransactionCount {
 export class MxElasticService {
   private readonly url = process.env.ELROND_ELASTICSEARCH;
   constructor(private readonly apiService: ApiService, private readonly logger: Logger) {}
-
-  async getNftHistory(
-    collection: string,
-    nonce: string,
-    size: number,
-    timestamp: number | string,
-  ): Promise<[HitResponse[], number, number]> {
-    const url = `${this.url}/logs/_search`;
-    const body = {
-      size: 2 * size,
-      query: {
-        bool: {
-          must: [
-            {
-              range: {
-                timestamp: {
-                  lt: timestamp,
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'events',
-                query: {
-                  bool: {
-                    must: [
-                      {
-                        match: {
-                          'events.topics': collection,
-                        },
-                      },
-                      {
-                        match: {
-                          'events.topics': nonce,
-                        },
-                      },
-                    ],
-                    must_not: [
-                      {
-                        match: {
-                          'events.identifier': 'bid',
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          ],
-        },
-      },
-      sort: [
-        {
-          timestamp: {
-            order: 'desc',
-          },
-        },
-      ],
-    };
-    try {
-      const response = await this.apiService.post(url, body);
-      const data: SearchResponse = response?.data;
-      let responseMap: HitResponse[] = [];
-      data?.hits?.hits.forEach((hit) => {
-        for (const event of hit._source.events) {
-          if (event.topics[0] === collection && event.topics[1] === nonce) {
-            responseMap.push(hit);
-            break;
-          }
-        }
-      });
-      return [responseMap, data?.hits?.total.value, data?.hits?.hits[data?.hits?.hits?.length - 1]?._source.timestamp];
-    } catch (e) {
-      this.logger.error('Fail to get logs', {
-        path: `${MxElasticService.name}.${this.getNftHistory.name}`,
-        address: nonce,
-        exception: e.toString(),
-      });
-      return [[], 0, 0];
-    }
-  }
 
   async setCustomValue<T>(collection: string, identifier: string, body: any, urlParams: string = null): Promise<void> {
     const uris: string[] = process.env.ELROND_ELASTICSEARCH_UPDATE.split(',');
@@ -424,6 +344,62 @@ export class MxElasticService {
     return JSON.stringify({
       properties: properties,
     });
+  }
+
+  /**
+   * Scrolls the events index and returns, for every page, the full logs (all events of a transaction)
+   * of the transactions that have at least one event matching the query, same as the legacy logs index.
+   */
+  async getScrollableLogs(elasticQuery: ElasticQuery, action: (logs: any[]) => Promise<boolean | any>): Promise<void> {
+    const processedTxHashes = new Set<string>();
+
+    await this.getScrollableList(ELASTIC_EVENTS_INDEX, '_id', elasticQuery, async (events) => {
+      const txHashes = this.getNewTxHashes(events, processedTxHashes);
+      if (events.length > 0 && txHashes.length === 0) {
+        return;
+      }
+
+      return await action(await this.getLogsByTxHashes(txHashes));
+    });
+  }
+
+  async getLogs(elasticQuery: ElasticQuery): Promise<any[]> {
+    const events = await this.getList(ELASTIC_EVENTS_INDEX, '_id', elasticQuery);
+    return await this.getLogsByTxHashes(this.getNewTxHashes(events, new Set<string>()));
+  }
+
+  private getNewTxHashes(events: any[], processedTxHashes: Set<string>): string[] {
+    const txHashes: string[] = [];
+    for (const event of events) {
+      if (!processedTxHashes.has(event.txHash)) {
+        processedTxHashes.add(event.txHash);
+        txHashes.push(event.txHash);
+      }
+    }
+    return txHashes;
+  }
+
+  private async getLogsByTxHashes(txHashes: string[]): Promise<any[]> {
+    if (txHashes.length === 0) {
+      return [];
+    }
+
+    const maxResults = 10000;
+    const query = ElasticQuery.create()
+      .withTerms(new TermsQuery('txHash', txHashes))
+      .withSort([{ name: '_doc', order: ElasticSortOrder.ascending }])
+      .withPagination({ from: 0, size: maxResults });
+
+    let events = await this.getList(ELASTIC_EVENTS_INDEX, '_id', query);
+    if (events.length >= maxResults) {
+      events = [];
+      await this.getScrollableList(ELASTIC_EVENTS_INDEX, '_id', query, async (items) => {
+        events.push(...items);
+      });
+    }
+
+    const txHashesOrder = new Map(txHashes.map((txHash, index) => [txHash, index]));
+    return ElasticEventsMapper.toLogs(events).sort((a, b) => txHashesOrder.get(a.identifier) - txHashesOrder.get(b.identifier));
   }
 
   async getList(collection: string, key: string, elasticQuery: ElasticQuery): Promise<any[]> {
