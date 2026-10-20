@@ -1,4 +1,4 @@
-import { ElasticQuery, ElasticSortOrder, MatchQuery, QueryType } from '@multiversx/sdk-nestjs-elastic';
+import { ElasticQuery, ElasticSortOrder, QueryType } from '@multiversx/sdk-nestjs-elastic';
 import { Injectable } from '@nestjs/common';
 import { MxElasticService } from 'src/common';
 
@@ -18,15 +18,11 @@ export class ElasticAnalyticsService {
 
     const elasticQuery = ElasticQuery.create()
       .withPagination({ from: 0, size: 500 })
-      .withMustCondition(
-        QueryType.Should(eventNames.map((eventName) => QueryType.Nested('events', [new MatchQuery('events.identifier', eventName)]))),
-      )
-      .withMustCondition(
-        QueryType.Should(addresses.map((address) => QueryType.Nested('events', [new MatchQuery('events.address', address)]))),
-      )
+      .withMustCondition(QueryType.Should(eventNames.map((eventName) => QueryType.Match('identifier', eventName))))
+      .withMustCondition(QueryType.Should(addresses.map((address) => QueryType.Match('address', address))))
       .withDateRangeFilter('timestamp', lte, gte)
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
-    await this.elasticService.getScrollableList('logs', '_id', elasticQuery, action);
+    await this.elasticService.getScrollableMatchingLogs(elasticQuery, action);
   }
 
   public async getEventsOrderedByTimestamp(gte: number, lte: number, eventNames: string[]): Promise<any> {
@@ -43,12 +39,10 @@ export class ElasticAnalyticsService {
 
   private async getTransactionsLogs(eventName: string, gte: number, lte: number): Promise<any[]> {
     const elasticQuery = ElasticQuery.create()
-      .withMustCondition(
-        QueryType.Should([eventName].map((eventName) => QueryType.Nested('events', [new MatchQuery('events.identifier', eventName)]))),
-      )
+      .withMustCondition(QueryType.Should([eventName].map((eventName) => QueryType.Match('identifier', eventName))))
       .withDateRangeFilter('timestamp', lte, gte)
       .withSort([{ name: 'timestamp', order: ElasticSortOrder.ascending }]);
 
-    return await this.elasticService.getList('logs', '', elasticQuery);
+    return await this.elasticService.getLogs(elasticQuery);
   }
 }

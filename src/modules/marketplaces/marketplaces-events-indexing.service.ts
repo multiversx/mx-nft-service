@@ -99,7 +99,7 @@ export class MarketplaceEventsIndexingService {
   private async addElasticTxToDbAndReturnNewestTimestamp(input: MarketplaceEventsIndexingRequest): Promise<number> {
     return await this.addGenericElasticDataToDbAndReturnNewestTimestamp(
       getMarketplaceTransactionsElasticQuery(input),
-      'transactions',
+      (query, action) => this.mxElasticService.getScrollableList('transactions', 'identifier', query, action),
       input.marketplaceAddress,
       this.saveTxToDb.bind(this),
       input.stopIfDuplicates,
@@ -109,7 +109,7 @@ export class MarketplaceEventsIndexingService {
   private async addElasticEventsToDbAndReturnNewestTimestamp(input: MarketplaceEventsIndexingRequest): Promise<number> {
     return await this.addGenericElasticDataToDbAndReturnNewestTimestamp(
       getMarketplaceEventsElasticQuery(input),
-      'logs',
+      (query, action) => this.mxElasticService.getScrollableLogs(query, action),
       input.marketplaceAddress,
       this.filterEventsAndSaveToDb.bind(this),
       input.stopIfDuplicates,
@@ -118,14 +118,14 @@ export class MarketplaceEventsIndexingService {
 
   private async addGenericElasticDataToDbAndReturnNewestTimestamp(
     elasticQuery: ElasticQuery,
-    elasticCollection: string,
+    scrollElastic: (elasticQuery: ElasticQuery, action: (items: any[]) => Promise<boolean | any>) => Promise<void>,
     marketplaceAddress: string,
     saveToDbFunction: (items: any[], marketplaceAddress: string) => Promise<[number, number]>,
     stopIfDuplicates?: boolean,
   ): Promise<number> {
     let newestTimestamp: number;
 
-    await this.mxElasticService.getScrollableList(elasticCollection, 'identifier', elasticQuery, async (items) => {
+    await scrollElastic(elasticQuery, async (items) => {
       if (!items || items.length === 0) {
         return false;
       }
