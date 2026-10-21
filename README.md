@@ -2,7 +2,7 @@ GraphQl service to provide informations regarding nfts and auctions on Multivers
 
 ## Dependencies
 
-1. Node.js > @16.x.x is required to be installed [docs](https://nodejs.org/en/)
+1. Node.js v24.22.1 is required to be installed [docs](https://nodejs.org/en/)
 1. Redis Server is required to be installed [docs](https://redis.io/).
 1. MySQL Server is required to be installed [docs](https://dev.mysql.com/doc/refman/8.0/en/installing.html).
 1. MongoDB Server is required to be installed [docs](https://www.mongodb.com/docs/manual/installation).
@@ -22,7 +22,7 @@ Make requests to [http://localhost:3005/graphql](http://localhost:3005/graphql).
 
 ## Running the app
 
-1. At the root folder run (make sure you have node v16.x.x)
+1. At the root folder run (make sure you have node v24.22.1, see `.nvmrc`)
 
 ```bash
 $ npm install
