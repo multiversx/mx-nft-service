@@ -1,9 +1,6 @@
-FROM node:lts As build
+FROM node:24.22.1 As build
 RUN apt update
 RUN apt install build-essential
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x |  bash -
-RUN  apt-get install -y nodejs
-RUN  apt-get install -y npm
 RUN useradd -m multiversx
 
 FROM build as development
