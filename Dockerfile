@@ -1,9 +1,9 @@
-FROM node:24.22.3 As build
+FROM node:24.22.3 AS build
 RUN apt update
 RUN apt install build-essential
 RUN useradd -m multiversx
 
-FROM build as development
+FROM build AS development
 WORKDIR /usr/src/app
 
 COPY package*.json ./
