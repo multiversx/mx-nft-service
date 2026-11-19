@@ -1,4 +1,4 @@
-FROM node:24.22.1 As build
+FROM node:24.22.3 As build
 RUN apt update
 RUN apt install build-essential
 RUN useradd -m multiversx

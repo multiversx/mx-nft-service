@@ -5,7 +5,7 @@
   "description": "Nest TypeScript starter repository",
   "license": "MIT",
   "engines": {
-    "node": ">=24.22.1"
+    "node": ">=24.22.3"
   },
   "scripts": {
     "init": "run-script-os",
